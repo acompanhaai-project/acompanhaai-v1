@@ -1,0 +1,16 @@
+target/
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+.env
+application-local.properties
+data/
+*.log
+postman/node_modules/
+postman/reports/
+/bin/
+.env.*
+!.env.example

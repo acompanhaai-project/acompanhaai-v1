@@ -1,0 +1,479 @@
+openapi: 3.0.3
+info:
+  title: Acompanhaai - Contas e autenticação
+  version: 0.0.1
+  description: |
+    API com autenticação por sessão. Obtenha GET /api/auth/csrf antes de qualquer escrita,
+    preserve o cookie JSESSIONID e envie o token no header X-CSRF-TOKEN.
+    Após login, obtenha um novo token. Cadastro não autentica automaticamente.
+    Cada conta só acessa seus próprios dados. Não há listagem nem consulta por ID.
+servers:
+  - url: http://localhost:8080
+    description: Desenvolvimento local com perfil dev
+security:
+  - sessionCookie: []
+paths:
+  /api/auth/csrf:
+    get:
+      operationId: getCsrf
+      summary: Obter token CSRF
+      security: []
+      responses:
+        '200':
+          description: Token vinculado à sessão; preserve o cookie JSESSIONID.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [headerName, token]
+                properties:
+                  headerName: {type: string, example: X-CSRF-TOKEN}
+                  token: {type: string}
+  /api/auth/login:
+    post:
+      operationId: login
+      summary: Autenticar por e-mail e senha
+      description: Renova o ID de sessão, invalida o CSRF anterior e retorna a conta autenticada.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: {type: string, format: email, maxLength: 254}
+                password: {type: string, format: password, maxLength: 128, writeOnly: true}
+      responses:
+        '200': {$ref: '#/components/responses/UserResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/auth/logout:
+    post:
+      operationId: logout
+      summary: Encerrar a sessão atual
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': {description: Sessão invalidada. Obtenha novo CSRF antes de novo login.}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /api/users:
+    post:
+      operationId: createUser
+      summary: Cadastrar conta
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - {$ref: '#/components/schemas/UserUpdate'}
+                - type: object
+                  required: [password]
+                  properties:
+                    password: {type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true}
+            example: {name: Maicon Amaral, email: maicon@example.com, password: 'SenhaExemplo123!'}
+      responses:
+        '201':
+          description: Conta cadastrada. Efetue login para acessá-la.
+          headers:
+            Location:
+              schema: {type: string, example: /api/users/me}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/User'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/users/me:
+    get:
+      operationId: getCurrentUser
+      summary: Consultar a própria conta
+      responses:
+        '200': {$ref: '#/components/responses/UserResponse'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    put:
+      operationId: updateCurrentUser
+      summary: Substituir nome e e-mail da própria conta
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UserUpdate'}
+      responses:
+        '200': {$ref: '#/components/responses/UserResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    delete:
+      operationId: deleteCurrentUser
+      summary: Excluir a própria conta
+      description: Invalida a sessão atual. Outras sessões são recusadas na próxima requisição.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': {description: Conta excluída.}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /api/users/me/password:
+    put:
+      operationId: changePassword
+      summary: Trocar a senha e encerrar todas as sessões
+      description: Exige a senha atual. Outras sessões são recusadas na próxima requisição.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: {type: string, format: password, maxLength: 128, writeOnly: true}
+                newPassword: {type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true}
+      responses:
+        '204': {description: Senha alterada. Um novo login é necessário.}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/users/me/photo:
+    get:
+      operationId: getProfilePhoto
+      summary: Consultar a própria foto de perfil
+      responses:
+        '200':
+          description: Imagem privada, sem cache.
+          content:
+            image/png:
+              schema: {type: string, format: binary}
+            image/jpeg:
+              schema: {type: string, format: binary}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      operationId: replaceProfilePhoto
+      summary: Enviar ou substituir foto de perfil
+      description: JPEG ou PNG de até 2 MiB e 4 milhões de pixels. Conteúdo validado e regravado pelo servidor.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: {type: string, format: binary}
+      responses:
+        '204': {description: Foto salva.}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '413': {description: Arquivo ou requisição multipart excede o limite.}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    delete:
+      operationId: deleteProfilePhoto
+      summary: Remover a própria foto
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': {description: Foto removida ou já ausente.}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /api/applications:
+    post:
+      operationId: createApplication
+      summary: Cadastrar vaga manual e candidatura
+      description: Cria a vaga pessoal, o acompanhamento e o evento inicial de histórico atomicamente. Link não é acessado.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ApplicationInput'}
+      responses:
+        '201':
+          description: Candidatura criada.
+          headers:
+            Location:
+              schema: {type: string, example: /api/applications/1}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Application'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/ApplicationConflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    get:
+      operationId: listApplications
+      summary: Listar candidaturas próprias
+      description: Ordenadas por updatedAt e id decrescentes.
+      parameters:
+        - in: query
+          name: status
+          schema: {$ref: '#/components/schemas/ApplicationStatus'}
+        - in: query
+          name: page
+          schema: {type: integer, minimum: 0, default: 0}
+        - in: query
+          name: size
+          schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      responses:
+        '200':
+          description: Página de candidaturas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items: {$ref: '#/components/schemas/Application'}
+                  page: {type: integer}
+                  size: {type: integer}
+                  totalElements: {type: integer, format: int64}
+                  totalPages: {type: integer}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/applications/{id}:
+    parameters:
+      - {$ref: '#/components/parameters/ApplicationId'}
+    get:
+      operationId: getApplication
+      summary: Consultar candidatura própria
+      responses:
+        '200': {$ref: '#/components/responses/ApplicationResponse'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      operationId: updateApplication
+      summary: Substituir dados manuais da candidatura e da vaga
+      description: |
+        Permite pular ou corrigir etapas. Mudança de status gera histórico na mesma transação.
+        Campos opcionais omitidos ficam nulos. Exige a versão recebida na última consulta.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - {$ref: '#/components/schemas/ApplicationInput'}
+                - type: object
+                  required: [status, version]
+                  properties:
+                    version: {type: integer, format: int64, minimum: 0}
+      responses:
+        '200': {$ref: '#/components/responses/ApplicationResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/ApplicationConflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    delete:
+      operationId: deleteApplication
+      summary: Excluir candidatura, sua vaga pessoal e histórico
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        '204': {description: Registros excluídos.}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/applications/{id}/history:
+    parameters:
+      - {$ref: '#/components/parameters/ApplicationId'}
+    get:
+      operationId: getApplicationHistory
+      summary: Consultar histórico de etapas
+      responses:
+        '200':
+          description: Eventos em ordem cronológica, com ID como desempate.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: {type: integer, format: int64}
+                    fromStatus:
+                      allOf:
+                        - {$ref: '#/components/schemas/ApplicationStatus'}
+                      nullable: true
+                      description: Nulo no evento inicial.
+                    toStatus: {$ref: '#/components/schemas/ApplicationStatus'}
+                    changedAt: {type: string, format: date-time}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+components:
+  parameters:
+    ApplicationId:
+      in: path
+      name: id
+      required: true
+      schema: {type: integer, format: int64}
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: Sessão anônima para CSRF ou autenticada após login; inatividade máxima de 30 minutos.
+    csrfHeader:
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+      description: Token obtido em GET /api/auth/csrf para a mesma sessão.
+  schemas:
+    ApplicationStatus:
+      type: string
+      enum: [SAVED, APPLIED, SCREENING, INTERVIEW, OFFER, HIRED, REJECTED, WITHDRAWN]
+      description: Salva, candidatura realizada, triagem, entrevista, proposta, contratado, reprovado ou desistência.
+    JobInput:
+      type: object
+      required: [title]
+      properties:
+        title: {type: string, minLength: 1, maxLength: 255}
+        companyName: {type: string, maxLength: 255, nullable: true}
+        sourceUrl: {type: string, maxLength: 2048, nullable: true, description: Link HTTP/HTTPS opcional. Não é acessado; link idêntico é único por usuário.}
+        description: {type: string, maxLength: 30000, nullable: true}
+    ApplicationInput:
+      type: object
+      required: [job]
+      properties:
+        job: {$ref: '#/components/schemas/JobInput'}
+        status:
+          allOf:
+            - {$ref: '#/components/schemas/ApplicationStatus'}
+          default: APPLIED
+        appliedOn: {type: string, format: date, nullable: true, description: Data passada ou atual. Obrigatoriamente nula em SAVED; não é presumida nos demais estados.}
+        notes: {type: string, maxLength: 5000, nullable: true}
+    Application:
+      allOf:
+        - {$ref: '#/components/schemas/ApplicationInput'}
+        - type: object
+          properties:
+            id: {type: integer, format: int64}
+            job:
+              allOf:
+                - {$ref: '#/components/schemas/JobInput'}
+                - type: object
+                  properties:
+                    id: {type: integer, format: int64}
+            version: {type: integer, format: int64}
+            createdAt: {type: string, format: date-time}
+            updatedAt: {type: string, format: date-time}
+    User:
+      type: object
+      required: [id, name, email, createdAt]
+      properties:
+        id: {type: integer, format: int64, readOnly: true}
+        name: {type: string}
+        email: {type: string, format: email}
+        createdAt: {type: string, format: date-time, readOnly: true}
+        photoUrl: {type: string, nullable: true, readOnly: true, description: Rota privada da foto; nula quando não cadastrada., example: /api/users/me/photo}
+    UserUpdate:
+      type: object
+      required: [name, email]
+      properties:
+        name: {type: string, minLength: 2, maxLength: 100, description: Espaços nas extremidades são removidos antes da validação.}
+        email: {type: string, format: email, maxLength: 254, description: Espaços nas extremidades são removidos; persistido em minúsculas.}
+    Problem:
+      type: object
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        instance: {type: string}
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field: {type: string}
+              message: {type: string}
+    SecurityError:
+      type: object
+      properties:
+        status: {type: integer}
+        error: {type: string}
+  responses:
+    ApplicationResponse:
+      description: Candidatura própria e dados manuais da vaga.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Application'}
+    ApplicationConflict:
+      description: Versão antiga ou link já cadastrado. Consulte o registro atualizado ou a candidatura existente antes de reenviar.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    NotFound:
+      description: Registro ausente ou pertencente a outro usuário.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    UserResponse:
+      description: Dados da conta, sem senha ou hash.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/User'}
+    BadRequest:
+      description: JSON inválido.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    Unauthorized:
+      description: Autenticação ausente/expirada ou credenciais inválidas. Filtros retornam SecurityError; controllers retornam Problem.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+        application/json:
+          schema: {$ref: '#/components/schemas/SecurityError'}
+    Forbidden:
+      description: Token CSRF ausente/inválido ou acesso negado. Obtenha novo token e repita com o mesmo cookie.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SecurityError'}
+    Conflict:
+      description: E-mail já cadastrado; altere o e-mail antes de repetir.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    ValidationError:
+      description: Campos inválidos. Corrija os campos indicados em errors.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}

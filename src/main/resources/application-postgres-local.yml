@@ -1,0 +1,11 @@
+# PostgreSQL instalado neste Windows, configurado na porta 5433.
+# DB_URL permite usar outra instancia, inclusive o Compose na porta 5432.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:${DB_PORT:5433}/acompanhaai}
+# Exclusivo para testar sessoes em HTTP no computador local.
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false

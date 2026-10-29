@@ -1,0 +1,8 @@
+{
+  "name": "acompanhaai-api-fixtures",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Executor local dos cenarios congelados da API",
+  "scripts": { "test:v1": "node fixtures/v1/run.cjs" },
+  "dependencies": { "newman": "6.2.3" }
+}

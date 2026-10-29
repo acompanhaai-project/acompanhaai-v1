@@ -1,0 +1,4238 @@
+{
+  "info": {
+    "name": "Acompanhaai - Mock completo v1 (SEM IMAGEM)",
+    "description": "Cenario congelado v1. API real com dados ficticios. Execute as pastas em ordem. Nao e um servidor de API simulada. A execucao completa remove as contas criadas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "fixtureData",
+      "value": "{\"version\":\"1.0.0\",\"date\":\"2026-01-15\",\"password\":\"MockV1!Senha2026\",\"newPassword\":\"MockV1!NovaSenha2026\",\"users\":[{\"actor\":\"a\",\"name\":\"Ana Teste V1\",\"emailPrefix\":\"qa.ana.v1\"},{\"actor\":\"b\",\"name\":\"Bruno Teste V1\",\"emailPrefix\":\"qa.bruno.v1\"}],\"applications\":[{\"job\":{\"title\":\"Desenvolvedor Java Junior\",\"companyName\":\"Empresa Aurora Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/1\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"SAVED\",\"appliedOn\":null,\"notes\":\"Dado ficticio v1 - SAVED\"},{\"job\":{\"title\":\"Backend Java e Spring Boot\",\"companyName\":\"Empresa Horizonte Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/2\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"APPLIED\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - APPLIED\"},{\"job\":{\"title\":\"Analista de Sistemas Java\",\"companyName\":\"Empresa Nuvem Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/3\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"SCREENING\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - SCREENING\"},{\"job\":{\"title\":\"Desenvolvedor Backend Pleno\",\"companyName\":\"Empresa Ponte Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/4\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"INTERVIEW\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - INTERVIEW\"},{\"job\":{\"title\":\"Engenheiro de Software Java\",\"companyName\":\"Empresa Farol Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/5\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"OFFER\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - OFFER\"},{\"job\":{\"title\":\"Desenvolvedor de APIs REST\",\"companyName\":\"Empresa Jardim Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/6\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"HIRED\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - HIRED\"},{\"job\":{\"title\":\"Desenvolvedor Java Trainee\",\"companyName\":\"Empresa Trilho Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/7\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"REJECTED\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - REJECTED\"},{\"job\":{\"title\":\"Analista Desenvolvedor Backend\",\"companyName\":\"Empresa Vento Ficticia\",\"sourceUrl\":\"https://example.com/acompanhaai-fixture-v1/8\",\"description\":\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"},\"status\":\"WITHDRAWN\",\"appliedOn\":\"2026-01-15\",\"notes\":\"Dado ficticio v1 - WITHDRAWN\"}]}",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const base=pm.environment.get('baseUrl')||'';",
+          " const parts=base.slice(7).split(':');",
+          " if(!base.startsWith('http://')||parts.length!==2||!['localhost','127.0.0.1'].includes(parts[0])||!/^[0-9]+$/.test(parts[1])||Number(parts[1])<1||Number(parts[1])>65535){pm.execution.skipRequest();throw new Error('Esta fixture so aceita HTTP local: localhost ou 127.0.0.1 com porta.');}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const actor=pm.variables.get('fixtureActor');",
+          " const cookie=pm.response.headers.all().find(h=>h.key.toLowerCase()==='set-cookie'&&h.value.startsWith('JSESSIONID='));",
+          " if(actor&&cookie)pm.environment.set(actor+'_cookie',cookie.value.split(';')[0]);",
+          " const d=JSON.parse(pm.collectionVariables.get('fixtureData'));",
+          " pm.test('Resposta nao expoe senhas de teste',()=>{pm.expect(pm.response.text()).not.to.include(d.password);pm.expect(pm.response.text()).not.to.include(d.newPassword);});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Preparacao",
+      "item": [
+        {
+          "name": "001 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");",
+                  "const d=JSON.parse(pm.collectionVariables.get('fixtureData'));",
+                  " const id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);",
+                  " ['a','a2','b'].forEach(a=>{pm.environment.unset(a+'_cookie');pm.environment.unset(a+'_csrf');});",
+                  " pm.environment.set('runId',id);",
+                  " d.users.forEach(u=>{pm.environment.set(u.actor+'_email',u.emailPrefix+'+'+id+'@example.test');pm.environment.set(u.actor+'_password',d.password);});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "002 - Cadastrar Ana Teste V1",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Teste V1\",\n  \"email\": \"{{registrationEmail}}\",\n  \"password\": \"MockV1!Senha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");",
+                  "pm.variables.set('registrationEmail',pm.environment.get('a_email').toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.test('Conta ficticia criada',()=>{pm.expect(j.email).to.eql(pm.environment.get('a_email'));pm.expect(j.photoUrl).to.eql(null);pm.expect(j.id).to.be.a('number');});pm.environment.set('a_id',j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "003 - Login (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"{{a_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");",
+                  "pm.variables.set('previousCookie',pm.environment.get('a_cookie'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Login da conta correta',()=>pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('a_id'))));",
+                  " pm.test('ID de sessao renovado',()=>pm.expect(pm.environment.get('a_cookie')).not.to.eql(pm.variables.get('previousCookie')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "004 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "005 - Obter CSRF (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('b_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "006 - Cadastrar Bruno Teste V1",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bruno Teste V1\",\n  \"email\": \"{{registrationEmail}}\",\n  \"password\": \"MockV1!Senha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");",
+                  "pm.variables.set('registrationEmail',pm.environment.get('b_email').toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.test('Conta ficticia criada',()=>{pm.expect(j.email).to.eql(pm.environment.get('b_email'));pm.expect(j.photoUrl).to.eql(null);pm.expect(j.id).to.be.a('number');});pm.environment.set('b_id',j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "007 - Login (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b_email}}\",\n  \"password\": \"{{b_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");",
+                  "pm.variables.set('previousCookie',pm.environment.get('b_cookie'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Login da conta correta',()=>pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('b_id'))));",
+                  " pm.test('ID de sessao renovado',()=>pm.expect(pm.environment.get('b_cookie')).not.to.eql(pm.variables.get('previousCookie')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "008 - Obter CSRF (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('b_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "009 - Criar candidatura SAVED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Java Junior\",\n    \"companyName\": \"Empresa Aurora Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/1\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": null,\n  \"notes\": \"Dado ficticio v1 - SAVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_SAVED',j.id);pm.test('Candidatura SAVED',()=>{pm.expect(j.status).to.eql('SAVED');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(null);pm.expect(j.job.companyName).to.eql(\"Empresa Aurora Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "010 - Criar candidatura APPLIED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"APPLIED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_APPLIED',j.id);pm.test('Candidatura APPLIED',()=>{pm.expect(j.status).to.eql('APPLIED');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Horizonte Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "011 - Criar candidatura SCREENING",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Analista de Sistemas Java\",\n    \"companyName\": \"Empresa Nuvem Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/3\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SCREENING\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - SCREENING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_SCREENING',j.id);pm.test('Candidatura SCREENING',()=>{pm.expect(j.status).to.eql('SCREENING');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Nuvem Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "012 - Criar candidatura INTERVIEW",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Backend Pleno\",\n    \"companyName\": \"Empresa Ponte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/4\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"INTERVIEW\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - INTERVIEW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_INTERVIEW',j.id);pm.test('Candidatura INTERVIEW',()=>{pm.expect(j.status).to.eql('INTERVIEW');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Ponte Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "013 - Criar candidatura OFFER",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Engenheiro de Software Java\",\n    \"companyName\": \"Empresa Farol Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/5\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"OFFER\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - OFFER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_OFFER',j.id);pm.test('Candidatura OFFER',()=>{pm.expect(j.status).to.eql('OFFER');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Farol Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "014 - Criar candidatura HIRED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor de APIs REST\",\n    \"companyName\": \"Empresa Jardim Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/6\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"HIRED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - HIRED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_HIRED',j.id);pm.test('Candidatura HIRED',()=>{pm.expect(j.status).to.eql('HIRED');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Jardim Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "015 - Criar candidatura REJECTED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Java Trainee\",\n    \"companyName\": \"Empresa Trilho Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/7\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"REJECTED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - REJECTED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_REJECTED',j.id);pm.test('Candidatura REJECTED',()=>{pm.expect(j.status).to.eql('REJECTED');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Trilho Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "016 - Criar candidatura WITHDRAWN",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Analista Desenvolvedor Backend\",\n    \"companyName\": \"Empresa Vento Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/8\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"WITHDRAWN\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - WITHDRAWN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j=pm.response.json();pm.environment.set('application_WITHDRAWN',j.id);pm.test('Candidatura WITHDRAWN',()=>{pm.expect(j.status).to.eql('WITHDRAWN');pm.expect(j.version).to.eql(0);pm.expect(j.appliedOn).to.eql(\"2026-01-15\");pm.expect(j.job.companyName).to.eql(\"Empresa Vento Ficticia\");});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "017 - Outra conta pode acompanhar o mesmo link",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Java Junior\",\n    \"companyName\": \"Empresa Aurora Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/1\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": null,\n  \"notes\": \"Dado ficticio v1 - SAVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('b_application',pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Validacoes",
+      "item": [
+        {
+          "name": "018 - Consulta anonima bloqueada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', null);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "019 - Cadastro sem CSRF bloqueado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Teste V1\",\n  \"email\": \"{{a_email}}\",\n  \"password\": \"MockV1!Senha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', null);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "020 - Senha incorreta rejeitada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"IncorretaV1!123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Erro generico',()=>pm.expect(pm.response.json().detail).to.eql('Credenciais inválidas.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "021 - Email duplicado rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Teste V1\",\n  \"email\": \"{{a_email}}\",\n  \"password\": \"MockV1!Senha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "022 - Cadastro invalido rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \" \",\n  \"email\": \"invalido\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Erros de campos retornados',()=>pm.expect(pm.response.json().errors).to.be.an('array').and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "023 - JSON malformado rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "024 - Consultar proprio perfil sem foto",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Perfil correto',()=>{pm.expect(j.id).to.eql(Number(pm.environment.get('a_id')));pm.expect(j.email).to.eql(pm.environment.get('a_email'));pm.expect(j.photoUrl).to.eql(null);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "025 - Editar nome e email",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Teste V1 Editada\",\n  \"email\": \"qa.ana.editada.v1+{{runId}}@example.test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Perfil atualizado sem trocar ID',()=>{pm.expect(j.id).to.eql(Number(pm.environment.get('a_id')));pm.expect(j.name).to.eql('Ana Teste V1 Editada');});pm.environment.set('a_email',j.email);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "026 - Nao permite email de outra conta",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Teste V1\",\n  \"email\": \"{{b_email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "027 - Listar oito candidaturas proprias",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?page=0&size=20",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Paginacao e quantidade',()=>{pm.expect(j.totalElements).to.eql(8);pm.expect(j.content).to.have.lengthOf(8);pm.expect(j.page).to.eql(0);pm.expect(j.size).to.eql(20);pm.expect(j.totalPages).to.eql(1);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "028 - Segunda conta ve somente sua candidatura",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Isolamento na listagem',()=>pm.expect(pm.response.json().totalElements).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "029 - Filtrar SAVED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=SAVED&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por SAVED',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('SAVED');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "030 - Filtrar APPLIED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=APPLIED&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por APPLIED',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('APPLIED');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "031 - Filtrar SCREENING",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=SCREENING&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por SCREENING',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('SCREENING');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "032 - Filtrar INTERVIEW",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=INTERVIEW&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por INTERVIEW',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('INTERVIEW');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "033 - Filtrar OFFER",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=OFFER&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por OFFER',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('OFFER');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "034 - Filtrar HIRED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=HIRED&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por HIRED',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('HIRED');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "035 - Filtrar REJECTED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=REJECTED&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por REJECTED',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('REJECTED');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "036 - Filtrar WITHDRAWN",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=WITHDRAWN&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Filtro por WITHDRAWN',()=>{pm.expect(j.totalElements).to.eql(1);pm.expect(j.content[0].status).to.eql('WITHDRAWN');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "037 - Pagina fora do resultado retorna vazia",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?page=99&size=1",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Pagina vazia',()=>{pm.expect(pm.response.json().content).to.have.lengthOf(0);pm.expect(pm.response.json().totalElements).to.eql(8);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "038 - Tamanho maximo de pagina respeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?size=101",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "039 - Status desconhecido rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications?status=DESCONHECIDO",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "040 - Consulta de candidatura por ID",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Descricao preservada',()=>pm.expect(pm.response.json().job.description).to.eql(\"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "041 - Historico inicial",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}/history",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Evento inicial',()=>{pm.expect(j).to.have.lengthOf(1);pm.expect(j[0].fromStatus).to.eql(null);pm.expect(j[0].toStatus).to.eql('APPLIED');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "042 - Outra conta nao acessa: GET candidatura",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "043 - Outra conta nao acessa: GET /history",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}/history",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "044 - Outra conta nao acessa: PUT candidatura",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"APPLIED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "045 - Outra conta nao acessa: DELETE candidatura",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "046 - Escrita sem CSRF bloqueada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Java Junior\",\n    \"companyName\": \"Empresa Aurora Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/1\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": null,\n  \"notes\": \"Dado ficticio v1 - SAVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "047 - Link duplicado na mesma conta rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Java Junior\",\n    \"companyName\": \"Empresa Aurora Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/1\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": null,\n  \"notes\": \"Dado ficticio v1 - SAVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "048 - Vaga salva nao pode ter data de inscricao",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Desenvolvedor Java Junior\",\n    \"companyName\": \"Empresa Aurora Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/1\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - SAVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "049 - Data futura de inscricao rejeitada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"APPLIED\",\n  \"appliedOn\": \"2999-01-01\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "050 - Titulo vazio rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \" \"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "051 - Status invalido no cadastro rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Java\"\n  },\n  \"status\": \"DESCONHECIDO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "052 - Falhas nao criaram registros extras",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Quantidade permanece oito',()=>pm.expect(pm.response.json().totalElements).to.eql(8));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "053 - Mover candidatura para SCREENING",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SCREENING\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('SCREENING');pm.expect(j.version).to.eql(1);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "054 - Edicao com versao antiga rejeitada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"OFFER\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "055 - Mover candidatura para INTERVIEW",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"INTERVIEW\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('INTERVIEW');pm.expect(j.version).to.eql(2);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "056 - Mover candidatura para OFFER",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"OFFER\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('OFFER');pm.expect(j.version).to.eql(3);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "057 - Mover candidatura para HIRED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"HIRED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('HIRED');pm.expect(j.version).to.eql(4);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "058 - Mover candidatura para WITHDRAWN",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"WITHDRAWN\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('WITHDRAWN');pm.expect(j.version).to.eql(5);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "059 - Mover candidatura para REJECTED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"REJECTED\",\n  \"appliedOn\": \"2026-01-15\",\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('REJECTED');pm.expect(j.version).to.eql(6);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "060 - Mover candidatura para SAVED",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": null,\n  \"notes\": \"Dado ficticio v1 - APPLIED\",\n  \"version\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Etapa e versao atualizadas',()=>{pm.expect(j.status).to.eql('SAVED');pm.expect(j.version).to.eql(7);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "061 - Historico completo em ordem",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}/history",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Eventos preservados sem edicao rejeitada',()=>{pm.expect(j.map(e=>e.toStatus)).to.eql([\"APPLIED\",\"SCREENING\",\"INTERVIEW\",\"OFFER\",\"HIRED\",\"WITHDRAWN\",\"REJECTED\",\"SAVED\"]);for(let i=1;i<j.length;i++){pm.expect(j[i].fromStatus).to.eql(j[i-1].toStatus);pm.expect(Date.parse(j[i].changedAt)).to.be.at.least(Date.parse(j[i-1].changedAt));}});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "062 - Editar observacoes sem mudar etapa",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Backend Java e Spring Boot\",\n    \"companyName\": \"Empresa Horizonte Ficticia\",\n    \"sourceUrl\": \"https://example.com/acompanhaai-fixture-v1/2\",\n    \"description\": \"Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe.\"\n  },\n  \"status\": \"SAVED\",\n  \"appliedOn\": null,\n  \"notes\": \"Observacao revisada no mock v1.\",\n  \"version\": 7\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Observacoes atualizadas',()=>pm.expect(pm.response.json().notes).to.eql('Observacao revisada no mock v1.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "063 - Edicao simples nao duplica historico",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_APPLIED}}/history",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Historico mantido',()=>pm.expect(pm.response.json()).to.have.lengthOf(8));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "064 - Excluir candidatura propria",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_SAVED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "065 - Candidatura excluida retorna 404",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/applications/{{application_SAVED}}",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "066 - Obter CSRF (a2)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a2_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a2\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a2_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "067 - Login (a2)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a2_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a2_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"{{a_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a2\");",
+                  "pm.variables.set('previousCookie',pm.environment.get('a2_cookie'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Login da conta correta',()=>pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('a_id'))));",
+                  " pm.test('ID de sessao renovado',()=>pm.expect(pm.environment.get('a2_cookie')).not.to.eql(pm.variables.get('previousCookie')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "068 - Obter CSRF (a2)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a2_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a2\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a2_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "069 - Troca de senha exige senha atual correta",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me/password",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"SenhaIncorretaV1!\",\n  \"newPassword\": \"MockV1!NovaSenha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "070 - Trocar senha e revogar sessoes",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me/password",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"MockV1!Senha2026\",\n  \"newPassword\": \"MockV1!NovaSenha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));",
+                  "if(pm.response.code===204)pm.environment.set('a_password',\"MockV1!NovaSenha2026\");"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "071 - Sessao atual revogada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "072 - Segunda sessao tambem revogada",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a2_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a2\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "073 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "074 - Senha antiga deixou de funcionar",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"MockV1!Senha2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "075 - Login (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"{{a_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");",
+                  "pm.variables.set('previousCookie',pm.environment.get('a_cookie'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Login da conta correta',()=>pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('a_id'))));",
+                  " pm.test('ID de sessao renovado',()=>pm.expect(pm.environment.get('a_cookie')).not.to.eql(pm.variables.get('previousCookie')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "076 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "077 - Logout",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "078 - Acesso apos logout bloqueado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "99 - Limpeza",
+      "item": [
+        {
+          "name": "079 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "080 - Login (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"{{a_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");",
+                  "pm.variables.set('previousCookie',pm.environment.get('a_cookie'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Login da conta correta',()=>pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('a_id'))));",
+                  " pm.test('ID de sessao renovado',()=>pm.expect(pm.environment.get('a_cookie')).not.to.eql(pm.variables.get('previousCookie')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "081 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "082 - Excluir somente conta ficticia a",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");",
+                  "if(!Number(pm.environment.get('a_id')) || !/^qa.[^@]+@example.test$/.test(pm.environment.get('a_email')||'')){pm.execution.skipRequest();throw new Error('Conta fora da fixture. Limpeza bloqueada.');}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));",
+                  "pm.test('Conta de teste removida',()=>pm.expect(pm.response.text()).to.eql(''));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "083 - Obter CSRF (a)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('a_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "084 - Login da conta excluida a rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{a_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{a_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{a_email}}\",\n  \"password\": \"{{a_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"a\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "085 - Obter CSRF (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('b_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "086 - Login (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b_email}}\",\n  \"password\": \"{{b_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");",
+                  "pm.variables.set('previousCookie',pm.environment.get('b_cookie'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Login da conta correta',()=>pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('b_id'))));",
+                  " pm.test('ID de sessao renovado',()=>pm.expect(pm.environment.get('b_cookie')).not.to.eql(pm.variables.get('previousCookie')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "087 - Obter CSRF (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('b_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "088 - Excluir somente conta ficticia b",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");",
+                  "if(!Number(pm.environment.get('b_id')) || !/^qa.[^@]+@example.test$/.test(pm.environment.get('b_email')||'')){pm.execution.skipRequest();throw new Error('Conta fora da fixture. Limpeza bloqueada.');}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));",
+                  "pm.test('Conta de teste removida',()=>pm.expect(pm.response.text()).to.eql(''));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "089 - Obter CSRF (b)",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/csrf",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json();pm.test('Token CSRF retornado',()=>{pm.expect(j.headerName).to.eql('X-CSRF-TOKEN');pm.expect(j.token).to.be.a('string').and.not.empty;});pm.environment.set('b_csrf',j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "090 - Login da conta excluida b rejeitado",
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{b_cookie}}"
+              },
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{b_csrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Fixture v1 congelada. Dados ficticios. Execute as pastas em ordem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{b_email}}\",\n  \"password\": \"{{b_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('fixtureActor', \"b\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

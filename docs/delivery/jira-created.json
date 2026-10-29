@@ -1,0 +1,771 @@
+{
+  "project": "KAN",
+  "cloudId": "72e6e193-6a94-4a2e-8f2a-969d676f4415",
+  "boardId": 1,
+  "sprints": {
+    "1": {
+      "id": 1,
+      "name": "S01 - Fundação e processo"
+    },
+    "2": {
+      "id": 2,
+      "name": "S02 - Backend de acesso",
+      "state": "future"
+    },
+    "3": {
+      "id": 3,
+      "name": "S03 - Backend: candidaturas",
+      "state": "future"
+    },
+    "4": {
+      "id": 4,
+      "name": "S04 - Angular: acesso",
+      "state": "future"
+    },
+    "5": {
+      "id": 5,
+      "name": "S05 - Angular: candidaturas",
+      "state": "future"
+    },
+    "6": {
+      "id": 6,
+      "name": "S06 - Coleta de vagas",
+      "state": "future"
+    },
+    "7": {
+      "id": 7,
+      "name": "S07 - Extração com IA",
+      "state": "future"
+    },
+    "8": {
+      "id": 8,
+      "name": "S08 - Importação no Angular",
+      "state": "future"
+    },
+    "9": {
+      "id": 9,
+      "name": "S09 - Homologação",
+      "state": "future"
+    },
+    "10": {
+      "id": 10,
+      "name": "S10 - Produção e operação",
+      "state": "future"
+    }
+  },
+  "issues": {
+    "E0": {
+      "key": "KAN-1",
+      "title": "Fundação, processo e arquitetura do Acompanhaai",
+      "type": "Épico"
+    },
+    "E1": {
+      "key": "KAN-2",
+      "title": "Identidade, segurança e perfil do usuário",
+      "type": "Épico"
+    },
+    "E2": {
+      "key": "KAN-3",
+      "title": "Gestão de vagas e candidaturas",
+      "type": "Épico"
+    },
+    "E3": {
+      "key": "KAN-4",
+      "title": "Experiência web em Angular e TypeScript",
+      "type": "Épico"
+    },
+    "E4": {
+      "key": "KAN-5",
+      "title": "Importação de vagas por link e extração com IA",
+      "type": "Épico"
+    },
+    "E5": {
+      "key": "KAN-6",
+      "title": "Qualidade, homologação e confiabilidade",
+      "type": "Épico"
+    },
+    "E6": {
+      "key": "KAN-7",
+      "title": "DevOps, produção e operação",
+      "type": "Épico"
+    },
+    "F01": {
+      "key": "KAN-8",
+      "title": "Plataforma e processo de engenharia",
+      "type": "Feature",
+      "sprint": 1,
+      "parent": "KAN-1"
+    },
+    "F02": {
+      "key": "KAN-9",
+      "title": "Contas, sessões e recuperação de acesso",
+      "type": "Feature",
+      "sprint": 2,
+      "parent": "KAN-2"
+    },
+    "F03": {
+      "key": "KAN-10",
+      "title": "Contrato completo de oportunidades e acompanhamento",
+      "type": "Feature",
+      "sprint": 3,
+      "parent": "KAN-3"
+    },
+    "F04": {
+      "key": "KAN-11",
+      "title": "Experiência de acesso e conta no Angular",
+      "type": "Feature",
+      "sprint": 4,
+      "parent": "KAN-4"
+    },
+    "F05": {
+      "key": "KAN-12",
+      "title": "Quadro, formulários e detalhes das candidaturas",
+      "type": "Feature",
+      "sprint": 5,
+      "parent": "KAN-4"
+    },
+    "F06": {
+      "key": "KAN-13",
+      "title": "Importação assíncrona e coleta segura",
+      "type": "Feature",
+      "sprint": 6,
+      "parent": "KAN-5"
+    },
+    "F07": {
+      "key": "KAN-14",
+      "title": "Extração estruturada e revisão transacional",
+      "type": "Feature",
+      "sprint": 7,
+      "parent": "KAN-5"
+    },
+    "F08": {
+      "key": "KAN-15",
+      "title": "Experiência completa de importação e revisão",
+      "type": "Feature",
+      "sprint": 8,
+      "parent": "KAN-4"
+    },
+    "F09": {
+      "key": "KAN-16",
+      "title": "Release candidate homologada",
+      "type": "Feature",
+      "sprint": 9,
+      "parent": "KAN-6"
+    },
+    "F10": {
+      "key": "KAN-17",
+      "title": "Publicação e operação da versão 1.0",
+      "type": "Feature",
+      "sprint": 10,
+      "parent": "KAN-7"
+    },
+    "T01": {
+      "key": "KAN-18",
+      "title": "Definir MVP, critérios de entrada e Definition of Done",
+      "type": "Tarefa",
+      "sprint": 1,
+      "parent": "KAN-1",
+      "role": "produto"
+    },
+    "T02": {
+      "key": "KAN-19",
+      "title": "Organizar Git, branches, pull requests e vínculo com Jira",
+      "type": "Tarefa",
+      "sprint": 1,
+      "parent": "KAN-1",
+      "role": "devops"
+    },
+    "T03": {
+      "key": "KAN-20",
+      "title": "Registrar arquitetura e decisões técnicas iniciais",
+      "type": "Tarefa",
+      "sprint": 1,
+      "parent": "KAN-1",
+      "role": "backend"
+    },
+    "T04": {
+      "key": "KAN-21",
+      "title": "Validar setup local e perfis de ambiente",
+      "type": "Tarefa",
+      "sprint": 1,
+      "parent": "KAN-1",
+      "role": "devops"
+    },
+    "T05": {
+      "key": "KAN-22",
+      "title": "Definir estratégia QA e preservar a fixture Postman v1",
+      "type": "Tarefa",
+      "sprint": 1,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T06": {
+      "key": "KAN-23",
+      "title": "Criar pipeline inicial de build e testes do backend",
+      "type": "Tarefa",
+      "sprint": 1,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "US01": {
+      "key": "KAN-24",
+      "title": "Autenticar e gerenciar a própria conta com segurança",
+      "type": "História",
+      "sprint": 2,
+      "parent": "KAN-2",
+      "role": "backend"
+    },
+    "US02": {
+      "key": "KAN-25",
+      "title": "Recuperar acesso por token de uso único",
+      "type": "História",
+      "sprint": 2,
+      "parent": "KAN-2",
+      "role": "backend"
+    },
+    "T07": {
+      "key": "KAN-26",
+      "title": "Revisar foto de perfil opcional e limites de upload",
+      "type": "Tarefa",
+      "sprint": 2,
+      "parent": "KAN-2",
+      "role": "backend"
+    },
+    "T08": {
+      "key": "KAN-27",
+      "title": "Executar matriz de segurança das contas em PostgreSQL",
+      "type": "Tarefa",
+      "sprint": 2,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T09": {
+      "key": "KAN-28",
+      "title": "Definir fluxo e modelo de Bug para triagem e reteste",
+      "type": "Tarefa",
+      "sprint": 2,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T10": {
+      "key": "KAN-29",
+      "title": "Isolar credenciais de aplicação e serviços de teste",
+      "type": "Tarefa",
+      "sprint": 2,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "US03": {
+      "key": "KAN-30",
+      "title": "Registrar salário e habilidades na vaga manual",
+      "type": "História",
+      "sprint": 3,
+      "parent": "KAN-3",
+      "role": "backend"
+    },
+    "US04": {
+      "key": "KAN-31",
+      "title": "Acompanhar etapas, filtros e histórico da candidatura",
+      "type": "História",
+      "sprint": 3,
+      "parent": "KAN-3",
+      "role": "backend"
+    },
+    "T11": {
+      "key": "KAN-32",
+      "title": "Tratar duplicatas, concorrência e exclusões de candidaturas",
+      "type": "Tarefa",
+      "sprint": 3,
+      "parent": "KAN-3",
+      "role": "backend"
+    },
+    "T12": {
+      "key": "KAN-33",
+      "title": "Criar regressão API v2 sem alterar a fixture v1",
+      "type": "Tarefa",
+      "sprint": 3,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T13": {
+      "key": "KAN-34",
+      "title": "Automatizar migrações e testes com PostgreSQL no CI",
+      "type": "Tarefa",
+      "sprint": 3,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T14": {
+      "key": "KAN-35",
+      "title": "Publicar contrato da API e guia de integração Angular",
+      "type": "Tarefa",
+      "sprint": 3,
+      "parent": "KAN-1",
+      "role": "produto"
+    },
+    "US05": {
+      "key": "KAN-36",
+      "title": "Cadastrar, entrar e recuperar acesso pelo Angular",
+      "type": "História",
+      "sprint": 4,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "US06": {
+      "key": "KAN-37",
+      "title": "Editar perfil e foto opcional pela interface",
+      "type": "História",
+      "sprint": 4,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T15": {
+      "key": "KAN-38",
+      "title": "Criar base Angular, navegação e sistema visual",
+      "type": "Tarefa",
+      "sprint": 4,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T16": {
+      "key": "KAN-39",
+      "title": "Implementar cliente HTTP de sessão, CSRF e erros",
+      "type": "Tarefa",
+      "sprint": 4,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T17": {
+      "key": "KAN-40",
+      "title": "Validar jornadas de conta no navegador",
+      "type": "Tarefa",
+      "sprint": 4,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T18": {
+      "key": "KAN-41",
+      "title": "Adicionar build Angular e qualidade de frontend ao CI",
+      "type": "Tarefa",
+      "sprint": 4,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "US07": {
+      "key": "KAN-42",
+      "title": "Visualizar e mover candidaturas no quadro",
+      "type": "História",
+      "sprint": 5,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "US08": {
+      "key": "KAN-43",
+      "title": "Criar, editar e consultar a vaga e sua candidatura",
+      "type": "História",
+      "sprint": 5,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T19": {
+      "key": "KAN-44",
+      "title": "Implementar filtros, pesquisa e paginação da lista",
+      "type": "Tarefa",
+      "sprint": 5,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T20": {
+      "key": "KAN-45",
+      "title": "Automatizar o fluxo manual completo de candidaturas",
+      "type": "Tarefa",
+      "sprint": 5,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T21": {
+      "key": "KAN-46",
+      "title": "Auditar responsividade e acessibilidade do quadro",
+      "type": "Tarefa",
+      "sprint": 5,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T22": {
+      "key": "KAN-47",
+      "title": "Disponibilizar ambiente de preview para revisão",
+      "type": "Tarefa",
+      "sprint": 5,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "US09": {
+      "key": "KAN-48",
+      "title": "Solicitar importação de vaga por URL",
+      "type": "História",
+      "sprint": 6,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "US10": {
+      "key": "KAN-49",
+      "title": "Importar a descrição colada como alternativa",
+      "type": "História",
+      "sprint": 6,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "T23": {
+      "key": "KAN-50",
+      "title": "Implementar worker durável e posse de tarefas",
+      "type": "Tarefa",
+      "sprint": 6,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "T24": {
+      "key": "KAN-51",
+      "title": "Validar coletor contra SSRF e conteúdo hostil",
+      "type": "Tarefa",
+      "sprint": 6,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T25": {
+      "key": "KAN-52",
+      "title": "Configurar limites e métricas da importação",
+      "type": "Tarefa",
+      "sprint": 6,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T26": {
+      "key": "KAN-53",
+      "title": "Documentar máquina de estados e limpeza de tarefas",
+      "type": "Tarefa",
+      "sprint": 6,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "US11": {
+      "key": "KAN-54",
+      "title": "Extrair dados da descrição com evidência",
+      "type": "História",
+      "sprint": 7,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "US12": {
+      "key": "KAN-55",
+      "title": "Revisar e confirmar uma importação uma única vez",
+      "type": "História",
+      "sprint": 7,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "T27": {
+      "key": "KAN-56",
+      "title": "Integrar provedor de IA por adaptador configurável",
+      "type": "Tarefa",
+      "sprint": 7,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "T28": {
+      "key": "KAN-57",
+      "title": "Criar conjunto de avaliação da extração",
+      "type": "Tarefa",
+      "sprint": 7,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T29": {
+      "key": "KAN-58",
+      "title": "Controlar falhas, cota e custo do provedor",
+      "type": "Tarefa",
+      "sprint": 7,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T30": {
+      "key": "KAN-59",
+      "title": "Simular falhas de IA e repetição de confirmação",
+      "type": "Tarefa",
+      "sprint": 7,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "US13": {
+      "key": "KAN-60",
+      "title": "Importar link ou texto e acompanhar o processamento",
+      "type": "História",
+      "sprint": 8,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "US14": {
+      "key": "KAN-61",
+      "title": "Revisar os dados extraídos antes de salvar",
+      "type": "História",
+      "sprint": 8,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T31": {
+      "key": "KAN-62",
+      "title": "Automatizar importação e revisão ponta a ponta",
+      "type": "Tarefa",
+      "sprint": 8,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T32": {
+      "key": "KAN-63",
+      "title": "Validar acessibilidade e compreensão da revisão",
+      "type": "Tarefa",
+      "sprint": 8,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T33": {
+      "key": "KAN-64",
+      "title": "Escrever ajuda e estados vazios do produto",
+      "type": "Tarefa",
+      "sprint": 8,
+      "parent": "KAN-4",
+      "role": "frontend"
+    },
+    "T34": {
+      "key": "KAN-65",
+      "title": "Executar política de retenção e exclusão de dados",
+      "type": "Tarefa",
+      "sprint": 8,
+      "parent": "KAN-5",
+      "role": "backend"
+    },
+    "US15": {
+      "key": "KAN-66",
+      "title": "Homologar a release candidate como usuário final",
+      "type": "História",
+      "sprint": 9,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T35": {
+      "key": "KAN-67",
+      "title": "Criar infraestrutura e pipeline de staging",
+      "type": "Tarefa",
+      "sprint": 9,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T36": {
+      "key": "KAN-68",
+      "title": "Executar revisão de segurança e dependências",
+      "type": "Tarefa",
+      "sprint": 9,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T37": {
+      "key": "KAN-69",
+      "title": "Medir desempenho e confiabilidade do MVP",
+      "type": "Tarefa",
+      "sprint": 9,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T38": {
+      "key": "KAN-70",
+      "title": "Ensaiar backup, restauração e rollback",
+      "type": "Tarefa",
+      "sprint": 9,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T39": {
+      "key": "KAN-71",
+      "title": "Consolidar gate de regressão e decisão de release",
+      "type": "Tarefa",
+      "sprint": 9,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "US16": {
+      "key": "KAN-72",
+      "title": "Disponibilizar o Acompanhaai em produção",
+      "type": "História",
+      "sprint": 10,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T40": {
+      "key": "KAN-73",
+      "title": "Preparar domínio, HTTPS, banco e segredos de produção",
+      "type": "Tarefa",
+      "sprint": 10,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T41": {
+      "key": "KAN-74",
+      "title": "Preparar execução da release e plano de retorno",
+      "type": "Tarefa",
+      "sprint": 10,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T42": {
+      "key": "KAN-75",
+      "title": "Configurar observabilidade e resposta a incidentes",
+      "type": "Tarefa",
+      "sprint": 10,
+      "parent": "KAN-7",
+      "role": "devops"
+    },
+    "T43": {
+      "key": "KAN-76",
+      "title": "Executar smoke de produção e acompanhar estabilidade",
+      "type": "Tarefa",
+      "sprint": 10,
+      "parent": "KAN-6",
+      "role": "qa"
+    },
+    "T44": {
+      "key": "KAN-77",
+      "title": "Publicar documentação final e retrospectiva da entrega",
+      "type": "Tarefa",
+      "sprint": 10,
+      "parent": "KAN-1",
+      "role": "produto"
+    },
+    "US01-DEV": {
+      "key": "KAN-78",
+      "title": "Revisar e completar: Autenticar e gerenciar a própria conta com segurança",
+      "type": "Subtask",
+      "sprint": 2,
+      "parent": "KAN-24",
+      "role": "backend"
+    },
+    "US01-QA": {
+      "key": "KAN-79",
+      "title": "QA e evidências: Autenticar e gerenciar a própria conta com segurança",
+      "type": "Subtask",
+      "sprint": 2,
+      "parent": "KAN-24",
+      "role": "qa"
+    },
+    "US02-DEV": {
+      "key": "KAN-80",
+      "title": "Implementar: Recuperar acesso por token de uso único",
+      "type": "Subtask",
+      "sprint": 2,
+      "parent": "KAN-25",
+      "role": "backend"
+    },
+    "US02-QA": {
+      "key": "KAN-81",
+      "title": "QA e evidências: Recuperar acesso por token de uso único",
+      "type": "Subtask",
+      "sprint": 2,
+      "parent": "KAN-25",
+      "role": "qa"
+    },
+    "US03-DEV": {
+      "key": "KAN-82",
+      "title": "Implementar: Registrar salário e habilidades na vaga manual",
+      "type": "Subtask",
+      "sprint": 3,
+      "parent": "KAN-30",
+      "role": "backend"
+    },
+    "US03-QA": {
+      "key": "KAN-83",
+      "title": "QA e evidências: Registrar salário e habilidades na vaga manual",
+      "type": "Subtask",
+      "sprint": 3,
+      "parent": "KAN-30",
+      "role": "qa"
+    },
+    "US04-DEV": {
+      "key": "KAN-84",
+      "title": "Revisar e completar: Acompanhar etapas, filtros e histórico da candidatura",
+      "type": "Subtask",
+      "sprint": 3,
+      "parent": "KAN-31",
+      "role": "backend"
+    },
+    "US04-QA": {
+      "key": "KAN-85",
+      "title": "QA e evidências: Acompanhar etapas, filtros e histórico da candidatura",
+      "type": "Subtask",
+      "sprint": 3,
+      "parent": "KAN-31",
+      "role": "qa"
+    },
+    "US05-DEV": {
+      "key": "KAN-86",
+      "title": "Implementar: Cadastrar, entrar e recuperar acesso pelo Angular",
+      "type": "Subtask",
+      "sprint": 4,
+      "parent": "KAN-36",
+      "role": "frontend"
+    },
+    "US05-QA": {
+      "key": "KAN-87",
+      "title": "QA e evidências: Cadastrar, entrar e recuperar acesso pelo Angular",
+      "type": "Subtask",
+      "sprint": 4,
+      "parent": "KAN-36",
+      "role": "qa"
+    },
+    "US06-DEV": {
+      "key": "KAN-88",
+      "title": "Implementar: Editar perfil e foto opcional pela interface",
+      "type": "Subtask",
+      "sprint": 4,
+      "parent": "KAN-37",
+      "role": "frontend"
+    },
+    "US06-QA": {
+      "key": "KAN-89",
+      "title": "QA e evidências: Editar perfil e foto opcional pela interface",
+      "type": "Subtask",
+      "sprint": 4,
+      "parent": "KAN-37",
+      "role": "qa"
+    },
+    "US07-DEV": {
+      "key": "KAN-90",
+      "title": "Implementar: Visualizar e mover candidaturas no quadro",
+      "type": "Subtask",
+      "sprint": 5,
+      "parent": "KAN-42",
+      "role": "frontend"
+    },
+    "US07-QA": {
+      "key": "KAN-91",
+      "title": "QA e evidências: Visualizar e mover candidaturas no quadro",
+      "type": "Subtask",
+      "sprint": 5,
+      "parent": "KAN-42",
+      "role": "qa"
+    },
+    "US08-DEV": {
+      "key": "KAN-92",
+      "title": "Implementar: Criar, editar e consultar a vaga e sua candidatura",
+      "type": "Subtask",
+      "sprint": 5,
+      "parent": "KAN-43",
+      "role": "frontend"
+    },
+    "US08-QA": {
+      "key": "KAN-93",
+      "title": "QA e evidências: Criar, editar e consultar a vaga e sua candidatura",
+      "type": "Subtask",
+      "sprint": 5,
+      "parent": "KAN-43",
+      "role": "qa"
+    }
+  }
+}

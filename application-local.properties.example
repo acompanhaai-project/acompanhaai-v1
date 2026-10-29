@@ -1,0 +1,6 @@
+# Copie para application-local.properties e preencha com suas credenciais reais.
+# O arquivo application-local.properties e ignorado pelo Git e carregado automaticamente.
+spring.datasource.username=SEU_USUARIO_POSTGRESQL
+spring.datasource.password=SUA_SENHA_POSTGRESQL
+# Sobrescreva a URL somente se usar outra instancia:
+# spring.datasource.url=jdbc:postgresql://localhost:5433/acompanhaai

@@ -1,0 +1,1772 @@
+{
+  "version": "1.0",
+  "project": "KAN",
+  "cloudId": "72e6e193-6a94-4a2e-8f2a-969d676f4415",
+  "boardId": 1,
+  "assumptions": [
+    "Planejamento didático para uma pessoa alternando PO, backend, frontend, QA e DevOps.",
+    "Java 25, Spring Boot 4.0+, PostgreSQL, Angular e TypeScript.",
+    "Cadência proposta: 14 dias por sprint. Datas e capacidade serão definidas no primeiro planning; nenhuma sprint será iniciada automaticamente.",
+    "Produção exige ambiente separado do PostgreSQL local, credenciais próprias, HTTPS, backup e gate de aprovação.",
+    "Fixture Postman v1 congelada: novas verificações em v2, preservando o contrato original."
+  ],
+  "epics": [
+    {
+      "id": "E0",
+      "title": "Fundação, processo e arquitetura do Acompanhaai",
+      "goal": "Estabelecer escopo, práticas de engenharia, rastreabilidade e base técnica reproduzível."
+    },
+    {
+      "id": "E1",
+      "title": "Identidade, segurança e perfil do usuário",
+      "goal": "Garantir cadastro, acesso, recuperação de conta e perfil com isolamento e proteção de credenciais."
+    },
+    {
+      "id": "E2",
+      "title": "Gestão de vagas e candidaturas",
+      "goal": "Gerenciar oportunidades, habilidades, salário, etapas e histórico pessoal de candidaturas."
+    },
+    {
+      "id": "E3",
+      "title": "Experiência web em Angular e TypeScript",
+      "goal": "Entregar interface responsiva e acessível para autenticação, perfil e acompanhamento de candidaturas."
+    },
+    {
+      "id": "E4",
+      "title": "Importação de vagas por link e extração com IA",
+      "goal": "Transformar URL ou descrição em uma proposta de dados revisável, sem inventar informações ausentes."
+    },
+    {
+      "id": "E5",
+      "title": "Qualidade, homologação e confiabilidade",
+      "goal": "Garantir testes reproduzíveis, evidências de QA, segurança, desempenho e critérios de aceite antes da publicação."
+    },
+    {
+      "id": "E6",
+      "title": "DevOps, produção e operação",
+      "goal": "Entregar CI/CD, ambientes separados, publicação segura, monitoramento, backup e recuperação."
+    }
+  ],
+  "sprints": [
+    {
+      "n": 1,
+      "title": "Fundação e processo",
+      "epic": "E0",
+      "feature": "Plataforma e processo de engenharia",
+      "goal": "Conseguir executar o projeto de forma reproduzível e trabalhar com escopo, DoR/DoD, Git, revisão e CI definidos.",
+      "exit": "Clonar e executar com instruções verificadas; pipeline de testes verde; primeiro planning concluído.",
+      "jiraName": "S01 - Fundação e processo"
+    },
+    {
+      "n": 2,
+      "title": "Backend de acesso e perfil",
+      "epic": "E1",
+      "feature": "Contas, sessões e recuperação de acesso",
+      "goal": "Validar o acesso existente, completar recuperação de senha e confirmar segurança das contas em PostgreSQL.",
+      "exit": "Fluxos de conta e recuperação aprovados por QA, com sessão/CSRF e isolamento demonstrados.",
+      "jiraName": "S02 - Backend de acesso"
+    },
+    {
+      "n": 3,
+      "title": "Backend de vagas e candidaturas",
+      "epic": "E2",
+      "feature": "Contrato completo de oportunidades e acompanhamento",
+      "goal": "Completar os dados manuais de vagas e consolidar filtros, concorrência e histórico do acompanhamento.",
+      "exit": "API documentada e validada em PostgreSQL com salário/habilidades, histórico e regressão v2.",
+      "jiraName": "S03 - Backend: candidaturas"
+    },
+    {
+      "n": 4,
+      "title": "Angular: acesso e perfil",
+      "epic": "E3",
+      "feature": "Experiência de acesso e conta no Angular",
+      "goal": "Permitir cadastro, login, recuperação e manutenção do perfil pela interface Angular integrada à API.",
+      "exit": "Usuário completa acesso e perfil pelo navegador, incluindo estados de erro e sessão expirada.",
+      "jiraName": "S04 - Angular: acesso"
+    },
+    {
+      "n": 5,
+      "title": "Angular: quadro de candidaturas",
+      "epic": "E3",
+      "feature": "Quadro, formulários e detalhes das candidaturas",
+      "goal": "Usar o fluxo manual completo no navegador, com quadro por etapas, pesquisa, filtros e histórico.",
+      "exit": "Uma candidatura é criada, consultada, movida, editada e excluída pelo Angular com evidência E2E.",
+      "jiraName": "S05 - Angular: candidaturas"
+    },
+    {
+      "n": 6,
+      "title": "Importação: coleta e processamento",
+      "epic": "E4",
+      "feature": "Importação assíncrona e coleta segura",
+      "goal": "Receber URL ou texto e processar tarefas duráveis com coleta segura, estados claros e tratamento de bloqueios.",
+      "exit": "Importação por URL/texto funciona com isolamento, limites, reexecução controlada e fallback manual.",
+      "jiraName": "S06 - Coleta de vagas"
+    },
+    {
+      "n": 7,
+      "title": "Importação: extração com IA",
+      "epic": "E4",
+      "feature": "Extração estruturada e revisão transacional",
+      "goal": "Extrair título, empresa, habilidades e salário com IA e dados estruturados, exigindo revisão antes de salvar.",
+      "exit": "Conjunto de avaliação aprovado; campos sem evidência permanecem ausentes; confirmação é atômica e idempotente.",
+      "jiraName": "S07 - Extração com IA"
+    },
+    {
+      "n": 8,
+      "title": "Angular: importar e revisar",
+      "epic": "E3",
+      "feature": "Experiência completa de importação e revisão",
+      "goal": "Colar link ou descrição, acompanhar processamento, revisar campos e salvar a candidatura pela interface.",
+      "exit": "Fluxo integrado de importação aprovado em casos de sucesso, erro, cota excedida e página indisponível.",
+      "jiraName": "S08 - Importação no Angular"
+    },
+    {
+      "n": 9,
+      "title": "Homologação e preparação da release",
+      "epic": "E5",
+      "feature": "Release candidate homologada",
+      "goal": "Homologar o produto em staging com regressão, segurança, acessibilidade, desempenho e restauração de backup.",
+      "exit": "UAT aprovado; sem bugs críticos/altos abertos; restore e rollback ensaiados; release candidate identificada.",
+      "jiraName": "S09 - Homologação"
+    },
+    {
+      "n": 10,
+      "title": "Produção e operação assistida",
+      "epic": "E6",
+      "feature": "Publicação e operação da versão 1.0",
+      "goal": "Publicar a versão aprovada em produção com HTTPS, permissões mínimas, observabilidade e procedimento de recuperação.",
+      "exit": "Smoke de produção aprovado, alertas exercitados, backup conferido e acompanhamento inicial registrado.",
+      "jiraName": "S10 - Produção e operação"
+    }
+  ],
+  "items": [
+    {
+      "id": "T01",
+      "sprint": 1,
+      "epic": "E0",
+      "type": "Tarefa",
+      "role": "produto",
+      "title": "Definir MVP, critérios de entrada e Definition of Done",
+      "accept": [
+        "Documentar persona, problema, objetivo do produto e escopo v1; confirmar as oito etapas de candidatura.",
+        "Definir DoR: objetivo, aceite, dependências, dados de teste e abordagem de QA conhecidos.",
+        "Definir DoD: código revisado, testes apropriados, evidência QA, documentação e ausência de segredos; item só é concluído após aceite."
+      ],
+      "depends": [],
+      "baseline": false
+    },
+    {
+      "id": "T02",
+      "sprint": 1,
+      "epic": "E0",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Organizar Git, branches, pull requests e vínculo com Jira",
+      "accept": [
+        "Versionar o código e criar repositório remoto no provedor escolhido pelo usuário.",
+        "Definir branches curtas com chave KAN, template de PR, revisão e proteção da branch principal.",
+        "Configurar .gitignore e checagem de segredos; manter credenciais locais e relatórios de sessão fora do Git."
+      ],
+      "depends": [
+        "T01"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T03",
+      "sprint": 1,
+      "epic": "E0",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Registrar arquitetura e decisões técnicas iniciais",
+      "accept": [
+        "Registrar ADRs: monólito em camadas, PostgreSQL, sessão/CSRF, importação assíncrona e frontend Angular.",
+        "Documentar as relações User/Job/Application/ImportTask e a diferença entre vaga salva e inscrição.",
+        "Registrar limitações de scraping e escolha do provedor de IA, com configuração substituível e revisão obrigatória."
+      ],
+      "depends": [],
+      "baseline": true
+    },
+    {
+      "id": "T04",
+      "sprint": 1,
+      "epic": "E0",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Validar setup local e perfis de ambiente",
+      "accept": [
+        "Documentar comandos para PostgreSQL local em 5433 e perfil H2; verificar a precedência das configurações privadas.",
+        "Executar as migrações em banco vazio de desenvolvimento e separar banco de testes.",
+        "Confirmar cookie local HTTP e produção HTTPS; nenhuma senha ou usuário administrador é copiado para exemplos versionados."
+      ],
+      "depends": [
+        "T02"
+      ],
+      "baseline": true
+    },
+    {
+      "id": "T05",
+      "sprint": 1,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Definir estratégia QA e preservar a fixture Postman v1",
+      "accept": [
+        "Mapear testes de unidade, integração PostgreSQL, contrato/API, Selenium Java E2E, acessibilidade e carga.",
+        "Registrar baseline histórico: 26 testes de integração e coleção v1 com 90 requisições/246 asserções; executar novamente e anexar resultado atual.",
+        "Conferir hashes da fixture v1 e planejar novas verificações exclusivamente em v2."
+      ],
+      "depends": [
+        "T01"
+      ],
+      "baseline": true
+    },
+    {
+      "id": "T06",
+      "sprint": 1,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Criar pipeline inicial de build e testes do backend",
+      "accept": [
+        "Configurar CI no provedor do repositório com JDK 25 e Maven Wrapper.",
+        "Executar build/testes em PR e publicar relatórios de teste e artefato, sem credenciais no log.",
+        "Demonstrar um PR com sucesso e um teste falhando que bloqueia merge."
+      ],
+      "depends": [
+        "T02",
+        "T04"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US01",
+      "sprint": 2,
+      "epic": "E1",
+      "type": "História",
+      "role": "backend",
+      "title": "Autenticar e gerenciar a própria conta com segurança",
+      "userGoal": "Como candidato, quero acessar e manter minha conta para preservar meus dados pessoais.",
+      "accept": [
+        "Revalidar cadastro, login, logout, consulta, edição e exclusão da própria conta; e-mail duplicado retorna 409.",
+        "Com login válido, renovar sessão e CSRF; sem sessão retornar 401 e escrita sem CSRF retornar 403.",
+        "Troca de senha exige senha atual e invalida outras sessões; respostas não expõem senha/hash."
+      ],
+      "depends": [
+        "T04"
+      ],
+      "baseline": true
+    },
+    {
+      "id": "US02",
+      "sprint": 2,
+      "epic": "E1",
+      "type": "História",
+      "role": "backend",
+      "title": "Recuperar acesso por token de uso único",
+      "userGoal": "Como usuário que esqueceu a senha, quero recuperar meu acesso sem depender do administrador.",
+      "accept": [
+        "Solicitação retorna resposta genérica para e-mail existente ou inexistente; há limite de frequência.",
+        "Token aleatório é armazenado como hash, expira em até 30 minutos e só pode ser usado uma vez.",
+        "Senha alterada revoga sessões; testes cobrem token inválido, expirado e repetido; envio de e-mail usa ambiente de testes."
+      ],
+      "depends": [
+        "US01",
+        "T10"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T07",
+      "sprint": 2,
+      "epic": "E1",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Revisar foto de perfil opcional e limites de upload",
+      "accept": [
+        "Validar JPEG/PNG por conteúdo, tamanho de 2 MiB e limite de 4 milhões de pixels.",
+        "Revalidar substituição, remoção idempotente e acesso apenas à foto da própria conta.",
+        "Exclusão de conta remove foto; frontend futuro terá avatar padrão quando photoUrl for nulo."
+      ],
+      "depends": [
+        "US01"
+      ],
+      "baseline": true
+    },
+    {
+      "id": "T08",
+      "sprint": 2,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Executar matriz de segurança das contas em PostgreSQL",
+      "accept": [
+        "Testar usuários A/B, múltiplas sessões, expiração, CSRF, e-mail duplicado e exclusão.",
+        "Usar banco de testes isolado; garantir que os testes não apagam dados pessoais do banco de desenvolvimento.",
+        "Anexar relatórios, ambiente, versão e passos de reprodução para cada falha."
+      ],
+      "depends": [
+        "US01",
+        "US02",
+        "T07"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T09",
+      "sprint": 2,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Definir fluxo e modelo de Bug para triagem e reteste",
+      "accept": [
+        "Usar o tipo Problema como Bug, com passos, massa, esperado/obtido, ambiente e evidência.",
+        "Separar severidade de prioridade e definir SLA didático de triagem para crítico/alto.",
+        "Definir: reportado → triagem → correção → revisão → reteste → fechado/reaberto; vincular bugs à história e à release. Não cadastrar defeitos fictícios como reais."
+      ],
+      "depends": [
+        "T05"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T10",
+      "sprint": 2,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Isolar credenciais de aplicação e serviços de teste",
+      "accept": [
+        "Criar usuário de banco da aplicação com permissões necessárias e distinguir executor de migrações.",
+        "Configurar segredos por ambiente e envio de e-mail de testes sem usar destinatários reais.",
+        "Documentar rotação e confirmar que logs/artefatos não contêm senha, token de recuperação ou cookie."
+      ],
+      "depends": [
+        "T04"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US03",
+      "sprint": 3,
+      "epic": "E2",
+      "type": "História",
+      "role": "backend",
+      "title": "Registrar salário e habilidades na vaga manual",
+      "userGoal": "Como candidato, quero salvar os requisitos e a remuneração informados na vaga para consultá-los depois.",
+      "accept": [
+        "Receber e retornar hard skills/soft skills, localização/modalidade e salário nos DTOs do cadastro e edição.",
+        "Salário ausente permanece nulo; faixa usa decimal exato, moeda e periodicidade explícitas, sem inferir valores.",
+        "Validar faixa invertida, tamanhos, habilidades duplicadas e propriedade; migração preserva dados existentes."
+      ],
+      "depends": [
+        "US01"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US04",
+      "sprint": 3,
+      "epic": "E2",
+      "type": "História",
+      "role": "backend",
+      "title": "Acompanhar etapas, filtros e histórico da candidatura",
+      "userGoal": "Como candidato, quero organizar minhas inscrições por etapa e consultar suas mudanças.",
+      "accept": [
+        "Revalidar SAVED/APPLIED/SCREENING/INTERVIEW/OFFER/HIRED/REJECTED/WITHDRAWN; implementar filtro de etapa e busca limitada por título/empresa, paginação e ordenação estável.",
+        "Atualização de status e evento no histórico são atômicos; editar observações não cria evento de status.",
+        "Versão antiga retorna 409; acesso de outro usuário retorna 404; SAVED não aceita data de inscrição."
+      ],
+      "depends": [
+        "US03"
+      ],
+      "baseline": true
+    },
+    {
+      "id": "T11",
+      "sprint": 3,
+      "epic": "E2",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Tratar duplicatas, concorrência e exclusões de candidaturas",
+      "accept": [
+        "Testar criação concorrente com mesmo link por usuário e permitir o mesmo link em contas diferentes.",
+        "Definir normalização conservadora de URL, preservando identificadores e conferindo colisão de hash.",
+        "Documentar e testar o efeito da exclusão sobre vaga, histórico, habilidades e tarefas vinculadas."
+      ],
+      "depends": [
+        "US03",
+        "US04"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T12",
+      "sprint": 3,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Criar regressão API v2 sem alterar a fixture v1",
+      "accept": [
+        "Criar coleção e dados v2 para novos campos e contrato, preservando integralmente postman/fixtures/v1 e seu executor.",
+        "Cobrir sucesso, payload inválido, autorização, versão antiga, duplicidade e rollback de transações.",
+        "Executar regressão em PostgreSQL de testes com limpeza restrita às contas criadas."
+      ],
+      "depends": [
+        "US03",
+        "US04",
+        "T11"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T13",
+      "sprint": 3,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Automatizar migrações e testes com PostgreSQL no CI",
+      "accept": [
+        "Subir instância PostgreSQL efêmera no CI e aplicar todas as migrações a partir de banco vazio.",
+        "Verificar FKs, tipos monetários, JSONB e concorrência no PostgreSQL; H2 permanece teste rápido complementar.",
+        "Definir política de migrações imutáveis e demonstrar atualização preservando registros."
+      ],
+      "depends": [
+        "T06",
+        "US03"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T14",
+      "sprint": 3,
+      "epic": "E0",
+      "type": "Tarefa",
+      "role": "produto",
+      "title": "Publicar contrato da API e guia de integração Angular",
+      "accept": [
+        "Atualizar OpenAPI com DTOs, paginação, erros, salário/habilidades e autenticação por sessão/CSRF.",
+        "Registrar exemplos de 401, 403, 409 e 422 e estratégia de renovação de CSRF após login.",
+        "Revisar exemplos com frontend e QA e vincular o contrato aos critérios das histórias."
+      ],
+      "depends": [
+        "US03",
+        "US04"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US05",
+      "sprint": 4,
+      "epic": "E3",
+      "type": "História",
+      "role": "frontend",
+      "title": "Cadastrar, entrar e recuperar acesso pelo Angular",
+      "userGoal": "Como candidato, quero acessar a aplicação pelo navegador com mensagens claras e navegação protegida.",
+      "accept": [
+        "Implementar cadastro, login, logout e recuperação com formulários tipados e validação acessível.",
+        "Renovar CSRF após login e tratar sessão expirada; estado autenticado deve refletir a API.",
+        "Rotas privadas redirecionam para login e nenhum segredo é persistido no localStorage."
+      ],
+      "depends": [
+        "US01",
+        "US02",
+        "T14",
+        "T16"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US06",
+      "sprint": 4,
+      "epic": "E3",
+      "type": "História",
+      "role": "frontend",
+      "title": "Editar perfil e foto opcional pela interface",
+      "userGoal": "Como usuário, quero manter meus dados e minha foto com uma experiência simples.",
+      "accept": [
+        "Consultar/editar nome e e-mail e trocar senha com validação da senha atual.",
+        "Enviar, substituir e remover foto com preview, limites e avatar padrão; apresentar erros do servidor.",
+        "Excluir conta exige confirmação e encerra sessão; navegação por teclado é funcional."
+      ],
+      "depends": [
+        "US05",
+        "T07"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T15",
+      "sprint": 4,
+      "epic": "E3",
+      "type": "Tarefa",
+      "role": "frontend",
+      "title": "Criar base Angular, navegação e sistema visual",
+      "accept": [
+        "Criar aplicação Angular/TypeScript com versão estável selecionada e documentada na implementação.",
+        "Definir layout responsivo, tokens de cor/tipografia, componentes de formulário e estados vazio/loading/erro.",
+        "Organizar módulos/domínios e lint; padronizar acessibilidade e textos em português."
+      ],
+      "depends": [
+        "T02",
+        "T14"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T16",
+      "sprint": 4,
+      "epic": "E3",
+      "type": "Tarefa",
+      "role": "frontend",
+      "title": "Implementar cliente HTTP de sessão, CSRF e erros",
+      "accept": [
+        "Centralizar comunicação e envio de credenciais/CSRF sem duplicar lógica por tela.",
+        "Definir proxy local ou mesma origem e política explícita de CORS quando necessário; não usar wildcard com credenciais.",
+        "Mapear ProblemDetail e erros de segurança para mensagens úteis e testar 401/403/409/422."
+      ],
+      "depends": [
+        "T15",
+        "T14"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T17",
+      "sprint": 4,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Validar jornadas de conta no navegador",
+      "accept": [
+        "Automatizar cadastro, login, recuperação e perfil com Selenium WebDriver/Java e dados exclusivos.",
+        "Executar cenários de teclado, foco, erros de campo e sessão expirada em viewport desktop e mobile.",
+        "Anexar evidência sem senha/cookie e abrir Bugs reais vinculados às histórias."
+      ],
+      "depends": [
+        "US05",
+        "US06"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T18",
+      "sprint": 4,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Adicionar build Angular e qualidade de frontend ao CI",
+      "accept": [
+        "Executar instalação com lockfile, lint, testes apropriados e build de produção em PR.",
+        "Gerar artefato identificável e validar ausência de chaves de IA ou senha em bundle.",
+        "Documentar execução local integrada e falha de build que bloqueia merge."
+      ],
+      "depends": [
+        "T06",
+        "T15"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US07",
+      "sprint": 5,
+      "epic": "E3",
+      "type": "História",
+      "role": "frontend",
+      "title": "Visualizar e mover candidaturas no quadro",
+      "userGoal": "Como candidato, quero enxergar minhas candidaturas por etapa e atualizar seu andamento.",
+      "accept": [
+        "Exibir as quatro etapas centrais e separar Salvas e finalizadas com rótulos claros.",
+        "Permitir mudança por controle acessível; arrastar e soltar, se implementado, terá alternativa por teclado.",
+        "Salvar alteração na API; em conflito de versão, preservar contexto e oferecer recarregamento; exibir erro sem fingir sucesso."
+      ],
+      "depends": [
+        "US04",
+        "US05",
+        "T16"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US08",
+      "sprint": 5,
+      "epic": "E3",
+      "type": "História",
+      "role": "frontend",
+      "title": "Criar, editar e consultar a vaga e sua candidatura",
+      "userGoal": "Como candidato, quero manter os detalhes da oportunidade e o histórico no mesmo lugar.",
+      "accept": [
+        "Formulário manual cobre título, empresa, link, descrição, salário, habilidades e dados do acompanhamento.",
+        "Detalhes exibem histórico em ordem e ausência de salário sem apresentar zero.",
+        "Excluir candidatura exige confirmação e atualiza listagem; mensagens explicam duplicidade e validações."
+      ],
+      "depends": [
+        "US03",
+        "US04",
+        "US07"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T19",
+      "sprint": 5,
+      "epic": "E3",
+      "type": "Tarefa",
+      "role": "frontend",
+      "title": "Implementar filtros, pesquisa e paginação da lista",
+      "accept": [
+        "Filtrar por etapa e integrar a paginação da API; pesquisa só será habilitada após contrato do backend.",
+        "Preservar filtros ao abrir/voltar dos detalhes e distinguir lista vazia de nenhum resultado.",
+        "Testar combinações, reset de filtro e ausência de registros de outras contas."
+      ],
+      "depends": [
+        "US07",
+        "T14"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T20",
+      "sprint": 5,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Automatizar o fluxo manual completo de candidaturas",
+      "accept": [
+        "E2E cria candidatura, edita, move etapas, confere histórico e exclui o registro.",
+        "Validar duas contas, conflito 409 e erro de rede com dados exclusivos e limpeza.",
+        "Publicar relatório no CI; falhas relevantes geram Bug com evidência reproduzível."
+      ],
+      "depends": [
+        "US07",
+        "US08",
+        "T19"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T21",
+      "sprint": 5,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Auditar responsividade e acessibilidade do quadro",
+      "accept": [
+        "Verificar teclado, ordem de foco, leitores de tela em amostra e contraste dos estados.",
+        "Executar viewport mobile sem depender apenas de cores ou de arrastar e soltar.",
+        "Registrar achados reais e retestar correções antes da aceitação."
+      ],
+      "depends": [
+        "US07",
+        "US08"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T22",
+      "sprint": 5,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Disponibilizar ambiente de preview para revisão",
+      "accept": [
+        "Publicar build de desenvolvimento/homologação com API e banco de testes separados.",
+        "Garantir mesma origem ou CORS restrito, cookies coerentes e massa fictícia identificada.",
+        "Documentar acesso, atualização, limpeza e custo previsto; segredos ficam fora do frontend."
+      ],
+      "depends": [
+        "T18",
+        "T10"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US09",
+      "sprint": 6,
+      "epic": "E4",
+      "type": "História",
+      "role": "backend",
+      "title": "Solicitar importação de vaga por URL",
+      "userGoal": "Como candidato, quero colar o link de uma vaga para reduzir o preenchimento manual.",
+      "accept": [
+        "POST de importação retorna 202 com ID da tarefa; consulta expõe estado e motivo de falha ao proprietário.",
+        "Coletar conteúdo com timeout e tamanho máximo e priorizar JobPosting estruturado quando disponível.",
+        "Página bloqueada/login/JavaScript não suportado gera NEEDS_INPUT com orientação para colar descrição, sem contornar restrições."
+      ],
+      "depends": [
+        "US03",
+        "US04",
+        "T23"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US10",
+      "sprint": 6,
+      "epic": "E4",
+      "type": "História",
+      "role": "backend",
+      "title": "Importar a descrição colada como alternativa",
+      "userGoal": "Como candidato, quero colar a descrição quando o site não puder ser lido.",
+      "accept": [
+        "Receber texto com limite de tamanho e origem TEXT, sem depender de URL.",
+        "Manter estados e contrato compatíveis com importação por URL e separar coleta de extração.",
+        "Validar entrada vazia, tamanho, propriedade e cancelamento/expiração conforme contrato."
+      ],
+      "depends": [
+        "T26",
+        "T23"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T23",
+      "sprint": 6,
+      "epic": "E4",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Implementar worker durável e posse de tarefas",
+      "accept": [
+        "Reivindicar tarefas atomicamente com lock token/validade e atualizar estado na mesma transação.",
+        "Recuperar execução interrompida após expiração e impedir gravação de worker antigo.",
+        "Limitar concorrência/tentativas e descartar resultado se a tarefa ou conta tiver sido excluída."
+      ],
+      "depends": [
+        "T26"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T24",
+      "sprint": 6,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Validar coletor contra SSRF e conteúdo hostil",
+      "accept": [
+        "Bloquear loopback, redes privadas, link-local, esquemas indevidos e destinos não públicos no momento da conexão.",
+        "Revalidar redirecionamentos e resolução DNS; testar portas, IPv6, respostas enormes e lentas.",
+        "Exercitar os casos com servidores controlados/simulações, sem acessar recursos internos reais."
+      ],
+      "depends": [
+        "US09",
+        "T23"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T25",
+      "sprint": 6,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Configurar limites e métricas da importação",
+      "accept": [
+        "Externalizar timeout, limite de bytes, concorrência, tentativas e cotas por usuário.",
+        "Registrar métricas por estado/erro e duração sem armazenar tokens ou conteúdo pessoal em logs.",
+        "Definir comportamento de sobrecarga com resposta clara e controle de uso."
+      ],
+      "depends": [
+        "T23"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T26",
+      "sprint": 6,
+      "epic": "E4",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Documentar máquina de estados e limpeza de tarefas",
+      "accept": [
+        "Definir transições PENDING/PROCESSING/READY_FOR_REVIEW/NEEDS_INPUT/FAILED/COMPLETED e impedir transições incoerentes.",
+        "Definir limites de retenção para texto coletado, resultados e falhas; vaga confirmada deve sobreviver à limpeza.",
+        "Publicar OpenAPI e exemplos que permitam ao frontend acompanhar e oferecer fallback."
+      ],
+      "depends": [
+        "US03",
+        "US04"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US11",
+      "sprint": 7,
+      "epic": "E4",
+      "type": "História",
+      "role": "backend",
+      "title": "Extrair dados da descrição com evidência",
+      "userGoal": "Como candidato, quero receber os dados da vaga estruturados para revisar antes de salvar.",
+      "accept": [
+        "Extrair título, empresa, hard skills, soft skills e salário apenas quando sustentados pelo texto.",
+        "Preservar evidência/origem por campo, validar JSON e manter informações ausentes como nulo/lista vazia.",
+        "Priorizar dados estruturados válidos e não executar instruções encontradas no conteúdo da vaga."
+      ],
+      "depends": [
+        "US09",
+        "US10",
+        "T23",
+        "T27"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US12",
+      "sprint": 7,
+      "epic": "E4",
+      "type": "História",
+      "role": "backend",
+      "title": "Revisar e confirmar uma importação uma única vez",
+      "userGoal": "Como candidato, quero corrigir a proposta extraída e decidir quando criar a candidatura.",
+      "accept": [
+        "Consulta retorna proposta separada da vaga definitiva e aceita correção explícita do usuário.",
+        "Confirmação valida os campos e cria/atualiza vaga e habilidades junto com a conclusão da tarefa em uma transação.",
+        "Segunda confirmação não duplica vagas; reimportação não sobrescreve alterações manuais sem revisão e controle de versão."
+      ],
+      "depends": [
+        "US11",
+        "US03"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T27",
+      "sprint": 7,
+      "epic": "E4",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Integrar provedor de IA por adaptador configurável",
+      "accept": [
+        "Implementar interface de extração e adaptador do provedor escolhido, inicialmente Gemini sujeito à elegibilidade da conta.",
+        "Configurar modelo/chave no backend; não enviar currículo, notas pessoais ou credenciais com a descrição.",
+        "Validar o contrato JSON e permitir trocar provedor por configuração sem alterar regras de candidaturas."
+      ],
+      "depends": [
+        "T26"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T28",
+      "sprint": 7,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Criar conjunto de avaliação da extração",
+      "accept": [
+        "Montar pelo menos 20 descrições fictícias com gabarito: salário ausente/faixa/exato, moedas, idiomas e habilidades ambíguas.",
+        "Definir meta inicial: zero salários inventados e ao menos 90% de acerto de título/empresa explícitos, registrando resultados por campo.",
+        "Separar testes determinísticos de contrato das avaliações reais do modelo; preservar versão do conjunto."
+      ],
+      "depends": [
+        "US11",
+        "T27"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T29",
+      "sprint": 7,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Controlar falhas, cota e custo do provedor",
+      "accept": [
+        "Tratar 429, timeout e indisponibilidade com tentativas limitadas e espera progressiva.",
+        "Definir cotas por usuário, limites de tokens e orçamento/configuração de desligamento da IA.",
+        "Falha externa não perde a candidatura nem bloqueia cadastro manual; registrar métricas sem conteúdo sensível."
+      ],
+      "depends": [
+        "T27"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T30",
+      "sprint": 7,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Simular falhas de IA e repetição de confirmação",
+      "accept": [
+        "Exercitar JSON inválido, resposta parcial, prompt injection no texto, 429 e timeout com simulação controlada.",
+        "Provar que confirmação duplicada e worker atrasado não geram registros duplicados.",
+        "Anexar evidência de integridade e teste de isolamento entre contas."
+      ],
+      "depends": [
+        "US12",
+        "T28",
+        "T29"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US13",
+      "sprint": 8,
+      "epic": "E3",
+      "type": "História",
+      "role": "frontend",
+      "title": "Importar link ou texto e acompanhar o processamento",
+      "userGoal": "Como candidato, quero entender o andamento da importação e saber como agir quando houver falha.",
+      "accept": [
+        "Interface recebe URL/texto, mostra estado do processamento e permite continuar navegando.",
+        "Polling tem intervalo/limite e é interrompido ao sair ou finalizar; recarregar recupera o estado pela API.",
+        "Distinguir bloqueio do site, conteúdo ausente e cota indisponível com alternativa de descrição colada."
+      ],
+      "depends": [
+        "T26",
+        "US11",
+        "US05"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US14",
+      "sprint": 8,
+      "epic": "E3",
+      "type": "História",
+      "role": "frontend",
+      "title": "Revisar os dados extraídos antes de salvar",
+      "userGoal": "Como candidato, quero conferir e corrigir a extração antes de adicionar a vaga ao meu acompanhamento.",
+      "accept": [
+        "Mostrar campos extraídos, ausentes e trechos de origem de forma compreensível e editável.",
+        "Permitir preencher salário/habilidades e escolher salvar como interesse ou registrar inscrição.",
+        "Evitar duplo envio e tratar 409 sem perda das correções; confirmar somente após ação do usuário."
+      ],
+      "depends": [
+        "US12",
+        "US13",
+        "US08"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T31",
+      "sprint": 8,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Automatizar importação e revisão ponta a ponta",
+      "accept": [
+        "E2E usa página/descrição controlada e provedor simulado para executar importar, revisar, salvar e consultar.",
+        "Cobrir recarga, sessão expirada, falha recuperável e repetição de clique sem duplicatas.",
+        "Manter teste real de integração com IA separado, com limite de consumo e sem dados pessoais."
+      ],
+      "depends": [
+        "US13",
+        "US14",
+        "T30"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T32",
+      "sprint": 8,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Validar acessibilidade e compreensão da revisão",
+      "accept": [
+        "Checar navegação por teclado, foco e anúncio dos estados assíncronos.",
+        "Verificar que ausência de salário não é confundida com zero e que texto da página não é renderizado como HTML executável.",
+        "Conduzir demonstração com roteiro de sucesso e fallback e registrar ajustes de UX."
+      ],
+      "depends": [
+        "US13",
+        "US14"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T33",
+      "sprint": 8,
+      "epic": "E3",
+      "type": "Tarefa",
+      "role": "frontend",
+      "title": "Escrever ajuda e estados vazios do produto",
+      "accept": [
+        "Explicar que salvar vaga não realiza inscrição e que a IA exige revisão.",
+        "Orientar primeiro uso, diferenças entre etapas e importação por texto sem expor termos internos de infraestrutura.",
+        "Cobrir loading, vazio, falha, nenhum resultado e confirmação de ações destrutivas."
+      ],
+      "depends": [
+        "US07",
+        "US13",
+        "US14"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T34",
+      "sprint": 8,
+      "epic": "E4",
+      "type": "Tarefa",
+      "role": "backend",
+      "title": "Executar política de retenção e exclusão de dados",
+      "accept": [
+        "Implementar rotina para expirar dados temporários de importação sem remover vagas confirmadas.",
+        "Testar exclusão de conta durante tarefa ativa e remoção dos dados associados.",
+        "Registrar política de retenção e operação; não guardar descrição em logs por padrão."
+      ],
+      "depends": [
+        "T26",
+        "US12"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US15",
+      "sprint": 9,
+      "epic": "E5",
+      "type": "História",
+      "role": "qa",
+      "title": "Homologar a release candidate como usuário final",
+      "userGoal": "Como responsável pelo produto, quero validar o MVP em um ambiente representativo antes da publicação.",
+      "accept": [
+        "Executar roteiro UAT: conta, perfil, cadastro manual, etapas, importação, revisão, filtros e exclusão.",
+        "Registrar aceite por fluxo e vincular Bugs encontrados; sem defeitos críticos/altos em aberto para liberar produção.",
+        "Revisar evidências com o usuário responsável e identificar a versão candidata e suas limitações conhecidas."
+      ],
+      "depends": [
+        "T20",
+        "T31",
+        "T32",
+        "T34",
+        "T35"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T35",
+      "sprint": 9,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Criar infraestrutura e pipeline de staging",
+      "accept": [
+        "Escolher hospedagem e estimar custos antes de contratar; documentar limites e responsabilidade operacional.",
+        "Criar imagens/artefatos reproduzíveis, health checks e staging com PostgreSQL e segredos separados.",
+        "Pipeline publica versão identificada com migração controlada e smoke automático; banco local não é reutilizado."
+      ],
+      "depends": [
+        "T22",
+        "T13",
+        "T18"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T36",
+      "sprint": 9,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Executar revisão de segurança e dependências",
+      "accept": [
+        "Revisar autenticação, autorização, CSRF, SSRF, uploads, renderização de conteúdo e limitação de tentativas.",
+        "Verificar dependências e segredos em repositório/bundle/logs, com severidade e plano de tratamento.",
+        "Confirmar credenciais mínimas de banco, cookies seguros em HTTPS e ausência de stacktrace nas respostas."
+      ],
+      "depends": [
+        "US15",
+        "T35"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T37",
+      "sprint": 9,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Medir desempenho e confiabilidade do MVP",
+      "accept": [
+        "Definir carga inicial controlada de 10 usuários concorrentes com massa fictícia e métricas de erros/p95.",
+        "Meta inicial para CRUD em staging: p95 até 750 ms e erros inesperados abaixo de 1%; ajustar metas com evidência no refinement.",
+        "Medir importação separadamente da latência do provedor e identificar gargalos de consultas/polling/worker."
+      ],
+      "depends": [
+        "T35",
+        "US15"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T38",
+      "sprint": 9,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Ensaiar backup, restauração e rollback",
+      "accept": [
+        "Restaurar backup em banco separado e validar contas, candidaturas, histórico e fotos.",
+        "Propor RPO de 24h e RTO de 4h para o MVP e registrar tempo/resultado real do ensaio.",
+        "Ensaiar rollback da aplicação sem reverter migração destrutiva; definir abordagem expand/contract e responsáveis."
+      ],
+      "depends": [
+        "T35"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T39",
+      "sprint": 9,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Consolidar gate de regressão e decisão de release",
+      "accept": [
+        "Executar unidade, integração PostgreSQL, API v1/v2 e E2E em staging com relatórios vinculados à release.",
+        "Fazer triagem e reteste dos Bugs reais; verificar que a fixture v1 permanece intacta.",
+        "Registrar Go/No-Go com UAT, segurança, carga, backup/restore e limites conhecidos antes de aprovar produção."
+      ],
+      "depends": [
+        "US15",
+        "T36",
+        "T37",
+        "T38"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US16",
+      "sprint": 10,
+      "epic": "E6",
+      "type": "História",
+      "role": "devops",
+      "title": "Disponibilizar o Acompanhaai em produção",
+      "userGoal": "Como candidato, quero acessar o produto publicado com disponibilidade, segurança e recuperação previstas.",
+      "accept": [
+        "Publicar versão aprovada em domínio/URL HTTPS com frontend e API integrados e banco dedicado.",
+        "Executar smoke de cadastro/login/candidatura/importação com conta sintética controlada e limpeza.",
+        "Registrar aprovação da release, versão, horário, resultado e responsável; não publicar com gate de homologação reprovado."
+      ],
+      "depends": [
+        "T39",
+        "T40",
+        "T41",
+        "T42"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T40",
+      "sprint": 10,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Preparar domínio, HTTPS, banco e segredos de produção",
+      "accept": [
+        "Aprovar provedor e custos; configurar DNS/TLS, acesso administrativo e política de renovação.",
+        "Criar banco e usuários próprios de produção com rede restrita, backup e retenção configurados.",
+        "Cadastrar segredos no provedor, revisar cookies/SameSite/CSRF e decidir persistência de sessão ou logout controlado em reinício."
+      ],
+      "depends": [
+        "T35",
+        "T36",
+        "T38"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T41",
+      "sprint": 10,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Preparar execução da release e plano de retorno",
+      "accept": [
+        "Fixar versão do artefato, sequência de migração/deploy e smoke com aprovação explícita antes da execução.",
+        "Definir gatilhos objetivos de rollback, versão anterior disponível e procedimento para migração incompatível.",
+        "Exercitar checklist em staging e registrar o plano de comunicação e responsáveis."
+      ],
+      "depends": [
+        "T39",
+        "T40"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T42",
+      "sprint": 10,
+      "epic": "E6",
+      "type": "Tarefa",
+      "role": "devops",
+      "title": "Configurar observabilidade e resposta a incidentes",
+      "accept": [
+        "Monitorar saúde, erros, latência, saturação, banco, fila de importação e cota de IA.",
+        "Criar alertas acionáveis e testá-los; logs estruturados usam correlação sem senhas/tokens/conteúdo pessoal.",
+        "Documentar runbooks para indisponibilidade, falha de migração, cota IA e recuperação; definir acompanhamento inicial."
+      ],
+      "depends": [
+        "T35",
+        "T40"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T43",
+      "sprint": 10,
+      "epic": "E5",
+      "type": "Tarefa",
+      "role": "qa",
+      "title": "Executar smoke de produção e acompanhar estabilidade",
+      "accept": [
+        "Executar apenas testes sintéticos aprovados; não rodar fixture completa de desenvolvimento sobre contas reais.",
+        "Verificar HTTPS, autorização, persistência, importação/fallback e alertas sem expor dados de usuários.",
+        "Registrar resultados após release e acompanhar métricas por pelo menos sete dias, abrindo incidentes/Bugs reais quando necessário."
+      ],
+      "depends": [
+        "US16",
+        "T42"
+      ],
+      "baseline": false
+    },
+    {
+      "id": "T44",
+      "sprint": 10,
+      "epic": "E0",
+      "type": "Tarefa",
+      "role": "produto",
+      "title": "Publicar documentação final e retrospectiva da entrega",
+      "accept": [
+        "Preparar README operacional, documentação de uso, release notes v1.0 e limitações conhecidas.",
+        "Conduzir review/retrospectiva com evidências, aprendizados e ações de melhoria com responsável.",
+        "Organizar backlog pós-MVP e revisar prioridades após uso real, preservando os contratos/fixtures versionados."
+      ],
+      "depends": [
+        "T43"
+      ],
+      "baseline": false
+    }
+  ],
+  "createdAt": "2026-10-28",
+  "features": [
+    {
+      "id": "F01",
+      "epic": "E0",
+      "title": "Plataforma e processo de engenharia",
+      "sprint": 1
+    },
+    {
+      "id": "F02",
+      "epic": "E1",
+      "title": "Contas, sessões e recuperação de acesso",
+      "sprint": 2
+    },
+    {
+      "id": "F03",
+      "epic": "E2",
+      "title": "Contrato completo de oportunidades e acompanhamento",
+      "sprint": 3
+    },
+    {
+      "id": "F04",
+      "epic": "E3",
+      "title": "Experiência de acesso e conta no Angular",
+      "sprint": 4
+    },
+    {
+      "id": "F05",
+      "epic": "E3",
+      "title": "Quadro, formulários e detalhes das candidaturas",
+      "sprint": 5
+    },
+    {
+      "id": "F06",
+      "epic": "E4",
+      "title": "Importação assíncrona e coleta segura",
+      "sprint": 6
+    },
+    {
+      "id": "F07",
+      "epic": "E4",
+      "title": "Extração estruturada e revisão transacional",
+      "sprint": 7
+    },
+    {
+      "id": "F08",
+      "epic": "E3",
+      "title": "Experiência completa de importação e revisão",
+      "sprint": 8
+    },
+    {
+      "id": "F09",
+      "epic": "E5",
+      "title": "Release candidate homologada",
+      "sprint": 9
+    },
+    {
+      "id": "F10",
+      "epic": "E6",
+      "title": "Publicação e operação da versão 1.0",
+      "sprint": 10
+    }
+  ],
+  "subtasks": [
+    {
+      "id": "US01-DEV",
+      "parent": "US01",
+      "epic": "E1",
+      "sprint": 2,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Revisar e completar: Autenticar e gerenciar a própria conta com segurança",
+      "accept": [
+        "Revalidar cadastro, login, logout, consulta, edição e exclusão da própria conta; e-mail duplicado retorna 409.",
+        "Com login válido, renovar sessão e CSRF; sem sessão retornar 401 e escrita sem CSRF retornar 403.",
+        "Troca de senha exige senha atual e invalida outras sessões; respostas não expõem senha/hash."
+      ],
+      "baseline": true
+    },
+    {
+      "id": "US01-QA",
+      "parent": "US01",
+      "epic": "E1",
+      "sprint": 2,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Autenticar e gerenciar a própria conta com segurança",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US02-DEV",
+      "parent": "US02",
+      "epic": "E1",
+      "sprint": 2,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Implementar: Recuperar acesso por token de uso único",
+      "accept": [
+        "Solicitação retorna resposta genérica para e-mail existente ou inexistente; há limite de frequência.",
+        "Token aleatório é armazenado como hash, expira em até 30 minutos e só pode ser usado uma vez.",
+        "Senha alterada revoga sessões; testes cobrem token inválido, expirado e repetido; envio de e-mail usa ambiente de testes."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US02-QA",
+      "parent": "US02",
+      "epic": "E1",
+      "sprint": 2,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Recuperar acesso por token de uso único",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US03-DEV",
+      "parent": "US03",
+      "epic": "E2",
+      "sprint": 3,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Implementar: Registrar salário e habilidades na vaga manual",
+      "accept": [
+        "Receber e retornar hard skills/soft skills, localização/modalidade e salário nos DTOs do cadastro e edição.",
+        "Salário ausente permanece nulo; faixa usa decimal exato, moeda e periodicidade explícitas, sem inferir valores.",
+        "Validar faixa invertida, tamanhos, habilidades duplicadas e propriedade; migração preserva dados existentes."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US03-QA",
+      "parent": "US03",
+      "epic": "E2",
+      "sprint": 3,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Registrar salário e habilidades na vaga manual",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US04-DEV",
+      "parent": "US04",
+      "epic": "E2",
+      "sprint": 3,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Revisar e completar: Acompanhar etapas, filtros e histórico da candidatura",
+      "accept": [
+        "Revalidar SAVED/APPLIED/SCREENING/INTERVIEW/OFFER/HIRED/REJECTED/WITHDRAWN; implementar filtro de etapa e busca limitada por título/empresa, paginação e ordenação estável.",
+        "Atualização de status e evento no histórico são atômicos; editar observações não cria evento de status.",
+        "Versão antiga retorna 409; acesso de outro usuário retorna 404; SAVED não aceita data de inscrição."
+      ],
+      "baseline": true
+    },
+    {
+      "id": "US04-QA",
+      "parent": "US04",
+      "epic": "E2",
+      "sprint": 3,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Acompanhar etapas, filtros e histórico da candidatura",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US05-DEV",
+      "parent": "US05",
+      "epic": "E3",
+      "sprint": 4,
+      "type": "Subtask",
+      "role": "frontend",
+      "title": "Implementar: Cadastrar, entrar e recuperar acesso pelo Angular",
+      "accept": [
+        "Implementar cadastro, login, logout e recuperação com formulários tipados e validação acessível.",
+        "Renovar CSRF após login e tratar sessão expirada; estado autenticado deve refletir a API.",
+        "Rotas privadas redirecionam para login e nenhum segredo é persistido no localStorage."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US05-QA",
+      "parent": "US05",
+      "epic": "E3",
+      "sprint": 4,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Cadastrar, entrar e recuperar acesso pelo Angular",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US06-DEV",
+      "parent": "US06",
+      "epic": "E3",
+      "sprint": 4,
+      "type": "Subtask",
+      "role": "frontend",
+      "title": "Implementar: Editar perfil e foto opcional pela interface",
+      "accept": [
+        "Consultar/editar nome e e-mail e trocar senha com validação da senha atual.",
+        "Enviar, substituir e remover foto com preview, limites e avatar padrão; apresentar erros do servidor.",
+        "Excluir conta exige confirmação e encerra sessão; navegação por teclado é funcional."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US06-QA",
+      "parent": "US06",
+      "epic": "E3",
+      "sprint": 4,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Editar perfil e foto opcional pela interface",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US07-DEV",
+      "parent": "US07",
+      "epic": "E3",
+      "sprint": 5,
+      "type": "Subtask",
+      "role": "frontend",
+      "title": "Implementar: Visualizar e mover candidaturas no quadro",
+      "accept": [
+        "Exibir as quatro etapas centrais e separar Salvas e finalizadas com rótulos claros.",
+        "Permitir mudança por controle acessível; arrastar e soltar, se implementado, terá alternativa por teclado.",
+        "Salvar alteração na API; em conflito de versão, preservar contexto e oferecer recarregamento; exibir erro sem fingir sucesso."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US07-QA",
+      "parent": "US07",
+      "epic": "E3",
+      "sprint": 5,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Visualizar e mover candidaturas no quadro",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US08-DEV",
+      "parent": "US08",
+      "epic": "E3",
+      "sprint": 5,
+      "type": "Subtask",
+      "role": "frontend",
+      "title": "Implementar: Criar, editar e consultar a vaga e sua candidatura",
+      "accept": [
+        "Formulário manual cobre título, empresa, link, descrição, salário, habilidades e dados do acompanhamento.",
+        "Detalhes exibem histórico em ordem e ausência de salário sem apresentar zero.",
+        "Excluir candidatura exige confirmação e atualiza listagem; mensagens explicam duplicidade e validações."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US08-QA",
+      "parent": "US08",
+      "epic": "E3",
+      "sprint": 5,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Criar, editar e consultar a vaga e sua candidatura",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US09-DEV",
+      "parent": "US09",
+      "epic": "E4",
+      "sprint": 6,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Implementar: Solicitar importação de vaga por URL",
+      "accept": [
+        "POST de importação retorna 202 com ID da tarefa; consulta expõe estado e motivo de falha ao proprietário.",
+        "Coletar conteúdo com timeout e tamanho máximo e priorizar JobPosting estruturado quando disponível.",
+        "Página bloqueada/login/JavaScript não suportado gera NEEDS_INPUT com orientação para colar descrição, sem contornar restrições."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US09-QA",
+      "parent": "US09",
+      "epic": "E4",
+      "sprint": 6,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Solicitar importação de vaga por URL",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US10-DEV",
+      "parent": "US10",
+      "epic": "E4",
+      "sprint": 6,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Implementar: Importar a descrição colada como alternativa",
+      "accept": [
+        "Receber texto com limite de tamanho e origem TEXT, sem depender de URL.",
+        "Manter estados e contrato compatíveis com importação por URL e separar coleta de extração.",
+        "Validar entrada vazia, tamanho, propriedade e cancelamento/expiração conforme contrato."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US10-QA",
+      "parent": "US10",
+      "epic": "E4",
+      "sprint": 6,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Importar a descrição colada como alternativa",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US11-DEV",
+      "parent": "US11",
+      "epic": "E4",
+      "sprint": 7,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Implementar: Extrair dados da descrição com evidência",
+      "accept": [
+        "Extrair título, empresa, hard skills, soft skills e salário apenas quando sustentados pelo texto.",
+        "Preservar evidência/origem por campo, validar JSON e manter informações ausentes como nulo/lista vazia.",
+        "Priorizar dados estruturados válidos e não executar instruções encontradas no conteúdo da vaga."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US11-QA",
+      "parent": "US11",
+      "epic": "E4",
+      "sprint": 7,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Extrair dados da descrição com evidência",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US12-DEV",
+      "parent": "US12",
+      "epic": "E4",
+      "sprint": 7,
+      "type": "Subtask",
+      "role": "backend",
+      "title": "Implementar: Revisar e confirmar uma importação uma única vez",
+      "accept": [
+        "Consulta retorna proposta separada da vaga definitiva e aceita correção explícita do usuário.",
+        "Confirmação valida os campos e cria/atualiza vaga e habilidades junto com a conclusão da tarefa em uma transação.",
+        "Segunda confirmação não duplica vagas; reimportação não sobrescreve alterações manuais sem revisão e controle de versão."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US12-QA",
+      "parent": "US12",
+      "epic": "E4",
+      "sprint": 7,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Revisar e confirmar uma importação uma única vez",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US13-DEV",
+      "parent": "US13",
+      "epic": "E3",
+      "sprint": 8,
+      "type": "Subtask",
+      "role": "frontend",
+      "title": "Implementar: Importar link ou texto e acompanhar o processamento",
+      "accept": [
+        "Interface recebe URL/texto, mostra estado do processamento e permite continuar navegando.",
+        "Polling tem intervalo/limite e é interrompido ao sair ou finalizar; recarregar recupera o estado pela API.",
+        "Distinguir bloqueio do site, conteúdo ausente e cota indisponível com alternativa de descrição colada."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US13-QA",
+      "parent": "US13",
+      "epic": "E3",
+      "sprint": 8,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Importar link ou texto e acompanhar o processamento",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US14-DEV",
+      "parent": "US14",
+      "epic": "E3",
+      "sprint": 8,
+      "type": "Subtask",
+      "role": "frontend",
+      "title": "Implementar: Revisar os dados extraídos antes de salvar",
+      "accept": [
+        "Mostrar campos extraídos, ausentes e trechos de origem de forma compreensível e editável.",
+        "Permitir preencher salário/habilidades e escolher salvar como interesse ou registrar inscrição.",
+        "Evitar duplo envio e tratar 409 sem perda das correções; confirmar somente após ação do usuário."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US14-QA",
+      "parent": "US14",
+      "epic": "E3",
+      "sprint": 8,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Revisar os dados extraídos antes de salvar",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US15-DEV",
+      "parent": "US15",
+      "epic": "E5",
+      "sprint": 9,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "Implementar: Homologar a release candidate como usuário final",
+      "accept": [
+        "Executar roteiro UAT: conta, perfil, cadastro manual, etapas, importação, revisão, filtros e exclusão.",
+        "Registrar aceite por fluxo e vincular Bugs encontrados; sem defeitos críticos/altos em aberto para liberar produção.",
+        "Revisar evidências com o usuário responsável e identificar a versão candidata e suas limitações conhecidas."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US15-QA",
+      "parent": "US15",
+      "epic": "E5",
+      "sprint": 9,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Homologar a release candidate como usuário final",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    },
+    {
+      "id": "US16-DEV",
+      "parent": "US16",
+      "epic": "E6",
+      "sprint": 10,
+      "type": "Subtask",
+      "role": "devops",
+      "title": "Implementar: Disponibilizar o Acompanhaai em produção",
+      "accept": [
+        "Publicar versão aprovada em domínio/URL HTTPS com frontend e API integrados e banco dedicado.",
+        "Executar smoke de cadastro/login/candidatura/importação com conta sintética controlada e limpeza.",
+        "Registrar aprovação da release, versão, horário, resultado e responsável; não publicar com gate de homologação reprovado."
+      ],
+      "baseline": false
+    },
+    {
+      "id": "US16-QA",
+      "parent": "US16",
+      "epic": "E6",
+      "sprint": 10,
+      "type": "Subtask",
+      "role": "qa",
+      "title": "QA e evidências: Disponibilizar o Acompanhaai em produção",
+      "accept": [
+        "Preparar dados fictícios exclusivos e executar todos os critérios de aceite da história, incluindo cenários negativos aplicáveis.",
+        "Anexar roteiro, versão, ambiente e resultado; abrir Problema somente para defeitos observados e vincular à história.",
+        "Retestar correções e registrar aceite; não concluir a história sem evidência de verificação."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "files": {
+    "AGENTS.md": "251d5145197744699cc4384a50282f0fded1d8f91e20f1257a52c5717429b802",
+    "README.md": "61490f1e9dedadad482a3872ac9877cf664595007d531cfef2602cf58d3e68bf",
+    "VALIDATION.md": "5db940599d48f28eee761095aadaa0d06e5a520630bb70549b05d72479c6ea25",
+    "acompanhaai-v1.postman_collection.json": "416e01b540614315257b4beb5e93ee2a51514a5faf2b4cedad54ad11c85f42c0",
+    "dados.json": "dd3f557122c044ab923e1870e2498b0c24e6210ed186fbbcca9bb35da4a0be1e",
+    "run.cjs": "5c50db2563413f54bd5d7e85af368257bf4c2e7c52e465723f6a71f91ecf7a13",
+    "../../package.json": "29aeea4758c80a4c8ba56f90458e505f4b47fbf89c1a96ee377741b7385911ce",
+    "../../package-lock.json": "c52de03977af1ee3477828db81820f67cf327ac0fa2baecea9e474234492608f",
+    "../../AGENTS.md": "3e9f794d3e3d10e7bbe5ab72e1b857e5081e501633ef1332f74ae46953443ea8"
+  }
+}

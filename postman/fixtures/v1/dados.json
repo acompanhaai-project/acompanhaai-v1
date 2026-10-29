@@ -1,0 +1,108 @@
+{
+  "version": "1.0.0",
+  "date": "2026-01-15",
+  "password": "MockV1!Senha2026",
+  "newPassword": "MockV1!NovaSenha2026",
+  "users": [
+    {
+      "actor": "a",
+      "name": "Ana Teste V1",
+      "emailPrefix": "qa.ana.v1"
+    },
+    {
+      "actor": "b",
+      "name": "Bruno Teste V1",
+      "emailPrefix": "qa.bruno.v1"
+    }
+  ],
+  "applications": [
+    {
+      "job": {
+        "title": "Desenvolvedor Java Junior",
+        "companyName": "Empresa Aurora Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/1",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "SAVED",
+      "appliedOn": null,
+      "notes": "Dado ficticio v1 - SAVED"
+    },
+    {
+      "job": {
+        "title": "Backend Java e Spring Boot",
+        "companyName": "Empresa Horizonte Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/2",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "APPLIED",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - APPLIED"
+    },
+    {
+      "job": {
+        "title": "Analista de Sistemas Java",
+        "companyName": "Empresa Nuvem Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/3",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "SCREENING",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - SCREENING"
+    },
+    {
+      "job": {
+        "title": "Desenvolvedor Backend Pleno",
+        "companyName": "Empresa Ponte Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/4",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "INTERVIEW",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - INTERVIEW"
+    },
+    {
+      "job": {
+        "title": "Engenheiro de Software Java",
+        "companyName": "Empresa Farol Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/5",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "OFFER",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - OFFER"
+    },
+    {
+      "job": {
+        "title": "Desenvolvedor de APIs REST",
+        "companyName": "Empresa Jardim Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/6",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "HIRED",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - HIRED"
+    },
+    {
+      "job": {
+        "title": "Desenvolvedor Java Trainee",
+        "companyName": "Empresa Trilho Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/7",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "REJECTED",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - REJECTED"
+    },
+    {
+      "job": {
+        "title": "Analista Desenvolvedor Backend",
+        "companyName": "Empresa Vento Ficticia",
+        "sourceUrl": "https://example.com/acompanhaai-fixture-v1/8",
+        "description": "Cenario ficticio: Java 25, Spring Boot, SQL, comunicacao e trabalho em equipe."
+      },
+      "status": "WITHDRAWN",
+      "appliedOn": "2026-01-15",
+      "notes": "Dado ficticio v1 - WITHDRAWN"
+    }
+  ]
+}
