@@ -248,7 +248,7 @@ $csrf = Invoke-RestMethod "$baseUrl/api/auth/csrf" -SessionVariable webSession
 $headers = @{ $csrf.headerName = $csrf.token }
 
 $cadastro = @{
-    name = "Maicon Amaral"
+    name = "Usuario-exemplo"
     email = "maicon@example.com"
     password = "MinhaSenhaForte123!"
 } | ConvertTo-Json
