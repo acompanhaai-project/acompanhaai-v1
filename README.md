@@ -296,3 +296,8 @@ java -jar target/acompanhaai-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
 Recuperação de senha por e-mail, confirmação de e-mail, limitação de tentativas de login e perfis administrativos ficam para etapas futuras. A importação de vagas e a integração com IA ainda não fazem parte desta etapa.
+
+## Contribuição
+
+Consulte o [guia de contribuição](CONTRIBUTING.md) para conhecer
+o fluxo de trabalho e os padrões de branches, commits e pull requests.
