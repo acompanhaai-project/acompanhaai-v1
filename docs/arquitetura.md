@@ -105,12 +105,28 @@ do histórico devem ocorrer na mesma transação.
 
 ### ImportTask
 
-Representa o processamento de uma importação.
-Sua estrutura de persistência já existe; o processamento
-e a confirmação da importação ainda estão planejados.
+Representa uma solicitação de importação de vaga por URL ou
+descrição. Registra a entrada, o estado do processamento,
+as tentativas, o resultado extraído e possíveis falhas.
 
-Todas as operações devem respeitar a propriedade dos dados.
-Um usuário não pode consultar ou alterar registros de outro.
+Toda ImportTask pertence obrigatoriamente a um User.
+Essa relação identifica o proprietário e permite restringir
+o acesso à tarefa e ao seu resultado.
+
+A associação com Job é opcional. Uma importação pode começar
+sem uma vaga cadastrada e ser vinculada a ela posteriormente,
+conforme o fluxo de confirmação.
+
+ImportTask acompanha o processamento; Job guarda os dados
+da oportunidade; Application registra o acompanhamento
+pessoal daquela oportunidade.
+
+O processamento está planejado para um worker na mesma
+aplicação, sem manter a requisição inicial aguardando
+a coleta e a extração.
+
+A entidade e sua estrutura de persistência já existem.
+O worker e a confirmação da importação ainda serão implementados.
 
 ## Decisão 3 — Autenticação por sessão
 
