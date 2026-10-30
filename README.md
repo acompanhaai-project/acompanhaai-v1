@@ -301,3 +301,7 @@ Recuperação de senha por e-mail, confirmação de e-mail, limitação de tenta
 
 Consulte o [guia de contribuição](CONTRIBUTING.md) para conhecer
 o fluxo de trabalho e os padrões de branches, commits e pull requests.
+
+## Arquitetura
+
+Consulte as [decisões de arquitetura](docs/arquitetura.md).
