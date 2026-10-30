@@ -24,7 +24,7 @@ Após a publicação inicial, as mudanças devem entrar por pull request.
 
 Formato:
 
-<tipo>/<chave-jira>-<descricao-curta>
+`<tipo>/<chave-jira>-<descricao-curta>`
 
 Usar descrição em minúsculas, sem espaços ou acentos,
 com palavras separadas por hífen. Manter a chave Jira em maiúsculas.
@@ -53,7 +53,7 @@ Evitar acumular alterações sem relação no mesmo pull request.
 
 Adotamos o seguinte padrão interno:
 
-<tipo>(<escopo-opcional>): <chave-jira> <descricao>
+`<tipo>(<escopo-opcional>): <chave-jira> <descricao>`
 
 Tipos: feat, fix, docs, refactor, test, chore e ci.
 
