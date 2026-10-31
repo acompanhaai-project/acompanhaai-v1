@@ -210,8 +210,11 @@ em um PostgreSQL de testes separado, passe as propriedades do datasource:
 
 ```powershell
 # Use exclusivamente um banco de testes: a suíte cadastra e exclui registros.
-$env:DB_PASSWORD = $dbCredential.GetNetworkCredential().Password
-.\mvnw.cmd test "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/acompanhaai_test" "-Dspring.datasource.username=acompanhaai" "-Dspring.datasource.password=$env:DB_PASSWORD"
+$credencialTeste = Get-Credential -UserName acompanhaai -Message "Senha do banco de testes"
+$env:SPRING_DATASOURCE_PASSWORD = $credencialTeste.GetNetworkCredential().Password
+.\mvnw.cmd test "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/acompanhaai_test" "-Dspring.datasource.username=acompanhaai"
+Remove-Item Env:SPRING_DATASOURCE_PASSWORD
+Remove-Variable credencialTeste
 ```
 
 Crie `acompanhaai_test` antes de executar esse comando. As propriedades
@@ -284,8 +287,15 @@ automatico de sessao/CSRF e limpeza dos dados criados. Mudancas futuras devem
 criar uma v2 e preservar a v1.
 
 ```powershell
-.\mvnw.cmd verify
+.\mvnw.cmd verify `
+  "-Dspring.datasource.url=jdbc:h2:mem:acompanhaai-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1" `
+  "-Dspring.datasource.username=sa" `
+  "-Dspring.datasource.password="
 ```
+
+O datasource de teste é explícito para evitar redirecionamento por configuração
+local. Consulte o [guia de qualidade](docs/qualidade.md) antes de executar suítes
+que criam e excluem registros.
 
 Os testes de integração usam MockMvc, Spring Security, o banco H2 e as migrações reais. Verificam cadastro, hash, e-mail duplicado, validação, CSRF, renovação da sessão, login inválido, edição, isolamento de contas, troca de senha, foto opcional e validação de imagens, CRUD de candidaturas, filtros, histórico, deduplicação por link, controle de versão e exclusão dos dados vinculados. O PostgreSQL exige uma verificação própria no ambiente que o disponibilizar.
 
@@ -305,3 +315,10 @@ o fluxo de trabalho e os padrões de branches, commits e pull requests.
 ## Arquitetura
 
 Consulte as [decisões de arquitetura](docs/arquitetura.md).
+
+## Documentação de trabalho
+
+O [índice de documentação](docs/README.md) reúne os guias de ambiente local,
+qualidade, CI/CD, integração com frontend, operação e release. Cada guia
+distingue o comportamento existente dos procedimentos ainda planejados.
+Sua publicação não comprova execução de testes nem implantação em produção.

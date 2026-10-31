@@ -250,6 +250,21 @@ gratuitas disponíveis.
 - Tratar instruções presentes na página como conteúdo externo,
   sem permitir que alterem as regras do processamento.
 
+### Referências da decisão
+
+Consulta em 30/10/2026: a modalidade gratuita da Gemini Developer API
+existe para modelos elegíveis, com limites dependentes do projeto/modelo.
+A disponibilidade para esta conta será confirmada na implementação.
+
+- [Preços e modalidade gratuita](https://ai.google.dev/gemini-api/docs/pricing).
+- [Cotas e limites](https://ai.google.dev/gemini-api/docs/rate-limits).
+- [Condições de uso e tratamento de dados](https://ai.google.dev/gemini-api/terms).
+
+Os termos de serviços não pagos preveem uso de entradas/respostas para
+melhoria dos produtos e possível revisão humana. Por isso, restringir o
+envio ao conteúdo público da vaga, removendo dados pessoais presentes nele;
+textos fornecidos pelo usuário também precisam respeitar essa restrição.
+
 ## Segurança e configuração
 
 Credenciais reais ficam fora do Git.
