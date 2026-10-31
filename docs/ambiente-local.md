@@ -1,7 +1,7 @@
 # Ambiente local e perfis
 
 Relacionamento: KAN-21. Roteiro baseado nos arquivos de configuração existentes.
-Nenhuma conexão, migração ou suíte foi executada durante a escrita deste guia.
+Os resultados da execução local estão registrados ao final deste guia.
 
 ## Pré-requisitos
 
@@ -140,5 +140,26 @@ a senha de um volume já inicializado.
 
 ## Registro de execução
 
-Estado inicial: **pendente**. Preencher commit, ambiente, procedimento,
-resultado, divergências, evidência sanitizada e responsável após executar.
+### Evidências da validação local — 30/10/2026
+
+Base do repositório antes deste registro: `3ea50cd`.
+Execução realizada pelo usuário; logs e respostas HTTP revisados nesta conversa.
+
+- Java 25 e Maven Wrapper executados com sucesso.
+- Perfil dev conectado ao H2 em arquivo.
+- Migrações V1 a V5 aplicadas em H2 inicialmente vazio.
+- Cadastro, login e consulta autenticada validados no H2.
+- Conta preservada após reinício; novo login necessário.
+- Perfil postgres-local conectado ao PostgreSQL na porta 5433.
+- Cadastro, login e consulta autenticada validados no PostgreSQL.
+- Banco isolado acompanhaai_setup_check criado vazio.
+- Migrações V1 a V5 aplicadas nesse banco com sucesso.
+- Suíte executada no H2 em memória, separado dos bancos PostgreSQL.
+- Resultado: 26 testes, zero falhas, zero erros, nenhum ignorado.
+- Build e geração do JAR concluídos com sucesso.
+
+Observação: Flyway emitiu aviso sobre a versão do H2 ser mais
+nova que a última verificada, sem impedir esta execução.
+
+HTTPS e comportamento do cookie em produção permanecem para
+validação em homologação; não foram comprovados nesta rodada.
