@@ -105,12 +105,28 @@ do histórico devem ocorrer na mesma transação.
 
 ### ImportTask
 
-Representa o processamento de uma importação.
-Sua estrutura de persistência já existe; o processamento
-e a confirmação da importação ainda estão planejados.
+Representa uma solicitação de importação de vaga por URL ou
+descrição. Registra a entrada, o estado do processamento,
+as tentativas, o resultado extraído e possíveis falhas.
 
-Todas as operações devem respeitar a propriedade dos dados.
-Um usuário não pode consultar ou alterar registros de outro.
+Toda ImportTask pertence obrigatoriamente a um User.
+Essa relação identifica o proprietário e permite restringir
+o acesso à tarefa e ao seu resultado.
+
+A associação com Job é opcional. Uma importação pode começar
+sem uma vaga cadastrada e ser vinculada a ela posteriormente,
+conforme o fluxo de confirmação.
+
+ImportTask acompanha o processamento; Job guarda os dados
+da oportunidade; Application registra o acompanhamento
+pessoal daquela oportunidade.
+
+O processamento está planejado para um worker na mesma
+aplicação, sem manter a requisição inicial aguardando
+a coleta e a extração.
+
+A entidade e sua estrutura de persistência já existem.
+O worker e a confirmação da importação ainda serão implementados.
 
 ## Decisão 3 — Autenticação por sessão
 
@@ -199,11 +215,30 @@ a descrição colada pelo usuário.
 
 ### Escolha planejada
 
-Usar uma integração substituível com provedor de IA,
-priorizando dados estruturados válidos quando disponíveis.
+Usar a Gemini Developer API como provedor inicial de IA,
+utilizando a modalidade gratuita enquanto estiver disponível
+e atender às necessidades do projeto.
 
-A contratação e disponibilidade do provedor serão verificadas
-na implementação.
+O modelo específico e as cotas serão confirmados no Google
+AI Studio durante a implementação. Provedor e modelo serão
+configuráveis, permitindo substituição futura.
+
+### Motivo
+
+Permitir experimentar a extração estruturada de informações
+de vagas sem custo inicial de chamadas, dentro das cotas
+gratuitas disponíveis.
+
+### Consequências
+
+- A gratuidade e os limites precisam ser reavaliados na implementação.
+- A integração será executada exclusivamente pelo backend.
+- A chave será fornecida por configuração privada, fora do Git.
+- Somente conteúdo público da vaga será enviado ao provedor,
+  sem dados pessoais, currículos ou observações privadas.
+- Falhas ou esgotamento de cota não impedirão o cadastro manual.
+- Não haverá mudança automática para um serviço pago.
+- A adequação para produção será reavaliada antes da publicação.
 
 ### Regras
 
