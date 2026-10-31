@@ -135,3 +135,23 @@ contrato novo não deve ser escondida alterando as expectativas da v1.
 KAN-22 exige estratégia revisada, integridade da v1 conferida e nova execução
 com resultado anexado. Os demais cartões exigem evidências específicas de
 seus critérios. Lacunas e testes não executados devem permanecer explícitos.
+
+## Evidência de execução — KAN-22 — 31/10/2026
+
+- Node.js 22.16.0 e npm 10.9.2.
+- Dependências instaladas com npm ci, usando o lockfile existente.
+- API exclusiva na porta 18082.
+- Banco H2 em memória: acompanhaai-postman-v1.
+- Migrações V1 a V5 aplicadas.
+- Integridade da fixture v1 verificada pelo executor.
+- Execução completa: preparação, validações e limpeza.
+- Resultado: 90 requisições e 246 asserções, sem falhas.
+- Duração observada: 36,7 segundos.
+- Fixture e dependências versionadas preservadas.
+
+Observações:
+- A instalação apresentou avisos de dependências descontinuadas.
+  Atualizações deverão ser tratadas em uma versão futura.
+- Esta rodada valida a API em H2; não substitui regressão em
+  PostgreSQL, testes de navegador, carga ou produção.
+
