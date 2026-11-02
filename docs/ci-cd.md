@@ -70,3 +70,14 @@ com permissões mínimas. Deploy não deve ser executado por PR não confiável.
 Não há publicação automática implementada nem contratação de infraestrutura
 autorizada por este documento. O procedimento futuro está em
 [operação](operacao.md).
+
+## Evidências de validação — KAN-23
+
+- Pipeline executado com sucesso no PR.
+- Check backend-build-test configurado como obrigatório na main.
+- Teste temporário introduzido para provocar falha controlada.
+- Check vermelho e bloqueio de merge confirmados.
+- Teste temporário removido.
+- Nova execução aprovada após a remoção.
+- Relatórios de testes e JAR disponíveis na execução bem-sucedida.
+
