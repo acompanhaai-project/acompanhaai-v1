@@ -1,0 +1,63 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: backend-build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      DB_PASSWORD: ""
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Configurar Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: "25"
+          cache: maven
+
+      - name: Permitir execução do Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Executar build e testes
+        run: |
+          ./mvnw --batch-mode --no-transfer-progress verify \
+            "-Dspring.datasource.url=jdbc:h2:mem:acompanhaai-ci;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1" \
+            "-Dspring.datasource.username=sa" \
+            "-Dspring.datasource.password="
+
+      - name: Disponibilizar relatórios de testes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testes-${{ github.sha }}
+          path: |
+            target/surefire-reports/*.xml
+            target/surefire-reports/*.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Disponibilizar JAR
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-${{ github.sha }}
+          path: target/acompanhaai-0.0.1-SNAPSHOT.jar
+          if-no-files-found: error
+          retention-days: 7
