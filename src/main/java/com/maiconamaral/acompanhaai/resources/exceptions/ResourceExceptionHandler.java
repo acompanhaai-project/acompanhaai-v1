@@ -14,6 +14,16 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ResourceExceptionHandler {
+    @ExceptionHandler(PasswordResetRateLimitException.class)
+    public ResponseEntity<ProblemDetail> passwordResetLimit(PasswordResetRateLimitException exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.getRetryAfter()))
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage()));
+    }
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ProblemDetail invalidPasswordResetToken(InvalidPasswordResetTokenException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail dataConflict(DataIntegrityViolationException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,

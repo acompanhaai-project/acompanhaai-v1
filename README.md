@@ -182,7 +182,7 @@ A configuração do volume segue a [documentação da imagem oficial do PostgreS
 ### Entidades e migrações
 
 O package `entities` contém `User`, `Job`, `JobSkill`, `Application`,
-`ApplicationStatusHistory` e `ImportTask`; os enums ficam em `entities.enums`.
+`ApplicationStatusHistory`, `ImportTask` e `PasswordResetToken`; os enums ficam em `entities.enums`.
 `BaseEntity` concentra ID e datas automáticas das entidades mutáveis.
 Vaga e candidatura têm `@Version` para controle de edições concorrentes.
 Os relacionamentos usam carregamento lazy e não propagam remoção para o usuário.
@@ -192,6 +192,13 @@ Os relacionamentos usam carregamento lazy e não propagam remoção para o usuá
 - V3: vagas, candidaturas e histórico.
 - V4: salário, detalhes da vaga, habilidades e constraints adicionais.
 - V5: tarefas de importação com resultado JSONB.
+- V6: registros de token de recuperação, somente com hash e validade limitada.
+
+O [modelo de recuperação de senha](docs/recuperacao-senha.md) já possui entidade,
+migração, emissão, redefinição, DTOs e endpoints no KAN-25. O perfil `mail-local`
+habilita entrega SMTP local após commit; veja o [guia de e-mail de testes](docs/email-local.md).
+A solicitação HTTP nunca retorna o token nem garante a entrega.
+As rotas de recuperação possuem [cotas por IP/globais por processo e emissão assíncrona](docs/protecao-recuperacao.md).
 
 As migrações criam FKs, índices e constraints, incluindo propriedade da vaga,
 unicidade por usuário e validação de salário. Rodam automaticamente ao iniciar
@@ -305,7 +312,7 @@ O pacote executável é gerado em `target/acompanhaai-0.0.1-SNAPSHOT.jar`:
 java -jar target/acompanhaai-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
-Recuperação de senha por e-mail, confirmação de e-mail, limitação de tentativas de login e perfis administrativos ficam para etapas futuras. A importação de vagas e a integração com IA ainda não fazem parte desta etapa.
+Recuperação de senha possui entrega SMTP local de testes; provedor de produção, confirmação de e-mail, limitação de tentativas de login e perfis administrativos ficam para etapas futuras. A importação de vagas e a integração com IA ainda não fazem parte desta etapa.
 
 ## Contribuição
 

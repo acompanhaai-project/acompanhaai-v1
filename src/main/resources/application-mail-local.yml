@@ -1,0 +1,7 @@
+app:
+  password-reset:
+    mail:
+      enabled: true
+      host: 127.0.0.1
+      port: 1025
+      reset-url: http://localhost:4200/reset-password
