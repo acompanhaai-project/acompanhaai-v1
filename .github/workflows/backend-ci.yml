@@ -61,3 +61,53 @@ jobs:
           path: target/acompanhaai-0.0.1-SNAPSHOT.jar
           if-no-files-found: error
           retention-days: 7
+
+  postgres-test:
+    name: backend-postgres-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: acompanhaai_ci
+          POSTGRES_USER: acompanhaai_ci
+          POSTGRES_PASSWORD: ci-disposable-only
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U acompanhaai_ci -d acompanhaai_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_PASSWORD: ""
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Configurar Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: "25"
+          cache: maven
+      - name: Permitir execução do Maven Wrapper
+        run: chmod +x mvnw
+      - name: Validar migrações e regressão no PostgreSQL
+        run: |
+          ./mvnw --batch-mode --no-transfer-progress verify \
+            "-Dspring.datasource.url=jdbc:postgresql://127.0.0.1:${{ job.services.postgres.ports[5432] }}/acompanhaai_ci" \
+            "-Dspring.datasource.username=acompanhaai_ci" \
+            "-Dspring.datasource.password=ci-disposable-only"
+      - name: Disponibilizar relatórios PostgreSQL
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testes-postgres-${{ github.sha }}
+          path: |
+            target/surefire-reports/*.xml
+            target/surefire-reports/*.txt
+          if-no-files-found: warn
+          retention-days: 7

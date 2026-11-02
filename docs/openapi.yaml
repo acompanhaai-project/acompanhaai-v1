@@ -13,6 +13,86 @@ servers:
 security:
   - sessionCookie: []
 paths:
+  /api/auth/password-reset/request:
+    post:
+      operationId: requestPasswordReset
+      summary: Solicitar recuperação de senha
+      description: |
+        Sem login; exige sessão anônima e CSRF. Conta existente, desconhecida ou
+        solicitação suprimida pelo intervalo de 60 segundos recebem a mesma resposta.
+        O token nunca é retornado. Com o perfil mail-local, o envio SMTP local é
+        agendado após commit, fora da requisição. Desabilitado por padrão.
+        202 confirma somente o recebimento, sem garantir emissão nem entrega.
+        Falha SMTP ou fila cheia preserva a resposta; não há retry automático nem fila durável.
+        Consulta da conta e emissão ocorrem em fila limitada, depois do agendamento;
+        a resposta não aguarda o banco nem o e-mail. Não há garantia de latência constante.
+        Cada rota admite 10 solicitações por IP e 100 no total por janela de 60 segundos,
+        por processo. Excesso ou fila de solicitações cheia mantém o mesmo 202, sem processar.
+        A janela por IP é independente da existência de conta; proxies não são confiados.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PasswordResetRequest'}
+            example: {email: pessoa@example.test}
+      responses:
+        '202':
+          description: Solicitação recebida, sem revelar existência da conta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+                    enum: ['Se houver uma conta para este e-mail, a solicitação de recuperação será processada.']
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/auth/password-reset/confirm:
+    post:
+      operationId: confirmPasswordReset
+      summary: Redefinir senha com token de uso único
+      description: |
+        Sem login; exige sessão e CSRF. Token no corpo JSON, nunca na URL.
+        Validade máxima de 30 minutos; expiração exclusiva. Consome token, altera
+        senha e revoga sessões anteriores na próxima requisição, atomicamente.
+        Não autentica automaticamente; efetue novo login e obtenha novo CSRF.
+        Limites independentes da solicitação de recuperação: 10 por IP e 100 no total
+        por janela de 60 segundos por processo. Excesso retorna 429 antes de consultar
+        ou consumir o token. Limites são avaliados após CSRF e validação do DTO.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PasswordResetConfirmation'}
+      responses:
+        '204': {description: Senha redefinida; resposta sem corpo. Novo login necessário.}
+        '400':
+          description: JSON inválido ou token inválido, desconhecido, substituído, expirado ou consumido. O motivo do token não é discriminado.
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+              example: {status: 400, detail: 'Token de recuperação inválido ou indisponível.'}
+        '429':
+          description: Limite por IP ou global atingido, independente da validade do token. Aguarde Retry-After e tente novamente.
+          headers:
+            Retry-After:
+              description: Segundos até o fim da janela do limitador.
+              schema: {type: integer, minimum: 1}
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+              example: {status: 429, detail: 'Limite de solicitações atingido. Tente novamente mais tarde.'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationError'}
   /api/auth/csrf:
     get:
       operationId: getCsrf
@@ -356,6 +436,17 @@ components:
       name: X-CSRF-TOKEN
       description: Token obtido em GET /api/auth/csrf para a mesma sessão.
   schemas:
+    PasswordResetRequest:
+      type: object
+      required: [email]
+      properties:
+        email: {type: string, format: email, minLength: 1, maxLength: 254, description: Obrigatório e não vazio; espaços externos removidos antes de validar.}
+    PasswordResetConfirmation:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token: {type: string, minLength: 1, maxLength: 128, writeOnly: true, description: Não vazio; formato emitido de 43 caracteres Base64 URL-safe. Formato inválido com até 128 caracteres retorna 400.}
+        newPassword: {type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true, description: Não pode conter somente espaços; preservada sem normalização.}
     ApplicationStatus:
       type: string
       enum: [SAVED, APPLIED, SCREENING, INTERVIEW, OFFER, HIRED, REJECTED, WITHDRAWN]

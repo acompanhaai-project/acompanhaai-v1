@@ -59,6 +59,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users", "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/password-reset/request",
+                                "/api/auth/password-reset/confirm").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors

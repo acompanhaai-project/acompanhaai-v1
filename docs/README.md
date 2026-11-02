@@ -10,6 +10,10 @@ evidências de execução: registrar resultados somente após executar cada rote
 | [Ambiente local](ambiente-local.md) | H2, PostgreSQL, configuração e roteiro KAN-21 | Procedimento documentado; execução pendente |
 | [Qualidade](qualidade.md) | Matriz de testes, dados, Bugs e evidências KAN-22 | Estratégia documentada; resultados atuais pendentes |
 | [Matriz KAN-24](matriz-kan-24.md) | Critérios de conta/autenticação, testes e lacunas | L1–L3 resolvidas; 14 testes de conta e 30 no total aprovados localmente; PR/aceite pendentes |
+| [Recuperação de senha](recuperacao-senha.md) | Modelo, V6, Service, DTOs e endpoints KAN-25 | HTTP e SMTP local implementados; aceite pendente |
+| [E-mail local](email-local.md) | Mailpit, entrega após commit e testes SMTP KAN-25 | GreenMail verificado; Mailpit manual pendente |
+| [Proteção da recuperação](protecao-recuperacao.md) | Cotas por IP/globais e processamento assíncrono KAN-25 | Proteção local implementada; validação de produção pendente |
+| [Validação PostgreSQL KAN-25](validacao-postgres-kan25.md) | Migração limpa, V5→V6, concorrência e CI | 84 testes aprovados em PostgreSQL 18.6; CI remoto pendente |
 | [CI/CD](ci-cd.md) | Especificação do pipeline e critérios KAN-23 | Pipeline ainda não implementado |
 | [Contrato OpenAPI](openapi.yaml) | Endpoints e estruturas disponíveis | Contrato versionado da API atual |
 | [Integração frontend](integracao-frontend.md) | Sessão, CSRF, erros e candidaturas KAN-35 | Guia da API atual; extensões futuras pendentes |
