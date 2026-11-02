@@ -9,6 +9,7 @@ evidências de execução: registrar resultados somente após executar cada rote
 | [Modelagem](modelagem-banco.md) | Entidades, relacionamentos e migrações | Estrutura existente e extensões planejadas identificadas |
 | [Ambiente local](ambiente-local.md) | H2, PostgreSQL, configuração e roteiro KAN-21 | Procedimento documentado; execução pendente |
 | [Qualidade](qualidade.md) | Matriz de testes, dados, Bugs e evidências KAN-22 | Estratégia documentada; resultados atuais pendentes |
+| [Matriz KAN-24](matriz-kan-24.md) | Critérios de conta/autenticação, testes e lacunas | L1–L3 resolvidas; 14 testes de conta e 30 no total aprovados localmente; PR/aceite pendentes |
 | [CI/CD](ci-cd.md) | Especificação do pipeline e critérios KAN-23 | Pipeline ainda não implementado |
 | [Contrato OpenAPI](openapi.yaml) | Endpoints e estruturas disponíveis | Contrato versionado da API atual |
 | [Integração frontend](integracao-frontend.md) | Sessão, CSRF, erros e candidaturas KAN-35 | Guia da API atual; extensões futuras pendentes |
