@@ -253,7 +253,12 @@ paths:
     put:
       operationId: replaceProfilePhoto
       summary: Enviar ou substituir foto de perfil
-      description: JPEG ou PNG de até 2 MiB e 4 milhões de pixels. Conteúdo validado e regravado pelo servidor.
+      description: |
+        JPEG ou PNG identificado pelos bytes, independente de nome ou MIME declarado.
+        Arquivo e imagem regravada de até 2097152 bytes (2 MiB), inclusive; até
+        4000000 pixels, inclusive. Entrada inválida preserva a foto existente.
+        Multipart completo limitado a 3 MiB. O servidor descarta até 4 MiB do corpo
+        rejeitado para entregar 413; corpos maiores podem ter a conexão encerrada.
       security:
         - sessionCookie: []
           csrfHeader: []
@@ -268,11 +273,15 @@ paths:
                 file: {type: string, format: binary}
       responses:
         '204': {description: Foto salva.}
-        '400': {$ref: '#/components/responses/BadRequest'}
+        '400': {description: Parte obrigatória file ausente ou multipart inválido.}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
-        '413': {description: Arquivo ou requisição multipart excede o limite.}
-        '422': {$ref: '#/components/responses/ValidationError'}
+        '413': {description: Arquivo acima de 2 MiB ou multipart acima de 3 MiB, rejeitado pelo servidor HTTP.}
+        '422':
+          description: Imagem vazia, corrompida, formato diferente de JPEG/PNG ou acima de 4 milhões de pixels; também rejeição dos limites de bytes pelo Service.
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
     delete:
       operationId: deleteProfilePhoto
       summary: Remover a própria foto

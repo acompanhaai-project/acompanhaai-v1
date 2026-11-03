@@ -10,6 +10,7 @@ evidências de execução: registrar resultados somente após executar cada rote
 | [Ambiente local](ambiente-local.md) | H2, PostgreSQL, configuração e roteiro KAN-21 | Procedimento documentado; execução pendente |
 | [Qualidade](qualidade.md) | Matriz de testes, dados, Bugs e evidências KAN-22 | Estratégia documentada; resultados atuais pendentes |
 | [Matriz KAN-24](matriz-kan-24.md) | Critérios de conta/autenticação, testes e lacunas | L1–L3 resolvidas; 14 testes de conta e 30 no total aprovados localmente; PR/aceite pendentes |
+| [Matriz KAN-26](matriz-kan-26.md) | Conteúdo, limites e privacidade da foto de perfil | PostgreSQL: 96 aprovados; H2: 95 aprovados e 1 ignorado; PR/aceite pendentes |
 | [Recuperação de senha](recuperacao-senha.md) | Modelo, V6, Service, DTOs e endpoints KAN-25 | HTTP e SMTP local implementados; aceite pendente |
 | [E-mail local](email-local.md) | Mailpit, entrega após commit e testes SMTP KAN-25 | GreenMail verificado; Mailpit manual pendente |
 | [Proteção da recuperação](protecao-recuperacao.md) | Cotas por IP/globais e processamento assíncrono KAN-25 | Proteção local implementada; validação de produção pendente |
