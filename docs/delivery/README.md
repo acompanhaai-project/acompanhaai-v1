@@ -50,6 +50,10 @@ Implementação revisada; testes apropriados aprovados; evidência QA vinculada;
 
 ## Bugs e workflow
 
+Consultar o [fluxo de Bugs da KAN-28](../bugs.md) e o
+[modelo de registro](../templates/bug.md) para aplicar o processo e documentar
+triagem, revisão, reteste e decisão final.
+
 Usar o tipo **Problema** para defeitos reais, com: resumo, versão/ambiente, pré-condições, passos, esperado, obtido, frequência, severidade, prioridade, evidência sanitizada e vínculo com história/release. Fluxo: reportado → triagem → correção → revisão → reteste → fechado ou reaberto. Bug crítico/alto bloqueia liberação até correção/decisão formal.
 
 O quadro atual tem A fazer → Em Progresso → In Review → Concluído. Revisão de código e QA devem ter checkpoints explícitos; o item T01 definirá o ajuste das colunas/status quando necessário, sem fechar histórias antes do aceite.
