@@ -496,6 +496,44 @@ components:
             description: Link HTTP/HTTPS opcional. Não é acessado; link idêntico é único por usuário.
           }
         description: { type: string, maxLength: 30000, nullable: true }
+        location: { type: string, maxLength: 255, nullable: true }
+        workMode:
+          type: string
+          nullable: true
+          enum: [REMOTE, HYBRID, ONSITE]
+        salary:
+          type: number
+          nullable: true
+          exclusiveMinimum: true
+          minimum: 0
+          maximum: 9999999999999.99
+          multipleOf: 0.01
+          description: Valor único declarado, positivo, com até duas casas decimais. Sem valor, null; nunca estimado.
+        salaryCurrency:
+          type: string
+          nullable: true
+          enum: [BRL]
+          description: Obrigatória com salário; deve ser nula ou omitida sem salário.
+        salaryPeriod:
+          type: string
+          nullable: true
+          enum: [HOUR, DAY, WEEK, MONTH, YEAR]
+          description: Obrigatória com salário; deve ser nula ou omitida sem salário. Não é presumida.
+        hardSkills:
+          $ref: "#/components/schemas/SkillNames"
+        softSkills:
+          $ref: "#/components/schemas/SkillNames"
+    SkillNames:
+      type: array
+      nullable: true
+      maxItems: 50
+      uniqueItems: true
+      items: { type: string, minLength: 1, maxLength: 150 }
+      description: >-
+        Até 50 nomes por tipo. Espaços repetidos e nas extremidades são normalizados.
+        Duplicatas são rejeitadas sem diferenciar maiúsculas/minúsculas, inclusive entre hard e soft skills.
+        Omissão ou null na entrada equivale a lista vazia. A resposta sempre usa listas, ordenadas por nome.
+        PUT substitui as listas; [] remove as habilidades daquele tipo.
     ApplicationInput:
       type: object
       required: [job]

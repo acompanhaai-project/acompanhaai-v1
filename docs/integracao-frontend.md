@@ -1,7 +1,8 @@
 # Guia de integração da API com o frontend
 
-Relacionamento: KAN-35. Descreve a API existente; o frontend Angular e as
-extensões de salário/habilidades/recuperação/importação ainda serão entregues.
+Relacionamento: KAN-35. Descreve a API existente; o frontend Angular ainda
+será entregue. Os detalhes de salário e habilidades seguem o
+[contrato KAN-30](vaga-manual-kan-30.md).
 
 Fonte do contrato: [openapi.yaml](openapi.yaml). Conferir DTOs, Resources e
 testes ao alterar o contrato. A coleção Postman v1 é um registro congelado,
@@ -73,8 +74,10 @@ Exemplo de payload atual, sem dados pessoais:
 
 `job.title` é obrigatório. Status omitido no cadastro assume APPLIED;
 SAVED exige data nula. Datas futuras são inválidas. O link é armazenado,
-não acessado. Salário, habilidades e modalidade já aparecem na modelagem,
-mas ainda não são campos do DTO HTTP atual.
+não acessado. Salário único, habilidades, localização e modalidade estão
+disponíveis nos DTOs conforme o [contrato KAN-30](vaga-manual-kan-30.md).
+Ao editar, reenviar os detalhes que devem ser preservados: opcionais omitidos
+são limpos e listas omitidas ou vazias removem as habilidades daquele tipo.
 
 ### Paginação e atualização
 
@@ -131,7 +134,7 @@ controller usam ProblemDetail. O frontend precisa aceitar ambos.
 
 ## Pendências para concluir KAN-35
 
-- Atualizar o contrato quando salário/habilidades forem expostos pelos DTOs.
+- Validar os campos de salário e habilidades do contrato KAN-30 no formulário Angular.
 - Sincronizar os exemplos e preparar regressão v2.
 - Verificar sessão e CSRF pelo navegador real do Angular.
 - Validar 401/403/409/422 com frontend e QA.

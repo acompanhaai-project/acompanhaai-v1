@@ -7,8 +7,12 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "tb_job")
@@ -59,6 +63,14 @@ public class Job extends BaseEntity {
     @Column(name = "salary_original_text", columnDefinition = "text")
     private String salaryOriginalText;
 
+    @Column(name = "salary", precision = 15, scale = 2)
+    private BigDecimal salary;
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    @BatchSize(size = 50)
+    private List<JobSkill> skills = new ArrayList<>();
+
     @Version
     @Column(nullable = false)
     private long version;
@@ -80,6 +92,12 @@ public class Job extends BaseEntity {
         this.companyName = dto.companyName();
         this.description = dto.description();
         this.sourceUrl = dto.sourceUrl();
+        this.location = dto.location();
+        this.workMode = dto.workMode();
+        this.salary = dto.salary();
+        this.salaryCurrency = dto.salaryCurrency();
+        this.salaryPeriod = dto.salaryPeriod();
+        updateSkills(dto.hardSkills(), dto.softSkills());
         this.normalizedUrl = sourceUrl;
         try {
             this.urlHash =
@@ -95,6 +113,43 @@ public class Job extends BaseEntity {
 
     public User getUser() {
         return user;
+    }
+
+    private void updateSkills(List<String> hardSkills, List<String> softSkills) {
+        skills.removeIf(skill -> {
+            List<String> desired = skill.getType() == SkillType.HARD ? hardSkills : softSkills;
+            return desired.stream().noneMatch(name -> name.toLowerCase(Locale.ROOT).equals(skill.getNormalizedName()));
+        });
+        updateSkills(hardSkills, SkillType.HARD);
+        updateSkills(softSkills, SkillType.SOFT);
+    }
+
+    private void updateSkills(List<String> names, SkillType type) {
+        for (String name : names) {
+            String normalized = name.toLowerCase(Locale.ROOT);
+            var existing = skills
+                .stream()
+                .filter(skill -> skill.getType() == type && skill.getNormalizedName().equals(normalized))
+                .findFirst();
+            if (existing.isPresent()) {
+                existing.get().setName(name);
+            } else {
+                skills.add(new JobSkill(this, name, normalized, type));
+            }
+        }
+    }
+
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public List<String> getSkills(SkillType type) {
+        return skills
+            .stream()
+            .filter(skill -> skill.getType() == type)
+            .map(JobSkill::getName)
+            .sorted(String.CASE_INSENSITIVE_ORDER)
+            .toList();
     }
 
     public String getTitle() {

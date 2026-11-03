@@ -55,7 +55,7 @@ Após o login e a renovação do CSRF, envie este JSON para `POST /api/applicati
 }
 ```
 
-`job.title` é obrigatório, com até 255 caracteres. Empresa, link e descrição são opcionais. Descrição aceita até 30.000 caracteres e observações até 5.000. O link é apenas armazenado nesta etapa; nenhuma página é acessada. O mesmo link é único por usuário quando informado; usuários diferentes podem registrar a mesma vaga. A API ainda não recebe os campos adicionais de salário e habilidades da modelagem.
+`job.title` é obrigatório, com até 255 caracteres. Empresa, link e descrição são opcionais. Descrição aceita até 30.000 caracteres e observações até 5.000. O link é apenas armazenado nesta etapa; nenhuma página é acessada. O mesmo link é único por usuário quando informado; usuários diferentes podem registrar a mesma vaga. A KAN-30 adiciona localização, modalidade, salário único opcional em BRL e listas de hard/soft skills sem duplicidade. Consulte o [contrato da vaga manual](docs/vaga-manual-kan-30.md) para regras e exemplos.
 
 Listagem: `GET /api/applications?status=SCREENING&page=0&size=20`. A página começa em zero, com tamanho entre 1 e 100. A resposta contém `content`, `page`, `size`, `totalElements` e `totalPages`, ordenada pela última atualização e ID decrescentes.
 
@@ -192,6 +192,7 @@ Os relacionamentos usam carregamento lazy e não propagam remoção para o usuá
 - V4: salário, detalhes da vaga, habilidades e constraints adicionais.
 - V5: tarefas de importação com resultado JSONB.
 - V6: registros de token de recuperação, somente com hash e validade limitada.
+- V7: salário único opcional; preserva faixas e textos salariais legados, sem inferir valores.
 
 O [modelo de recuperação de senha](docs/recuperacao-senha.md) já possui entidade,
 migração, emissão, redefinição, DTOs e endpoints no KAN-25. O perfil `mail-local`

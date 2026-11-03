@@ -6,7 +6,10 @@ import com.maiconamaral.acompanhaai.entities.enums.ApplicationStatus;
 import com.maiconamaral.acompanhaai.repositories.*;
 import com.maiconamaral.acompanhaai.services.exceptions.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 import org.springframework.data.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,7 @@ public class ApplicationService {
     public ApplicationDTO insert(Long userId, ApplicationInsertDTO dto) {
         var status = dto.status() == null ? ApplicationStatus.APPLIED : dto.status();
         validate(status, dto.appliedOn());
+        validateJob(dto.job());
         var user = users.getReferenceById(userId);
         var job = jobs.save(new Job(user, dto.job()));
         var application = repository.saveAndFlush(new Application(user, job, status, dto.appliedOn(), dto.notes()));
@@ -65,11 +69,14 @@ public class ApplicationService {
             throw new ObjectOptimisticLockingFailureException(Application.class, id);
         }
         validate(dto.status(), dto.appliedOn());
+        validateJob(dto.job());
         var previous = application.getStatus();
         application.getJob().update(dto.job());
         application.update(dto.status(), dto.appliedOn(), dto.notes());
         repository.saveAndFlush(application);
-        if (previous != dto.status()) history.save(new ApplicationStatusHistory(application, previous));
+        if (previous != dto.status()) {
+            history.save(new ApplicationStatusHistory(application, previous));
+        }
         return new ApplicationDTO(application);
     }
 
@@ -101,6 +108,26 @@ public class ApplicationService {
     private void validate(ApplicationStatus status, LocalDate appliedOn) {
         if (status == ApplicationStatus.SAVED && appliedOn != null) {
             throw new InvalidDataException("Uma vaga apenas salva não pode ter data de candidatura.");
+        }
+    }
+
+    private void validateJob(JobInputDTO dto) {
+        if (dto.salary() == null) {
+            if (dto.salaryCurrency() != null || dto.salaryPeriod() != null) {
+                throw new InvalidDataException("Informe um salário para definir moeda e periodicidade.");
+            }
+        } else if (!"BRL".equals(dto.salaryCurrency()) || dto.salaryPeriod() == null) {
+            throw new InvalidDataException("Informe moeda BRL e periodicidade para o salário.");
+        }
+        var names = new HashSet<String>();
+        for (String name : Stream.concat(dto.hardSkills().stream(), dto.softSkills().stream()).toList()) {
+            String normalized = name.toLowerCase(Locale.ROOT);
+            if (normalized.length() > 150) {
+                throw new InvalidDataException("O nome normalizado da habilidade deve ter até 150 caracteres.");
+            }
+            if (!names.add(normalized)) {
+                throw new InvalidDataException("Não são permitidas habilidades duplicadas, inclusive entre tipos.");
+            }
         }
     }
 }
