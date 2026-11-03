@@ -93,7 +93,7 @@ Remove-Variable credencialLocal -ErrorAction SilentlyContinue
 ## PostgreSQL com Compose
 
 Copiar `.env.example` para `.env` somente se o arquivo ainda não existir.
-Preencher a senha local sem colocá-la em exemplos versionados.
+Preencher POSTGRES_ADMIN_PASSWORD sem colocá-la em exemplos versionados.
 
 ```powershell
 docker compose up -d postgres
@@ -102,11 +102,14 @@ docker compose ps
 
 O Compose expõe por padrão `127.0.0.1:5432`; o PostgreSQL nativo deste projeto
 usa 5433. Para usar o container, adaptar a URL do bloco anterior para 5432
-ou para a porta definida no seu `.env`. O serviço configura o banco e o
-usuário `acompanhaai`; usar a senha escolhida no `.env`.
+ou para a porta definida no seu `.env`. Em volume novo, o serviço configura
+o banco acompanhaai e o administrador acompanhaai_admin, com a senha administrativa
+escolhida no .env. Não usar essa credencial no datasource da API.
 
-O usuário criado por `POSTGRES_USER` não representa a política de permissões
-mínimas de produção. KAN-29 separará credenciais e permissões.
+Antes de iniciar a API, seguir o [guia de credenciais da KAN-29](credenciais.md)
+para criar app/migrator, adotar os objetos existentes e configurar os segredos.
+Um volume antigo mantém seus usuários originais; não é reconfigurado pelas
+novas variáveis do Compose.
 
 `docker compose down` para o serviço preservando o volume. Não usar
 `down -v` como rotina: remove os dados. Alterar a senha no `.env` não muda

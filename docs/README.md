@@ -16,7 +16,7 @@ evidências de execução: registrar resultados somente após executar cada rote
 | [E-mail local](email-local.md)                             | Mailpit, entrega após commit e testes SMTP KAN-25           | GreenMail verificado; Mailpit manual pendente                                                |
 | [Proteção da recuperação](protecao-recuperacao.md)         | Cotas por IP/globais e processamento assíncrono KAN-25      | Proteção local implementada; validação de produção pendente                                  |
 | [Validação PostgreSQL KAN-25](validacao-postgres-kan25.md) | Migração limpa, V5→V6, concorrência e CI                    | 84 testes aprovados em PostgreSQL 18.6; CI remoto pendente                                   |
-| [CI/CD](ci-cd.md)                                          | Pipeline GitHub Actions, checks e artefatos                 | CI H2/PostgreSQL implementado; deploy pendente                                               |
+| [CI/CD](ci-cd.md)                                          | Checks H2/PostgreSQL, isolamento de roles e artefatos       | CI implementado; novo check de permissões aguardando execução remota; deploy pendente        |
 | [Contrato OpenAPI](openapi.yaml)                           | Endpoints e estruturas disponíveis                          | Contrato versionado da API atual                                                             |
 | [Integração frontend](integracao-frontend.md)              | Sessão, CSRF, erros e candidaturas KAN-35                   | Guia da API atual; extensões futuras pendentes                                               |
 | [Operação](operacao.md)                                    | Release, backup, restore, rollback e incidentes             | Procedimento planejado; infraestrutura não provisionada                                      |
@@ -28,6 +28,14 @@ evidências de execução: registrar resultados somente após executar cada rote
 O [fluxo de Bugs — KAN-28](bugs.md) e o [modelo copiável](templates/bug.md)
 definem severidade, prioridade, prazos didáticos de triagem, revisão e reteste.
 Processo documentado; janela de trabalho, mapeamento no Jira e aceite pendentes.
+
+O [guia de credenciais — KAN-29](credenciais.md) explica provisionamento,
+adoção dos objetos, configuração, rotação e validação com usuário restrito.
+
+A [revisão inicial de credenciais — KAN-29](revisao-credenciais-kan-29.md)
+registra a configuração e as permissões fornecidas pelo pgAdmin. A V6 e o
+provisionamento local foram executados, e o smoke da API foi aprovado;
+CI do PR e aceite continuam pendentes.
 
 1. Selecionar o cartão de execução no Jira; a Feature é o índice da entrega.
 2. Consultar o guia correspondente e executar o que estiver no seu escopo.

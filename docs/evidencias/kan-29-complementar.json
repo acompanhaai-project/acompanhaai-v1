@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-03",
+  "base": "53350e9 + alteracoes locais KAN-29",
+  "runtime": {
+    "profile": "postgres-runtime,test",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "mavenExitCode": 0,
+    "migrationCredentialProvided": false
+  },
+  "h2": {
+    "tests": 104,
+    "passed": 97,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 7,
+    "mavenExitCode": 0
+  },
+  "memory": "Xms32m Xmx384m MaxMetaspaceSize192m ReservedCodeCacheSize96m"
+}

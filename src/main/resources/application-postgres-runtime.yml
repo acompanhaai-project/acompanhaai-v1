@@ -1,0 +1,8 @@
+# Operação após migrações aplicadas em etapa separada.
+# Não ativar junto de postgres-separated nem fornecer segredo de migração.
+spring:
+  datasource:
+    username: acompanhaai_app
+    password: ${APP_DB_PASSWORD}
+  flyway:
+    enabled: false

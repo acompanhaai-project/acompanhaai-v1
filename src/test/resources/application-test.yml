@@ -1,8 +1,13 @@
 spring:
+  test:
+    mockmvc:
+      print: none
   datasource:
     url: jdbc:h2:mem:acompanhaai-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     username: sa
     password: ""
+  flyway:
+    locations: classpath:db/migration
 app:
   password-reset:
     limits:
@@ -13,3 +18,6 @@ server:
     session:
       cookie:
         secure: false
+logging:
+  level:
+    com.icegreen.greenmail: WARN
