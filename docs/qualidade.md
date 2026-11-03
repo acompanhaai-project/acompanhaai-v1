@@ -5,15 +5,15 @@ Esta estratégia não representa um relatório de testes executados.
 
 ## Cobertura atual e evolução
 
-| Camada | Base existente | Evolução planejada |
-|---|---|---|
-| Integração Spring/MockMvc | Conta, autenticação, perfil, fotos e candidaturas | Novos campos, recuperação e importação |
-| Persistência | Testes de mapeamento em H2 e migrações | PostgreSQL, concorrência e atualizações preservando dados |
-| API | Fixture Postman v1 congelada | Regressão v2 para o novo contrato |
-| Unidade | Sem suíte dedicada identificada nesta revisão | Regras isoladas quando trouxerem valor |
-| Navegador | Frontend ainda não implementado | Selenium/Java, sessão, jornadas e acessibilidade |
-| Desempenho/operação | Sem execução comprovada nesta entrega | Carga, restore, rollback e smoke |
-| IA | Integração ainda não implementada | Conjunto de avaliação e falhas controladas |
+| Camada                    | Base existente                                    | Evolução planejada                                        |
+| ------------------------- | ------------------------------------------------- | --------------------------------------------------------- |
+| Integração Spring/MockMvc | Conta, autenticação, perfil, fotos e candidaturas | Novos campos, recuperação e importação                    |
+| Persistência              | Testes de mapeamento em H2 e migrações            | PostgreSQL, concorrência e atualizações preservando dados |
+| API                       | Fixture Postman v1 congelada                      | Regressão v2 para o novo contrato                         |
+| Unidade                   | Sem suíte dedicada identificada nesta revisão     | Regras isoladas quando trouxerem valor                    |
+| Navegador                 | Frontend ainda não implementado                   | Selenium/Java, sessão, jornadas e acessibilidade          |
+| Desempenho/operação       | Sem execução comprovada nesta entrega             | Carga, restore, rollback e smoke                          |
+| IA                        | Integração ainda não implementada                 | Conjunto de avaliação e falhas controladas                |
 
 O baseline histórico registrado no planejamento é de 26 testes de integração
 e 90 requisições/246 asserções na fixture v1. Esses números não comprovam
@@ -89,16 +89,16 @@ esse estado e não publicar `postman/reports/`.
 
 ## Matriz mínima de aceite
 
-| Domínio | Cenários |
-|---|---|
-| Contas | Cadastro, e-mail duplicado, entrada inválida e ausência de senha/hash na resposta |
-| Autenticação | Credenciais válidas/inválidas, 401 anônimo, CSRF, rotação e logout |
-| Isolamento | A não consulta, altera nem exclui dados de B |
-| Perfil/foto | Foto opcional, upload inválido, limites, substituição e remoção; fora da fixture v1 |
-| Candidaturas | CRUD, oito etapas, filtro, paginação, SAVED sem data e data futura |
-| Histórico | Evento inicial, troca de etapa atômica e edição simples sem novo evento |
-| Concorrência | Versão antiga, duplicidade e testes PostgreSQL dedicados |
-| Migrações | Banco vazio e atualização com dados preservados |
+| Domínio           | Cenários                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Contas            | Cadastro, e-mail duplicado, entrada inválida e ausência de senha/hash na resposta          |
+| Autenticação      | Credenciais válidas/inválidas, 401 anônimo, CSRF, rotação e logout                         |
+| Isolamento        | A não consulta, altera nem exclui dados de B                                               |
+| Perfil/foto       | Foto opcional, upload inválido, limites, substituição e remoção; fora da fixture v1        |
+| Candidaturas      | CRUD, oito etapas, filtro, paginação, SAVED sem data e data futura                         |
+| Histórico         | Evento inicial, troca de etapa atômica e edição simples sem novo evento                    |
+| Concorrência      | Versão antiga, duplicidade e testes PostgreSQL dedicados                                   |
+| Migrações         | Banco vazio e atualização com dados preservados                                            |
 | Importação futura | Coleta indisponível, cota, timeout, propriedade, confirmação repetida e conteúdo malicioso |
 
 ## Modelo de evidência
@@ -150,8 +150,8 @@ seus critérios. Lacunas e testes não executados devem permanecer explícitos.
 - Fixture e dependências versionadas preservadas.
 
 Observações:
+
 - A instalação apresentou avisos de dependências descontinuadas.
   Atualizações deverão ser tratadas em uma versão futura.
 - Esta rodada valida a API em H2; não substitui regressão em
   PostgreSQL, testes de navegador, carga ou produção.
-

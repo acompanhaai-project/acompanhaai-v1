@@ -1,6 +1,9 @@
 package com.maiconamaral.acompanhaai.entities.enums;
 
 public enum SalaryPeriod {
-    HOUR, DAY, WEEK, MONTH, YEAR
+    HOUR,
+    DAY,
+    WEEK,
+    MONTH,
+    YEAR
 }
-

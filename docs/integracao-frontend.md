@@ -36,14 +36,14 @@ com token antigo durante login/logout.
 
 ## Operações disponíveis
 
-| Domínio | Operações |
-|---|---|
-| Conta | POST `/api/users`; GET/PUT/DELETE `/api/users/me` |
-| Autenticação | GET `/api/auth/csrf`; POST `/api/auth/login` e `/api/auth/logout` |
-| Senha | PUT `/api/users/me/password`, com senha atual e nova |
-| Foto | GET/PUT/DELETE `/api/users/me/photo` |
+| Domínio      | Operações                                                             |
+| ------------ | --------------------------------------------------------------------- |
+| Conta        | POST `/api/users`; GET/PUT/DELETE `/api/users/me`                     |
+| Autenticação | GET `/api/auth/csrf`; POST `/api/auth/login` e `/api/auth/logout`     |
+| Senha        | PUT `/api/users/me/password`, com senha atual e nova                  |
+| Foto         | GET/PUT/DELETE `/api/users/me/photo`                                  |
 | Candidaturas | GET/POST `/api/applications`; GET/PUT/DELETE `/api/applications/{id}` |
-| Histórico | GET `/api/applications/{id}/history` |
+| Histórico    | GET `/api/applications/{id}/history`                                  |
 
 Troca de senha e exclusão da conta encerram a sessão atual; outras sessões
 são recusadas na próxima requisição. A inatividade máxima configurada é
@@ -115,16 +115,16 @@ exata para decidir regras do cliente.
  "errors": [{"field": "job.title", "message": "não deve estar em branco"}]}
 ```
 
-| Status | Ação esperada |
-|---|---|
-| 400 | Corrigir JSON, parâmetros ou tipos; não repetir sem correção |
-| 401 | No login, apresentar erro; em rota privada, solicitar autenticação |
-| 403 | Conferir sessão/CSRF; não reenviar escrita indefinidamente |
-| 404 | Registro inexistente ou não pertencente à conta; não revelar outro proprietário |
-| 409 | Conflito de e-mail, link ou versão; orientar correção/reconciliação |
-| 413 | Informar limite de upload |
-| 422 | Destacar campos inválidos quando houver `errors`; também aceitar `detail` sem lista |
-| 5xx/rede | Preservar dados digitados e informar falha; não fingir sucesso |
+| Status   | Ação esperada                                                                       |
+| -------- | ----------------------------------------------------------------------------------- |
+| 400      | Corrigir JSON, parâmetros ou tipos; não repetir sem correção                        |
+| 401      | No login, apresentar erro; em rota privada, solicitar autenticação                  |
+| 403      | Conferir sessão/CSRF; não reenviar escrita indefinidamente                          |
+| 404      | Registro inexistente ou não pertencente à conta; não revelar outro proprietário     |
+| 409      | Conflito de e-mail, link ou versão; orientar correção/reconciliação                 |
+| 413      | Informar limite de upload                                                           |
+| 422      | Destacar campos inválidos quando houver `errors`; também aceitar `detail` sem lista |
+| 5xx/rede | Preservar dados digitados e informar falha; não fingir sucesso                      |
 
 Erros dos filtros de segurança usam `status/error`; erros tratados no
 controller usam ProblemDetail. O frontend precisa aceitar ambos.

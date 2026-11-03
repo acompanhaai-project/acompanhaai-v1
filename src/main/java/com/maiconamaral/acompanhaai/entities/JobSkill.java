@@ -1,12 +1,13 @@
 package com.maiconamaral.acompanhaai.entities;
 
-import jakarta.persistence.*;
 import com.maiconamaral.acompanhaai.entities.enums.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
 @Table(name = "tb_job_skill")
 public class JobSkill {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +29,7 @@ public class JobSkill {
     @Column(name = "source_excerpt", columnDefinition = "text")
     private String sourceExcerpt;
 
-    protected JobSkill() { }
+    protected JobSkill() {}
 
     public JobSkill(Job job, String name, String normalizedName, SkillType type) {
         this.job = Objects.requireNonNull(job);
@@ -37,16 +38,43 @@ public class JobSkill {
         this.type = Objects.requireNonNull(type);
     }
 
-    public Long getId() { return id; }
-    public Job getJob() { return job; }
-    public String getName() { return name; }
-    public String getNormalizedName() { return normalizedName; }
-    public SkillType getType() { return type; }
-    public String getSourceExcerpt() { return sourceExcerpt; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setName(String name) { this.name = name; }
-    public void setNormalizedName(String normalizedName) { this.normalizedName = normalizedName; }
-    public void setType(SkillType type) { this.type = type; }
-    public void setSourceExcerpt(String sourceExcerpt) { this.sourceExcerpt = sourceExcerpt; }
+    public Job getJob() {
+        return job;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getNormalizedName() {
+        return normalizedName;
+    }
+
+    public SkillType getType() {
+        return type;
+    }
+
+    public String getSourceExcerpt() {
+        return sourceExcerpt;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setNormalizedName(String normalizedName) {
+        this.normalizedName = normalizedName;
+    }
+
+    public void setType(SkillType type) {
+        this.type = type;
+    }
+
+    public void setSourceExcerpt(String sourceExcerpt) {
+        this.sourceExcerpt = sourceExcerpt;
+    }
 }
-

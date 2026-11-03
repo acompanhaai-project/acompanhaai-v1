@@ -1,15 +1,17 @@
 package com.maiconamaral.acompanhaai.security;
 
-import org.junit.jupiter.api.Test;
+import static com.maiconamaral.acompanhaai.security.PasswordResetRateLimiter.Route.*;
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
-import static org.assertj.core.api.Assertions.*;
-import static com.maiconamaral.acompanhaai.security.PasswordResetRateLimiter.Route.*;
+import org.junit.jupiter.api.Test;
 
 class PasswordResetRateLimiterTest {
+
     @Test
     void enforcesPerIpAndGlobalLimitsIndependentlyOfAccount() {
         var limiter = new PasswordResetRateLimiter(2, 3, () -> 0);
@@ -36,8 +38,9 @@ class PasswordResetRateLimiterTest {
     void concurrentRequestsCannotExceedGlobalQuota() throws Exception {
         var limiter = new PasswordResetRateLimiter(10, 7, System::nanoTime);
         try (var executor = Executors.newFixedThreadPool(8)) {
-            var calls = IntStream.range(0, 40).mapToObj(index -> executor.submit(() ->
-                    limiter.acquire(REQUEST, "ip-" + index))).toList();
+            var calls = IntStream.range(0, 40)
+                .mapToObj(index -> executor.submit(() -> limiter.acquire(REQUEST, "ip-" + index)))
+                .toList();
             int accepted = 0;
             for (var call : calls) if (call.get(5, TimeUnit.SECONDS) == 0) accepted++;
             assertThat(accepted).isEqualTo(7);

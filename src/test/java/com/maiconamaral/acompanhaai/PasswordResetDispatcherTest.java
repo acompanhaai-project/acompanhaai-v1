@@ -1,21 +1,23 @@
 package com.maiconamaral.acompanhaai;
 
-import com.maiconamaral.acompanhaai.security.PasswordResetRateLimiter;
-import com.maiconamaral.acompanhaai.services.PasswordResetRequestDispatcher;
-import com.maiconamaral.acompanhaai.services.PasswordResetService;
-import org.junit.jupiter.api.Test;
-import java.util.ArrayDeque;
-import java.util.concurrent.RejectedExecutionException;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.maiconamaral.acompanhaai.security.PasswordResetRateLimiter;
+import com.maiconamaral.acompanhaai.services.PasswordResetRequestDispatcher;
+import com.maiconamaral.acompanhaai.services.PasswordResetService;
+import java.util.ArrayDeque;
+import java.util.concurrent.RejectedExecutionException;
+import org.junit.jupiter.api.Test;
+
 class PasswordResetDispatcherTest {
+
     @Test
     void accountLookupDoesNotRunBeforeGenericResponseCanBeReturned() {
         var service = mock(PasswordResetService.class);
         var queue = new ArrayDeque<Runnable>();
         var dispatcher = new PasswordResetRequestDispatcher(service, new PasswordResetRateLimiter(10, 100), queue::add);
-        for (String email : new String[]{"existing@example.test", "unknown@example.test", "existing@example.test"}) {
+        for (String email : new String[] { "existing@example.test", "unknown@example.test", "existing@example.test" }) {
             dispatcher.request(email, "ip");
             verifyNoInteractions(service);
         }
@@ -39,8 +41,9 @@ class PasswordResetDispatcherTest {
     @Test
     void saturatedQueueDoesNotExposeErrorsOrExecuteLookupOnCallerThread() {
         var service = mock(PasswordResetService.class);
-        var dispatcher = new PasswordResetRequestDispatcher(service, new PasswordResetRateLimiter(10, 100),
-                task -> { throw new RejectedExecutionException(); });
+        var dispatcher = new PasswordResetRequestDispatcher(service, new PasswordResetRateLimiter(10, 100), task -> {
+            throw new RejectedExecutionException();
+        });
         assertThatCode(() -> dispatcher.request("test@example.test", "ip")).doesNotThrowAnyException();
         verifyNoInteractions(service);
     }

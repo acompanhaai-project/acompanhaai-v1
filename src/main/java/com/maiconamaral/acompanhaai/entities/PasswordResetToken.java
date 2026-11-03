@@ -6,9 +6,12 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tb_password_reset_token", uniqueConstraints =
-        @UniqueConstraint(name = "uk_password_reset_token_hash", columnNames = "token_hash"))
+@Table(
+    name = "tb_password_reset_token",
+    uniqueConstraints = @UniqueConstraint(name = "uk_password_reset_token_hash", columnNames = "token_hash")
+)
 public class PasswordResetToken {
+
     private static final Duration MAX_LIFETIME = Duration.ofMinutes(30);
 
     @Id
@@ -35,7 +38,7 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private long version;
 
-    protected PasswordResetToken() { }
+    protected PasswordResetToken() {}
 
     public PasswordResetToken(User user, String tokenHash, Instant createdAt, Instant expiresAt) {
         this.user = Objects.requireNonNull(user);
@@ -62,11 +65,31 @@ public class PasswordResetToken {
         usedAt = instant;
     }
 
-    public Long getId() { return id; }
-    public User getUser() { return user; }
-    public String getTokenHash() { return tokenHash; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getExpiresAt() { return expiresAt; }
-    public Instant getUsedAt() { return usedAt; }
-    public long getVersion() { return version; }
+    public Long getId() {
+        return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public String getTokenHash() {
+        return tokenHash;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public Instant getUsedAt() {
+        return usedAt;
+    }
+
+    public long getVersion() {
+        return version;
+    }
 }

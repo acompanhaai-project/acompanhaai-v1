@@ -1,23 +1,26 @@
 package com.maiconamaral.acompanhaai.services;
 
 import com.maiconamaral.acompanhaai.security.PasswordResetRateLimiter;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionException;
-
 @Service
 public class PasswordResetRequestDispatcher {
+
     private static final Logger LOG = LoggerFactory.getLogger(PasswordResetRequestDispatcher.class);
     private final PasswordResetService service;
     private final PasswordResetRateLimiter limiter;
     private final Executor executor;
 
-    public PasswordResetRequestDispatcher(PasswordResetService service, PasswordResetRateLimiter limiter,
-            @Qualifier("passwordResetRequestExecutor") Executor executor) {
+    public PasswordResetRequestDispatcher(
+        PasswordResetService service,
+        PasswordResetRateLimiter limiter,
+        @Qualifier("passwordResetRequestExecutor") Executor executor
+    ) {
         this.service = service;
         this.limiter = limiter;
         this.executor = executor;

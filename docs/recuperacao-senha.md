@@ -26,15 +26,15 @@ Entidade: [PasswordResetToken](../src/main/java/com/maiconamaral/acompanhaai/ent
 Migração: [V6](../src/main/resources/db/migration/V6__create_password_reset_tokens.sql).
 Tabela: `tb_password_reset_token`.
 
-| Campo | Responsabilidade |
-|---|---|
-| id | Identificador interno do registro; não é o token de recuperação. |
-| user_id | Proprietário obrigatório, referenciando tb_user. |
-| token_hash | Representação hexadecimal SHA-256, com unicidade global. |
-| created_at | Instante de emissão, informado na criação do objeto. |
-| expires_at | Expiração posterior à emissão e limitada a 30 minutos. |
-| used_at | Nulo antes do uso; preenchido quando consumido. |
-| version | Versão de persistência para controle otimista de concorrência. |
+| Campo      | Responsabilidade                                                 |
+| ---------- | ---------------------------------------------------------------- |
+| id         | Identificador interno do registro; não é o token de recuperação. |
+| user_id    | Proprietário obrigatório, referenciando tb_user.                 |
+| token_hash | Representação hexadecimal SHA-256, com unicidade global.         |
+| created_at | Instante de emissão, informado na criação do objeto.             |
+| expires_at | Expiração posterior à emissão e limitada a 30 minutos.           |
+| used_at    | Nulo antes do uso; preenchido quando consumido.                  |
+| version    | Versão de persistência para controle otimista de concorrência.   |
 
 A entidade recebe um hash já calculado. Ela não gera o token nem calcula
 o hash nesta etapa. Nenhum campo armazena o token original e a entidade
@@ -288,12 +288,12 @@ Token e senha são enviados no corpo, nunca na URL. Sucesso retorna `204 No Cont
 Não autentica automaticamente; efetue novo login com a nova senha e obtenha
 novo CSRF após o login. Sessões anteriores são rejeitadas na próxima requisição.
 
-| Status | Significado |
-|---|---|
-| 400 | JSON ausente/inválido; na confirmação, também token inválido, desconhecido, expirado, substituído ou consumido |
-| 403 | CSRF ausente/inválido; reobter CSRF para a mesma sessão |
-| 422 | Campos obrigatórios, e-mail, comprimento ou senha inválidos; erros sem repetir valores enviados |
-| 429 | Somente na confirmação: cota por IP ou global atingida; aguardar os segundos informados em Retry-After |
+| Status | Significado                                                                                                    |
+| ------ | -------------------------------------------------------------------------------------------------------------- |
+| 400    | JSON ausente/inválido; na confirmação, também token inválido, desconhecido, expirado, substituído ou consumido |
+| 403    | CSRF ausente/inválido; reobter CSRF para a mesma sessão                                                        |
+| 422    | Campos obrigatórios, e-mail, comprimento ou senha inválidos; erros sem repetir valores enviados                |
+| 429    | Somente na confirmação: cota por IP ou global atingida; aguardar os segundos informados em Retry-After         |
 
 Erros de token retornam application/problem+json com `status: 400` e o mesmo
 detail: `Token de recuperação inválido ou indisponível.` Não diferenciam
@@ -329,17 +329,17 @@ completa do padrão OpenAPI. As respostas foram verificadas por MockMvc.
 
 ## Pendências do KAN-25
 
-| Área | Situação |
-|---|---|
-| Entidade e V6 | Implementadas e verificadas em H2 |
-| Repository e transação de emissão | Implementados e verificados em H2 |
-| Geração segura e hash | Implementados; token original somente no resultado interno |
-| Limites de frequência e resposta genérica | Intervalo por conta, cotas por IP/globais por processo e consulta assíncrona implementados; ver limites em proteção HTTP |
-| Envio de e-mail de testes e coordenação com KAN-29 | SMTP local implementado; produção, segredos e entrega durável continuam pendentes |
-| DTOs, rotas e atualização OpenAPI | Implementados; oito testes HTTP aprovados em H2 |
-| Reset, revogação de sessões e invalidação dos tokens antigos | Implementados no Service; testes em H2 |
-| Token inválido, expirado, repetido e concorrência no fluxo completo | Cobertos no Service e HTTP; concorrência no Service; fluxo HTTP → SMTP → confirmação → login verificado em H2 |
-| PostgreSQL, CI do PR e aceite | PostgreSQL 18.6 aprovado: 84 testes, incluindo V5→V6; PR, CI remoto e aceite pendentes |
+| Área                                                                | Situação                                                                                                                 |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Entidade e V6                                                       | Implementadas e verificadas em H2                                                                                        |
+| Repository e transação de emissão                                   | Implementados e verificados em H2                                                                                        |
+| Geração segura e hash                                               | Implementados; token original somente no resultado interno                                                               |
+| Limites de frequência e resposta genérica                           | Intervalo por conta, cotas por IP/globais por processo e consulta assíncrona implementados; ver limites em proteção HTTP |
+| Envio de e-mail de testes e coordenação com KAN-29                  | SMTP local implementado; produção, segredos e entrega durável continuam pendentes                                        |
+| DTOs, rotas e atualização OpenAPI                                   | Implementados; oito testes HTTP aprovados em H2                                                                          |
+| Reset, revogação de sessões e invalidação dos tokens antigos        | Implementados no Service; testes em H2                                                                                   |
+| Token inválido, expirado, repetido e concorrência no fluxo completo | Cobertos no Service e HTTP; concorrência no Service; fluxo HTTP → SMTP → confirmação → login verificado em H2            |
+| PostgreSQL, CI do PR e aceite                                       | PostgreSQL 18.6 aprovado: 84 testes, incluindo V5→V6; PR, CI remoto e aceite pendentes                                   |
 
 ## Referência de segurança
 

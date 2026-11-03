@@ -1,13 +1,14 @@
 package com.maiconamaral.acompanhaai.entities;
 
-import jakarta.persistence.*;
 import com.maiconamaral.acompanhaai.entities.enums.*;
-import java.util.Objects;
+import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "tb_application")
 public class Application extends BaseEntity {
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
@@ -30,7 +31,7 @@ public class Application extends BaseEntity {
     @Column(nullable = false)
     private long version;
 
-    protected Application() { }
+    protected Application() {}
 
     public Application(Job job) {
         this.job = Objects.requireNonNull(job);
@@ -53,15 +54,39 @@ public class Application extends BaseEntity {
         onUpdate();
     }
 
-    public User getUser() { return user; }
-    public Job getJob() { return job; }
-    public ApplicationStatus getStatus() { return status; }
-    public LocalDate getAppliedOn() { return appliedOn; }
-    public String getNotes() { return notes; }
-    public long getVersion() { return version; }
+    public User getUser() {
+        return user;
+    }
 
-    public void setStatus(ApplicationStatus status) { this.status = status; }
-    public void setAppliedOn(LocalDate appliedOn) { this.appliedOn = appliedOn; }
-    public void setNotes(String notes) { this.notes = notes; }
+    public Job getJob() {
+        return job;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public LocalDate getAppliedOn() {
+        return appliedOn;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
+    }
+
+    public void setAppliedOn(LocalDate appliedOn) {
+        this.appliedOn = appliedOn;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 }
-

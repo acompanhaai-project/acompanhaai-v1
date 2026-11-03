@@ -1,34 +1,40 @@
 package com.maiconamaral.acompanhaai.resources.exceptions;
 
 import com.maiconamaral.acompanhaai.services.exceptions.*;
+import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.dao.DataIntegrityViolationException;
-import java.util.List;
 
 @RestControllerAdvice
 public class ResourceExceptionHandler {
+
     @ExceptionHandler(PasswordResetRateLimitException.class)
     public ResponseEntity<ProblemDetail> passwordResetLimit(PasswordResetRateLimitException exception) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.getRetryAfter()))
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage()));
+            .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.getRetryAfter()))
+            .body(ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage()));
     }
+
     @ExceptionHandler(InvalidPasswordResetTokenException.class)
     public ProblemDetail invalidPasswordResetToken(InvalidPasswordResetTokenException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail dataConflict(DataIntegrityViolationException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-                "Conflito de dados. Verifique se a vaga já foi cadastrada com esse link.");
+        return ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            "Conflito de dados. Verifique se a vaga já foi cadastrada com esse link."
+        );
     }
+
     @ExceptionHandler(InvalidDataException.class)
     public ProblemDetail invalidData(InvalidDataException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(422), exception.getMessage());
@@ -36,7 +42,10 @@ public class ResourceExceptionHandler {
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ProblemDetail concurrentUpdate(ObjectOptimisticLockingFailureException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "O registro foi alterado. Recarregue antes de salvar.");
+        return ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            "O registro foi alterado. Recarregue antes de salvar."
+        );
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -48,6 +57,7 @@ public class ResourceExceptionHandler {
     public ProblemDetail invalidParameters(HandlerMethodValidationException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(422), "Parâmetros de consulta inválidos.");
     }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ProblemDetail duplicateEmail(EmailAlreadyExistsException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
@@ -66,8 +76,12 @@ public class ResourceExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail validation(MethodArgumentNotValidException exception) {
         var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, "Dados inválidos.");
-        List<FieldErrorDTO> errors = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> new FieldErrorDTO(error.getField(), error.getDefaultMessage())).toList();
+        List<FieldErrorDTO> errors = exception
+            .getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> new FieldErrorDTO(error.getField(), error.getDefaultMessage()))
+            .toList();
         problem.setProperty("errors", errors);
         return problem;
     }
@@ -77,5 +91,5 @@ public class ResourceExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Corpo JSON inválido.");
     }
 
-    public record FieldErrorDTO(String field, String message) { }
+    public record FieldErrorDTO(String field, String message) {}
 }

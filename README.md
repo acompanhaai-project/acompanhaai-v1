@@ -6,32 +6,32 @@ Backend para acompanhar candidaturas a vagas de emprego. Implementa contas, aute
 
 A foto é opcional. `GET /api/users/me` retorna `photoUrl: null` quando não houver foto; caso contrário, retorna `/api/users/me/photo`, acessível somente com a sessão autenticada. A imagem fica em `tb_user_photo`, separada dos dados da conta, e é removida ao excluir a conta. Os bytes não são enviados no JSON do perfil.
 
-| Método | Rota | Resultado |
-|---|---|---|
-| PUT | `/api/users/me/photo` | Envia/substitui foto via multipart, campo `file`; retorna 204 |
-| GET | `/api/users/me/photo` | Retorna JPEG/PNG; sem foto retorna 404 |
-| DELETE | `/api/users/me/photo` | Remove a foto; retorna 204 mesmo se já não houver foto |
-| POST | `/api/applications` | Cria vaga manual e candidatura na mesma transação; retorna 201 |
-| GET | `/api/applications` | Lista apenas suas candidaturas, com paginação e filtro por status |
-| GET | `/api/applications/{id}` | Consulta uma candidatura própria |
-| PUT | `/api/applications/{id}` | Substitui os dados manuais da vaga e do acompanhamento; exige `version` |
-| GET | `/api/applications/{id}/history` | Consulta o histórico de etapas, incluindo o registro inicial |
-| DELETE | `/api/applications/{id}` | Exclui a candidatura, sua vaga e histórico; retorna 204 |
+| Método | Rota                             | Resultado                                                               |
+| ------ | -------------------------------- | ----------------------------------------------------------------------- |
+| PUT    | `/api/users/me/photo`            | Envia/substitui foto via multipart, campo `file`; retorna 204           |
+| GET    | `/api/users/me/photo`            | Retorna JPEG/PNG; sem foto retorna 404                                  |
+| DELETE | `/api/users/me/photo`            | Remove a foto; retorna 204 mesmo se já não houver foto                  |
+| POST   | `/api/applications`              | Cria vaga manual e candidatura na mesma transação; retorna 201          |
+| GET    | `/api/applications`              | Lista apenas suas candidaturas, com paginação e filtro por status       |
+| GET    | `/api/applications/{id}`         | Consulta uma candidatura própria                                        |
+| PUT    | `/api/applications/{id}`         | Substitui os dados manuais da vaga e do acompanhamento; exige `version` |
+| GET    | `/api/applications/{id}/history` | Consulta o histórico de etapas, incluindo o registro inicial            |
+| DELETE | `/api/applications/{id}`         | Exclui a candidatura, sua vaga e histórico; retorna 204                 |
 
 As novas rotas exigem autenticação; operações de escrita também exigem CSRF. IDs de outros usuários retornam 404. Fotos: JPEG/PNG de até 2 MiB e 4 milhões de pixels. O servidor identifica o formato pelos bytes e regrava a imagem sem os metadados originais. Arquivo inválido retorna 422; requisição multipart acima do limite retorna 413.
 
 ### Etapas do acompanhamento
 
-| Código na API | Nome na interface | Significado |
-|---|---|---|
-| SAVED | Salva | Interesse salvo antes de se inscrever |
-| APPLIED | Candidatura realizada | Inscrição enviada |
-| SCREENING | Triagem | Currículo ou perfil em avaliação |
-| INTERVIEW | Entrevista | Entrevistas e avaliações do processo |
-| OFFER | Proposta | Oferta recebida, ainda em decisão |
-| HIRED | Contratado | Oferta aceita e contratação confirmada |
-| REJECTED | Reprovado | Processo encerrado pela empresa |
-| WITHDRAWN | Desistência | Processo encerrado pelo candidato |
+| Código na API | Nome na interface     | Significado                            |
+| ------------- | --------------------- | -------------------------------------- |
+| SAVED         | Salva                 | Interesse salvo antes de se inscrever  |
+| APPLIED       | Candidatura realizada | Inscrição enviada                      |
+| SCREENING     | Triagem               | Currículo ou perfil em avaliação       |
+| INTERVIEW     | Entrevista            | Entrevistas e avaliações do processo   |
+| OFFER         | Proposta              | Oferta recebida, ainda em decisão      |
+| HIRED         | Contratado            | Oferta aceita e contratação confirmada |
+| REJECTED      | Reprovado             | Processo encerrado pela empresa        |
+| WITHDRAWN     | Desistência           | Processo encerrado pelo candidato      |
 
 No quadro, as quatro etapas centrais são Candidatura realizada, Triagem, Entrevista e Proposta. Salvas ficam antes do funil; os três desfechos podem ficar em uma área de finalizadas. É permitido pular etapas e corrigir status, sempre preservando o histórico. Alterar apenas os dados da vaga ou observações não cria evento de status. A etapa de testes técnicos pode ser registrada em observações durante Entrevista por enquanto.
 
@@ -231,16 +231,16 @@ passadas pelo Maven substituem o datasource H2 do perfil de testes.
 
 O contrato está em [docs/openapi.yaml](docs/openapi.yaml).
 
-| Método | Rota | Comportamento |
-|---|---|---|
-| GET | `/api/auth/csrf` | Obtém token CSRF e inicia uma sessão anônima |
-| POST | `/api/users` | Cadastra uma conta; não realiza login automaticamente |
-| POST | `/api/auth/login` | Autentica e renova o ID da sessão |
-| GET | `/api/users/me` | Consulta a própria conta |
-| PUT | `/api/users/me` | Substitui nome e e-mail da própria conta |
-| PUT | `/api/users/me/password` | Troca senha mediante senha atual e encerra todas as sessões |
-| DELETE | `/api/users/me` | Exclui a própria conta e encerra todas as sessões |
-| POST | `/api/auth/logout` | Encerra a sessão atual |
+| Método | Rota                     | Comportamento                                               |
+| ------ | ------------------------ | ----------------------------------------------------------- |
+| GET    | `/api/auth/csrf`         | Obtém token CSRF e inicia uma sessão anônima                |
+| POST   | `/api/users`             | Cadastra uma conta; não realiza login automaticamente       |
+| POST   | `/api/auth/login`        | Autentica e renova o ID da sessão                           |
+| GET    | `/api/users/me`          | Consulta a própria conta                                    |
+| PUT    | `/api/users/me`          | Substitui nome e e-mail da própria conta                    |
+| PUT    | `/api/users/me/password` | Troca senha mediante senha atual e encerra todas as sessões |
+| DELETE | `/api/users/me`          | Exclui a própria conta e encerra todas as sessões           |
+| POST   | `/api/auth/logout`       | Encerra a sessão atual                                      |
 
 Não há listagem pública ou acesso a contas por ID. A identidade vem da sessão. Todas as operações de escrita, inclusive cadastro e login, exigem o cookie da sessão e o header CSRF. Obtenha um novo token após login ou logout: o login invalida o token anterior. A sessão expira após 30 minutos de inatividade.
 

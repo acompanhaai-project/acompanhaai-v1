@@ -5,22 +5,27 @@ import com.maiconamaral.acompanhaai.entities.*;
 import com.maiconamaral.acompanhaai.entities.enums.ApplicationStatus;
 import com.maiconamaral.acompanhaai.repositories.*;
 import com.maiconamaral.acompanhaai.services.exceptions.*;
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class ApplicationService {
+
     private final ApplicationRepository repository;
     private final JobRepository jobs;
     private final UserRepository users;
     private final ApplicationStatusHistoryRepository history;
 
-    public ApplicationService(ApplicationRepository repository, JobRepository jobs, UserRepository users,
-                               ApplicationStatusHistoryRepository history) {
+    public ApplicationService(
+        ApplicationRepository repository,
+        JobRepository jobs,
+        UserRepository users,
+        ApplicationStatusHistoryRepository history
+    ) {
         this.repository = repository;
         this.jobs = jobs;
         this.users = users;
@@ -41,13 +46,17 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public PageDTO<ApplicationDTO> findAll(Long userId, ApplicationStatus status, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("updatedAt"), Sort.Order.desc("id")));
-        var result = status == null ? repository.findByUser_Id(userId, pageable)
+        var result =
+            status == null
+                ? repository.findByUser_Id(userId, pageable)
                 : repository.findByUser_IdAndStatus(userId, status, pageable);
         return new PageDTO<>(result.map(ApplicationDTO::new));
     }
 
     @Transactional(readOnly = true)
-    public ApplicationDTO findById(Long userId, Long id) { return new ApplicationDTO(findEntity(userId, id)); }
+    public ApplicationDTO findById(Long userId, Long id) {
+        return new ApplicationDTO(findEntity(userId, id));
+    }
 
     @Transactional
     public ApplicationDTO update(Long userId, Long id, ApplicationUpdateDTO dto) {
@@ -67,7 +76,11 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public List<ApplicationHistoryDTO> history(Long userId, Long id) {
         findEntity(userId, id);
-        return history.findByApplication_IdOrderByChangedAtAscIdAsc(id).stream().map(ApplicationHistoryDTO::new).toList();
+        return history
+            .findByApplication_IdOrderByChangedAtAscIdAsc(id)
+            .stream()
+            .map(ApplicationHistoryDTO::new)
+            .toList();
     }
 
     @Transactional
@@ -80,8 +93,9 @@ public class ApplicationService {
     }
 
     private Application findEntity(Long userId, Long id) {
-        return repository.findByIdAndUser_Id(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Candidatura não encontrada."));
+        return repository
+            .findByIdAndUser_Id(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Candidatura não encontrada."));
     }
 
     private void validate(ApplicationStatus status, LocalDate appliedOn) {

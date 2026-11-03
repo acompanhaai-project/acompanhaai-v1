@@ -17,14 +17,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthResource {
+
     private final AuthService authService;
     private final UserService userService;
     private final SecurityContextRepository contextRepository;
     private final SessionAuthenticationStrategy sessionStrategy;
     private final SecurityContextLogoutHandler logoutHandler;
 
-    public AuthResource(AuthService authService, UserService userService, SecurityContextRepository contextRepository,
-                        SessionAuthenticationStrategy sessionStrategy, SecurityContextLogoutHandler logoutHandler) {
+    public AuthResource(
+        AuthService authService,
+        UserService userService,
+        SecurityContextRepository contextRepository,
+        SessionAuthenticationStrategy sessionStrategy,
+        SecurityContextLogoutHandler logoutHandler
+    ) {
         this.authService = authService;
         this.userService = userService;
         this.contextRepository = contextRepository;
@@ -33,7 +39,9 @@ public class AuthResource {
     }
 
     @GetMapping("/csrf")
-    public CsrfDTO csrf(CsrfToken token) { return new CsrfDTO(token.getHeaderName(), token.getToken()); }
+    public CsrfDTO csrf(CsrfToken token) {
+        return new CsrfDTO(token.getHeaderName(), token.getToken());
+    }
 
     @PostMapping("/login")
     public UserDTO login(@Valid @RequestBody LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
@@ -47,11 +55,14 @@ public class AuthResource {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response,
-                                       Authentication authentication) {
+    public ResponseEntity<Void> logout(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Authentication authentication
+    ) {
         logoutHandler.logout(request, response, authentication);
         return ResponseEntity.noContent().build();
     }
 
-    public record CsrfDTO(String headerName, String token) { }
+    public record CsrfDTO(String headerName, String token) {}
 }

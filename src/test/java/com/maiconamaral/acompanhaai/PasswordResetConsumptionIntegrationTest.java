@@ -1,11 +1,25 @@
 package com.maiconamaral.acompanhaai;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.maiconamaral.acompanhaai.entities.PasswordResetToken;
 import com.maiconamaral.acompanhaai.entities.User;
 import com.maiconamaral.acompanhaai.repositories.PasswordResetTokenRepository;
 import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.PasswordResetService;
 import com.maiconamaral.acompanhaai.services.exceptions.InvalidPasswordResetTokenException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.HexFormat;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,36 +35,36 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.HexFormat;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class PasswordResetConsumptionIntegrationTest {
+
     private static final Instant NOW = Instant.parse("2026-11-02T03:00:00Z");
     private static final String EMAIL = "reset-consumption@example.test";
     private static final String OLD_PASSWORD = "SenhaAnterior123!";
     private static final String NEW_PASSWORD = "NovaSenha123!";
-    @Autowired private PasswordResetService service;
-    @Autowired private PasswordResetTokenRepository tokens;
-    @Autowired private UserRepository users;
-    @Autowired private PasswordEncoder encoder;
-    @Autowired private MockMvc mvc;
-    @Autowired private PlatformTransactionManager transactions;
-    @MockitoBean private Clock clock;
+
+    @Autowired
+    private PasswordResetService service;
+
+    @Autowired
+    private PasswordResetTokenRepository tokens;
+
+    @Autowired
+    private UserRepository users;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private PlatformTransactionManager transactions;
+
+    @MockitoBean
+    private Clock clock;
 
     @BeforeEach
     void prepare() {
@@ -59,7 +73,9 @@ class PasswordResetConsumptionIntegrationTest {
     }
 
     @AfterEach
-    void clean() { users.deleteAll(); }
+    void clean() {
+        users.deleteAll();
+    }
 
     @Test
     void resetStoresEncodedPasswordConsumesTokenAndIncrementsAuthenticationVersion() throws Exception {
@@ -79,10 +95,10 @@ class PasswordResetConsumptionIntegrationTest {
     void unknownAndMalformedTokensDoNotChangePasswordOrConsumeValidToken() throws Exception {
         var user = user(EMAIL);
         var issued = service.issueToken(EMAIL).orElseThrow();
-        for (String token : new String[]{null, "", " ", "abc", "a".repeat(43), "a".repeat(1000)}) {
+        for (String token : new String[] { null, "", " ", "abc", "a".repeat(43), "a".repeat(1000) }) {
             assertThatThrownBy(() -> service.resetPassword(token, NEW_PASSWORD))
-                    .isInstanceOf(InvalidPasswordResetTokenException.class)
-                    .hasMessage("Token de recuperação inválido ou indisponível.");
+                .isInstanceOf(InvalidPasswordResetTokenException.class)
+                .hasMessage("Token de recuperação inválido ou indisponível.");
         }
         assertUnchanged(user, issued.token());
     }
@@ -91,10 +107,11 @@ class PasswordResetConsumptionIntegrationTest {
     void expiryBoundaryAndExpiredTokensAreRejected() throws Exception {
         var user = user(EMAIL);
         var issued = service.issueToken(EMAIL).orElseThrow();
-        for (Instant instant : new Instant[]{NOW.plusSeconds(1800), NOW.plusSeconds(1801)}) {
+        for (Instant instant : new Instant[] { NOW.plusSeconds(1800), NOW.plusSeconds(1801) }) {
             when(clock.instant()).thenReturn(instant);
-            assertThatThrownBy(() -> service.resetPassword(issued.token(), NEW_PASSWORD))
-                    .isInstanceOf(InvalidPasswordResetTokenException.class);
+            assertThatThrownBy(() -> service.resetPassword(issued.token(), NEW_PASSWORD)).isInstanceOf(
+                InvalidPasswordResetTokenException.class
+            );
         }
         assertUnchanged(user, issued.token());
     }
@@ -104,8 +121,9 @@ class PasswordResetConsumptionIntegrationTest {
         var user = user(EMAIL);
         var issued = service.issueToken(EMAIL).orElseThrow();
         when(clock.instant()).thenReturn(NOW.minusSeconds(1));
-        assertThatThrownBy(() -> service.resetPassword(issued.token(), NEW_PASSWORD))
-                .isInstanceOf(InvalidPasswordResetTokenException.class);
+        assertThatThrownBy(() -> service.resetPassword(issued.token(), NEW_PASSWORD)).isInstanceOf(
+            InvalidPasswordResetTokenException.class
+        );
         assertUnchanged(user, issued.token());
     }
 
@@ -124,8 +142,9 @@ class PasswordResetConsumptionIntegrationTest {
         var issued = service.issueToken(EMAIL).orElseThrow();
         service.resetPassword(issued.token(), NEW_PASSWORD);
         var updated = users.findById(user.getId()).orElseThrow();
-        assertThatThrownBy(() -> service.resetPassword(issued.token(), "OutraSenha123!"))
-                .isInstanceOf(InvalidPasswordResetTokenException.class);
+        assertThatThrownBy(() -> service.resetPassword(issued.token(), "OutraSenha123!")).isInstanceOf(
+            InvalidPasswordResetTokenException.class
+        );
         var reloaded = users.findById(user.getId()).orElseThrow();
         assertThat(reloaded.getPasswordHash()).isEqualTo(updated.getPasswordHash());
         assertThat(reloaded.getAuthVersion()).isEqualTo(updated.getAuthVersion());
@@ -135,9 +154,10 @@ class PasswordResetConsumptionIntegrationTest {
     void invalidNewPasswordDoesNotConsumeToken() throws Exception {
         var user = user(EMAIL);
         var issued = service.issueToken(EMAIL).orElseThrow();
-        for (String password : new String[]{null, "", " ".repeat(8), "1234567", "a".repeat(129)}) {
-            assertThatThrownBy(() -> service.resetPassword(issued.token(), password))
-                    .isInstanceOf(IllegalArgumentException.class);
+        for (String password : new String[] { null, "", " ".repeat(8), "1234567", "a".repeat(129) }) {
+            assertThatThrownBy(() -> service.resetPassword(issued.token(), password)).isInstanceOf(
+                IllegalArgumentException.class
+            );
         }
         assertUnchanged(user, issued.token());
         service.resetPassword(issued.token(), NEW_PASSWORD);
@@ -149,8 +169,9 @@ class PasswordResetConsumptionIntegrationTest {
         var old = service.issueToken(EMAIL).orElseThrow();
         when(clock.instant()).thenReturn(NOW.plusSeconds(60));
         var current = service.issueToken(EMAIL).orElseThrow();
-        assertThatThrownBy(() -> service.resetPassword(old.token(), NEW_PASSWORD))
-                .isInstanceOf(InvalidPasswordResetTokenException.class);
+        assertThatThrownBy(() -> service.resetPassword(old.token(), NEW_PASSWORD)).isInstanceOf(
+            InvalidPasswordResetTokenException.class
+        );
         service.resetPassword(current.token(), NEW_PASSWORD);
     }
 
@@ -167,8 +188,9 @@ class PasswordResetConsumptionIntegrationTest {
         service.resetPassword(issued.token(), NEW_PASSWORD);
 
         assertThat(tokens.findByTokenHash(hash(legacy))).isEmpty();
-        assertThatThrownBy(() -> service.resetPassword(legacy, NEW_PASSWORD))
-                .isInstanceOf(InvalidPasswordResetTokenException.class);
+        assertThatThrownBy(() -> service.resetPassword(legacy, NEW_PASSWORD)).isInstanceOf(
+            InvalidPasswordResetTokenException.class
+        );
         assertUnchanged(other, otherToken.token());
         service.resetPassword(otherToken.token(), "OutraSenha123!");
     }
@@ -186,7 +208,9 @@ class PasswordResetConsumptionIntegrationTest {
             assertThat(firstWon).isNotEqualTo(secondWon);
             var updated = users.findById(user.getId()).orElseThrow();
             assertThat(updated.getAuthVersion()).isEqualTo(1);
-            assertThat(encoder.matches(firstWon ? NEW_PASSWORD : "Concorrente123!", updated.getPasswordHash())).isTrue();
+            assertThat(
+                encoder.matches(firstWon ? NEW_PASSWORD : "Concorrente123!", updated.getPasswordHash())
+            ).isTrue();
         }
     }
 
@@ -197,11 +221,13 @@ class PasswordResetConsumptionIntegrationTest {
         String legacy = "c".repeat(43);
         tokens.saveAndFlush(new PasswordResetToken(owner, hash(legacy), NOW, NOW.plusSeconds(1800)));
         var transaction = new TransactionTemplate(transactions);
-        assertThatThrownBy(() -> transaction.executeWithoutResult(status -> {
-            service.resetPassword(issued.token(), NEW_PASSWORD);
-            // O Service participa da transação externa, inclusive após o flush.
-            throw new IllegalStateException("Falha simulada antes do commit");
-        })).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() ->
+            transaction.executeWithoutResult(status -> {
+                service.resetPassword(issued.token(), NEW_PASSWORD);
+                // O Service participa da transação externa, inclusive após o flush.
+                throw new IllegalStateException("Falha simulada antes do commit");
+            })
+        ).isInstanceOf(IllegalStateException.class);
         assertUnchanged(owner, issued.token());
         assertThat(tokens.findByTokenHash(hash(legacy))).isPresent();
         service.resetPassword(issued.token(), NEW_PASSWORD);
@@ -222,8 +248,12 @@ class PasswordResetConsumptionIntegrationTest {
         assertThat(first.isInvalid()).isTrue();
         assertThat(second.isInvalid()).isTrue();
         mvc.perform(get("/api/users/me").session(other)).andExpect(status().isOk());
-        mvc.perform(post("/api/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                .content(loginJson(EMAIL, OLD_PASSWORD))).andExpect(status().isUnauthorized());
+        mvc.perform(
+            post("/api/auth/login")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson(EMAIL, OLD_PASSWORD))
+        ).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/users/me")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/users/me").session(login(EMAIL, NEW_PASSWORD))).andExpect(status().isOk());
     }
@@ -250,14 +280,23 @@ class PasswordResetConsumptionIntegrationTest {
     }
 
     private String hash(String token) throws Exception {
-        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                .digest(token.getBytes(StandardCharsets.UTF_8)));
+        return HexFormat.of().formatHex(
+            MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8))
+        );
     }
 
     private MockHttpSession login(String email, String password) throws Exception {
-        return (MockHttpSession) mvc.perform(post("/api/auth/login").with(csrf())
-                .contentType(MediaType.APPLICATION_JSON).content(loginJson(email, password)))
-                .andExpect(status().isOk()).andReturn().getRequest().getSession(false);
+        return (MockHttpSession) mvc
+            .perform(
+                post("/api/auth/login")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(loginJson(email, password))
+            )
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
     }
 
     private String loginJson(String email, String password) {

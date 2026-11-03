@@ -1,13 +1,14 @@
 package com.maiconamaral.acompanhaai.entities;
 
-import jakarta.persistence.*;
 import com.maiconamaral.acompanhaai.entities.enums.*;
-import java.util.Objects;
+import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "tb_application_status_history")
 public class ApplicationStatusHistory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,9 +31,14 @@ public class ApplicationStatusHistory {
     @Column(name = "note", columnDefinition = "text")
     private String note;
 
-    protected ApplicationStatusHistory() { }
+    protected ApplicationStatusHistory() {}
 
-    public ApplicationStatusHistory(Application application, ApplicationStatus fromStatus, ApplicationStatus toStatus, String note) {
+    public ApplicationStatusHistory(
+        Application application,
+        ApplicationStatus fromStatus,
+        ApplicationStatus toStatus,
+        String note
+    ) {
         this.application = Objects.requireNonNull(application);
         this.fromStatus = fromStatus;
         this.toStatus = Objects.requireNonNull(toStatus);
@@ -45,13 +51,27 @@ public class ApplicationStatusHistory {
         this.changedAt = application.getUpdatedAt();
     }
 
-    public Long getId() { return id; }
-    public Application getApplication() { return application; }
-    public ApplicationStatus getFromStatus() { return fromStatus; }
-    public ApplicationStatus getToStatus() { return toStatus; }
-    public Instant getChangedAt() { return changedAt; }
-    public String getNote() { return note; }
+    public Long getId() {
+        return id;
+    }
 
+    public Application getApplication() {
+        return application;
+    }
 
+    public ApplicationStatus getFromStatus() {
+        return fromStatus;
+    }
+
+    public ApplicationStatus getToStatus() {
+        return toStatus;
+    }
+
+    public Instant getChangedAt() {
+        return changedAt;
+    }
+
+    public String getNote() {
+        return note;
+    }
 }
-

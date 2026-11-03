@@ -36,10 +36,10 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/PasswordResetRequest'}
-            example: {email: pessoa@example.test}
+            schema: { $ref: "#/components/schemas/PasswordResetRequest" }
+            example: { email: pessoa@example.test }
       responses:
-        '202':
+        "202":
           description: Solicitação recebida, sem revelar existência da conta.
           content:
             application/json:
@@ -49,10 +49,10 @@ paths:
                 properties:
                   message:
                     type: string
-                    enum: ['Se houver uma conta para este e-mail, a solicitação de recuperação será processada.']
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+                    enum: ["Se houver uma conta para este e-mail, a solicitação de recuperação será processada."]
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationError" }
   /api/auth/password-reset/confirm:
     post:
       operationId: confirmPasswordReset
@@ -72,34 +72,34 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/PasswordResetConfirmation'}
+            schema: { $ref: "#/components/schemas/PasswordResetConfirmation" }
       responses:
-        '204': {description: Senha redefinida; resposta sem corpo. Novo login necessário.}
-        '400':
+        "204": { description: Senha redefinida; resposta sem corpo. Novo login necessário. }
+        "400":
           description: JSON inválido ou token inválido, desconhecido, substituído, expirado ou consumido. O motivo do token não é discriminado.
           content:
             application/problem+json:
-              schema: {$ref: '#/components/schemas/Problem'}
-              example: {status: 400, detail: 'Token de recuperação inválido ou indisponível.'}
-        '429':
+              schema: { $ref: "#/components/schemas/Problem" }
+              example: { status: 400, detail: "Token de recuperação inválido ou indisponível." }
+        "429":
           description: Limite por IP ou global atingido, independente da validade do token. Aguarde Retry-After e tente novamente.
           headers:
             Retry-After:
               description: Segundos até o fim da janela do limitador.
-              schema: {type: integer, minimum: 1}
+              schema: { type: integer, minimum: 1 }
           content:
             application/problem+json:
-              schema: {$ref: '#/components/schemas/Problem'}
-              example: {status: 429, detail: 'Limite de solicitações atingido. Tente novamente mais tarde.'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+              schema: { $ref: "#/components/schemas/Problem" }
+              example: { status: 429, detail: "Limite de solicitações atingido. Tente novamente mais tarde." }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationError" }
   /api/auth/csrf:
     get:
       operationId: getCsrf
       summary: Obter token CSRF
       security: []
       responses:
-        '200':
+        "200":
           description: Token vinculado à sessão; preserve o cookie JSESSIONID.
           content:
             application/json:
@@ -107,8 +107,8 @@ paths:
                 type: object
                 required: [headerName, token]
                 properties:
-                  headerName: {type: string, example: X-CSRF-TOKEN}
-                  token: {type: string}
+                  headerName: { type: string, example: X-CSRF-TOKEN }
+                  token: { type: string }
   /api/auth/login:
     post:
       operationId: login
@@ -125,14 +125,14 @@ paths:
               type: object
               required: [email, password]
               properties:
-                email: {type: string, format: email, maxLength: 254}
-                password: {type: string, format: password, maxLength: 128, writeOnly: true}
+                email: { type: string, format: email, maxLength: 254 }
+                password: { type: string, format: password, maxLength: 128, writeOnly: true }
       responses:
-        '200': {$ref: '#/components/responses/UserResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+        "200": { $ref: "#/components/responses/UserResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationError" }
   /api/auth/logout:
     post:
       operationId: logout
@@ -141,9 +141,9 @@ paths:
         - sessionCookie: []
           csrfHeader: []
       responses:
-        '204': {description: Sessão invalidada. Obtenha novo CSRF antes de novo login.}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
+        "204": { description: Sessão invalidada. Obtenha novo CSRF antes de novo login. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
   /api/users:
     post:
       operationId: createUser
@@ -157,32 +157,32 @@ paths:
           application/json:
             schema:
               allOf:
-                - {$ref: '#/components/schemas/UserUpdate'}
+                - { $ref: "#/components/schemas/UserUpdate" }
                 - type: object
                   required: [password]
                   properties:
-                    password: {type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true}
-            example: {name: Maicon Amaral, email: maicon@example.com, password: 'SenhaExemplo123!'}
+                    password: { type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true }
+            example: { name: Maicon Amaral, email: maicon@example.com, password: "SenhaExemplo123!" }
       responses:
-        '201':
+        "201":
           description: Conta cadastrada. Efetue login para acessá-la.
           headers:
             Location:
-              schema: {type: string, example: /api/users/me}
+              schema: { type: string, example: /api/users/me }
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/User'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
   /api/users/me:
     get:
       operationId: getCurrentUser
       summary: Consultar a própria conta
       responses:
-        '200': {$ref: '#/components/responses/UserResponse'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
+        "200": { $ref: "#/components/responses/UserResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
     put:
       operationId: updateCurrentUser
       summary: Substituir nome e e-mail da própria conta
@@ -193,14 +193,14 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/UserUpdate'}
+            schema: { $ref: "#/components/schemas/UserUpdate" }
       responses:
-        '200': {$ref: '#/components/responses/UserResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+        "200": { $ref: "#/components/responses/UserResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
     delete:
       operationId: deleteCurrentUser
       summary: Excluir a própria conta
@@ -209,9 +209,9 @@ paths:
         - sessionCookie: []
           csrfHeader: []
       responses:
-        '204': {description: Conta excluída.}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
+        "204": { description: Conta excluída. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
   /api/users/me/password:
     put:
       operationId: changePassword
@@ -228,28 +228,28 @@ paths:
               type: object
               required: [currentPassword, newPassword]
               properties:
-                currentPassword: {type: string, format: password, maxLength: 128, writeOnly: true}
-                newPassword: {type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true}
+                currentPassword: { type: string, format: password, maxLength: 128, writeOnly: true }
+                newPassword: { type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true }
       responses:
-        '204': {description: Senha alterada. Um novo login é necessário.}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+        "204": { description: Senha alterada. Um novo login é necessário. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationError" }
   /api/users/me/photo:
     get:
       operationId: getProfilePhoto
       summary: Consultar a própria foto de perfil
       responses:
-        '200':
+        "200":
           description: Imagem privada, sem cache.
           content:
             image/png:
-              schema: {type: string, format: binary}
+              schema: { type: string, format: binary }
             image/jpeg:
-              schema: {type: string, format: binary}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '404': {$ref: '#/components/responses/NotFound'}
+              schema: { type: string, format: binary }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
     put:
       operationId: replaceProfilePhoto
       summary: Enviar ou substituir foto de perfil
@@ -270,18 +270,18 @@ paths:
               type: object
               required: [file]
               properties:
-                file: {type: string, format: binary}
+                file: { type: string, format: binary }
       responses:
-        '204': {description: Foto salva.}
-        '400': {description: Parte obrigatória file ausente ou multipart inválido.}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '413': {description: Arquivo acima de 2 MiB ou multipart acima de 3 MiB, rejeitado pelo servidor HTTP.}
-        '422':
+        "204": { description: Foto salva. }
+        "400": { description: Parte obrigatória file ausente ou multipart inválido. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "413": { description: Arquivo acima de 2 MiB ou multipart acima de 3 MiB, rejeitado pelo servidor HTTP. }
+        "422":
           description: Imagem vazia, corrompida, formato diferente de JPEG/PNG ou acima de 4 milhões de pixels; também rejeição dos limites de bytes pelo Service.
           content:
             application/problem+json:
-              schema: {$ref: '#/components/schemas/Problem'}
+              schema: { $ref: "#/components/schemas/Problem" }
     delete:
       operationId: deleteProfilePhoto
       summary: Remover a própria foto
@@ -289,9 +289,9 @@ paths:
         - sessionCookie: []
           csrfHeader: []
       responses:
-        '204': {description: Foto removida ou já ausente.}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
+        "204": { description: Foto removida ou já ausente. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
   /api/applications:
     post:
       operationId: createApplication
@@ -304,21 +304,21 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/ApplicationInput'}
+            schema: { $ref: "#/components/schemas/ApplicationInput" }
       responses:
-        '201':
+        "201":
           description: Candidatura criada.
           headers:
             Location:
-              schema: {type: string, example: /api/applications/1}
+              schema: { type: string, example: /api/applications/1 }
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/Application'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '409': {$ref: '#/components/responses/ApplicationConflict'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+              schema: { $ref: "#/components/schemas/Application" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/ApplicationConflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
     get:
       operationId: listApplications
       summary: Listar candidaturas próprias
@@ -326,15 +326,15 @@ paths:
       parameters:
         - in: query
           name: status
-          schema: {$ref: '#/components/schemas/ApplicationStatus'}
+          schema: { $ref: "#/components/schemas/ApplicationStatus" }
         - in: query
           name: page
-          schema: {type: integer, minimum: 0, default: 0}
+          schema: { type: integer, minimum: 0, default: 0 }
         - in: query
           name: size
-          schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
       responses:
-        '200':
+        "200":
           description: Página de candidaturas.
           content:
             application/json:
@@ -343,24 +343,24 @@ paths:
                 properties:
                   content:
                     type: array
-                    items: {$ref: '#/components/schemas/Application'}
-                  page: {type: integer}
-                  size: {type: integer}
-                  totalElements: {type: integer, format: int64}
-                  totalPages: {type: integer}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+                    items: { $ref: "#/components/schemas/Application" }
+                  page: { type: integer }
+                  size: { type: integer }
+                  totalElements: { type: integer, format: int64 }
+                  totalPages: { type: integer }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationError" }
   /api/applications/{id}:
     parameters:
-      - {$ref: '#/components/parameters/ApplicationId'}
+      - { $ref: "#/components/parameters/ApplicationId" }
     get:
       operationId: getApplication
       summary: Consultar candidatura própria
       responses:
-        '200': {$ref: '#/components/responses/ApplicationResponse'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '404': {$ref: '#/components/responses/NotFound'}
+        "200": { $ref: "#/components/responses/ApplicationResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
     put:
       operationId: updateApplication
       summary: Substituir dados manuais da candidatura e da vaga
@@ -376,19 +376,19 @@ paths:
           application/json:
             schema:
               allOf:
-                - {$ref: '#/components/schemas/ApplicationInput'}
+                - { $ref: "#/components/schemas/ApplicationInput" }
                 - type: object
                   required: [status, version]
                   properties:
-                    version: {type: integer, format: int64, minimum: 0}
+                    version: { type: integer, format: int64, minimum: 0 }
       responses:
-        '200': {$ref: '#/components/responses/ApplicationResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/ApplicationConflict'}
-        '422': {$ref: '#/components/responses/ValidationError'}
+        "200": { $ref: "#/components/responses/ApplicationResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/ApplicationConflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
     delete:
       operationId: deleteApplication
       summary: Excluir candidatura, sua vaga pessoal e histórico
@@ -396,18 +396,18 @@ paths:
         - sessionCookie: []
           csrfHeader: []
       responses:
-        '204': {description: Registros excluídos.}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
+        "204": { description: Registros excluídos. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
   /api/applications/{id}/history:
     parameters:
-      - {$ref: '#/components/parameters/ApplicationId'}
+      - { $ref: "#/components/parameters/ApplicationId" }
     get:
       operationId: getApplicationHistory
       summary: Consultar histórico de etapas
       responses:
-        '200':
+        "200":
           description: Eventos em ordem cronológica, com ID como desempate.
           content:
             application/json:
@@ -416,23 +416,23 @@ paths:
                 items:
                   type: object
                   properties:
-                    id: {type: integer, format: int64}
+                    id: { type: integer, format: int64 }
                     fromStatus:
                       allOf:
-                        - {$ref: '#/components/schemas/ApplicationStatus'}
+                        - { $ref: "#/components/schemas/ApplicationStatus" }
                       nullable: true
                       description: Nulo no evento inicial.
-                    toStatus: {$ref: '#/components/schemas/ApplicationStatus'}
-                    changedAt: {type: string, format: date-time}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '404': {$ref: '#/components/responses/NotFound'}
+                    toStatus: { $ref: "#/components/schemas/ApplicationStatus" }
+                    changedAt: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
 components:
   parameters:
     ApplicationId:
       in: path
       name: id
       required: true
-      schema: {type: integer, format: int64}
+      schema: { type: integer, format: int64 }
   securitySchemes:
     sessionCookie:
       type: apiKey
@@ -449,13 +449,35 @@ components:
       type: object
       required: [email]
       properties:
-        email: {type: string, format: email, minLength: 1, maxLength: 254, description: Obrigatório e não vazio; espaços externos removidos antes de validar.}
+        email:
+          {
+            type: string,
+            format: email,
+            minLength: 1,
+            maxLength: 254,
+            description: Obrigatório e não vazio; espaços externos removidos antes de validar.
+          }
     PasswordResetConfirmation:
       type: object
       required: [token, newPassword]
       properties:
-        token: {type: string, minLength: 1, maxLength: 128, writeOnly: true, description: Não vazio; formato emitido de 43 caracteres Base64 URL-safe. Formato inválido com até 128 caracteres retorna 400.}
-        newPassword: {type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true, description: Não pode conter somente espaços; preservada sem normalização.}
+        token:
+          {
+            type: string,
+            minLength: 1,
+            maxLength: 128,
+            writeOnly: true,
+            description: Não vazio; formato emitido de 43 caracteres Base64 URL-safe. Formato inválido com até 128 caracteres retorna 400.
+          }
+        newPassword:
+          {
+            type: string,
+            format: password,
+            minLength: 8,
+            maxLength: 128,
+            writeOnly: true,
+            description: Não pode conter somente espaços; preservada sem normalização.
+          }
     ApplicationStatus:
       type: string
       enum: [SAVED, APPLIED, SCREENING, INTERVIEW, OFFER, HIRED, REJECTED, WITHDRAWN]
@@ -464,116 +486,147 @@ components:
       type: object
       required: [title]
       properties:
-        title: {type: string, minLength: 1, maxLength: 255}
-        companyName: {type: string, maxLength: 255, nullable: true}
-        sourceUrl: {type: string, maxLength: 2048, nullable: true, description: Link HTTP/HTTPS opcional. Não é acessado; link idêntico é único por usuário.}
-        description: {type: string, maxLength: 30000, nullable: true}
+        title: { type: string, minLength: 1, maxLength: 255 }
+        companyName: { type: string, maxLength: 255, nullable: true }
+        sourceUrl:
+          {
+            type: string,
+            maxLength: 2048,
+            nullable: true,
+            description: Link HTTP/HTTPS opcional. Não é acessado; link idêntico é único por usuário.
+          }
+        description: { type: string, maxLength: 30000, nullable: true }
     ApplicationInput:
       type: object
       required: [job]
       properties:
-        job: {$ref: '#/components/schemas/JobInput'}
+        job: { $ref: "#/components/schemas/JobInput" }
         status:
           allOf:
-            - {$ref: '#/components/schemas/ApplicationStatus'}
+            - { $ref: "#/components/schemas/ApplicationStatus" }
           default: APPLIED
-        appliedOn: {type: string, format: date, nullable: true, description: Data passada ou atual. Obrigatoriamente nula em SAVED; não é presumida nos demais estados.}
-        notes: {type: string, maxLength: 5000, nullable: true}
+        appliedOn:
+          {
+            type: string,
+            format: date,
+            nullable: true,
+            description: Data passada ou atual. Obrigatoriamente nula em SAVED; não é presumida nos demais estados.
+          }
+        notes: { type: string, maxLength: 5000, nullable: true }
     Application:
       allOf:
-        - {$ref: '#/components/schemas/ApplicationInput'}
+        - { $ref: "#/components/schemas/ApplicationInput" }
         - type: object
           properties:
-            id: {type: integer, format: int64}
+            id: { type: integer, format: int64 }
             job:
               allOf:
-                - {$ref: '#/components/schemas/JobInput'}
+                - { $ref: "#/components/schemas/JobInput" }
                 - type: object
                   properties:
-                    id: {type: integer, format: int64}
-            version: {type: integer, format: int64}
-            createdAt: {type: string, format: date-time}
-            updatedAt: {type: string, format: date-time}
+                    id: { type: integer, format: int64 }
+            version: { type: integer, format: int64 }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
     User:
       type: object
       required: [id, name, email, createdAt]
       properties:
-        id: {type: integer, format: int64, readOnly: true}
-        name: {type: string}
-        email: {type: string, format: email}
-        createdAt: {type: string, format: date-time, readOnly: true}
-        photoUrl: {type: string, nullable: true, readOnly: true, description: Rota privada da foto; nula quando não cadastrada., example: /api/users/me/photo}
+        id: { type: integer, format: int64, readOnly: true }
+        name: { type: string }
+        email: { type: string, format: email }
+        createdAt: { type: string, format: date-time, readOnly: true }
+        photoUrl:
+          {
+            type: string,
+            nullable: true,
+            readOnly: true,
+            description: Rota privada da foto; nula quando não cadastrada.,
+            example: /api/users/me/photo
+          }
     UserUpdate:
       type: object
       required: [name, email]
       properties:
-        name: {type: string, minLength: 2, maxLength: 100, description: Espaços nas extremidades são removidos antes da validação.}
-        email: {type: string, format: email, maxLength: 254, description: Espaços nas extremidades são removidos; persistido em minúsculas.}
+        name:
+          {
+            type: string,
+            minLength: 2,
+            maxLength: 100,
+            description: Espaços nas extremidades são removidos antes da validação.
+          }
+        email:
+          {
+            type: string,
+            format: email,
+            maxLength: 254,
+            description: Espaços nas extremidades são removidos; persistido em minúsculas.
+          }
     Problem:
       type: object
       properties:
-        type: {type: string}
-        title: {type: string}
-        status: {type: integer}
-        detail: {type: string}
-        instance: {type: string}
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
         errors:
           type: array
           items:
             type: object
             properties:
-              field: {type: string}
-              message: {type: string}
+              field: { type: string }
+              message: { type: string }
     SecurityError:
       type: object
       properties:
-        status: {type: integer}
-        error: {type: string}
+        status: { type: integer }
+        error: { type: string }
   responses:
     ApplicationResponse:
       description: Candidatura própria e dados manuais da vaga.
       content:
         application/json:
-          schema: {$ref: '#/components/schemas/Application'}
+          schema: { $ref: "#/components/schemas/Application" }
     ApplicationConflict:
       description: Versão antiga ou link já cadastrado. Consulte o registro atualizado ou a candidatura existente antes de reenviar.
       content:
         application/problem+json:
-          schema: {$ref: '#/components/schemas/Problem'}
+          schema: { $ref: "#/components/schemas/Problem" }
     NotFound:
       description: Registro ausente ou pertencente a outro usuário.
       content:
         application/problem+json:
-          schema: {$ref: '#/components/schemas/Problem'}
+          schema: { $ref: "#/components/schemas/Problem" }
     UserResponse:
       description: Dados da conta, sem senha ou hash.
       content:
         application/json:
-          schema: {$ref: '#/components/schemas/User'}
+          schema: { $ref: "#/components/schemas/User" }
     BadRequest:
       description: JSON inválido.
       content:
         application/problem+json:
-          schema: {$ref: '#/components/schemas/Problem'}
+          schema: { $ref: "#/components/schemas/Problem" }
     Unauthorized:
       description: Autenticação ausente/expirada ou credenciais inválidas. Filtros retornam SecurityError; controllers retornam Problem.
       content:
         application/problem+json:
-          schema: {$ref: '#/components/schemas/Problem'}
+          schema: { $ref: "#/components/schemas/Problem" }
         application/json:
-          schema: {$ref: '#/components/schemas/SecurityError'}
+          schema: { $ref: "#/components/schemas/SecurityError" }
     Forbidden:
       description: Token CSRF ausente/inválido ou acesso negado. Obtenha novo token e repita com o mesmo cookie.
       content:
         application/json:
-          schema: {$ref: '#/components/schemas/SecurityError'}
+          schema: { $ref: "#/components/schemas/SecurityError" }
     Conflict:
       description: E-mail já cadastrado; altere o e-mail antes de repetir.
       content:
         application/problem+json:
-          schema: {$ref: '#/components/schemas/Problem'}
+          schema: { $ref: "#/components/schemas/Problem" }
     ValidationError:
       description: Campos inválidos. Corrija os campos indicados em errors.
       content:
         application/problem+json:
-          schema: {$ref: '#/components/schemas/Problem'}
+          schema: { $ref: "#/components/schemas/Problem" }

@@ -45,25 +45,25 @@ O email deve ser normalizado da mesma forma no cadastro, edição e login. A uni
 
 ## 2. tb_job — oportunidade revisada
 
-| Campo | Tipo | Obrigatório | Finalidade |
-|---|---|---|---|
-| id | BIGINT | Sim | Identificador |
-| user_id | BIGINT FK | Sim | Proprietário |
-| title | VARCHAR(255) | Sim | Nome da vaga |
-| company_name | VARCHAR(255) | Não | Empresa; pode estar ausente no anúncio |
-| source_url | VARCHAR(2048) | Não | Link original; cadastro por texto pode não ter link |
-| normalized_url | TEXT | Não | URL após normalização conservadora |
-| url_hash | VARCHAR(64) | Não | SHA-256 hexadecimal da URL normalizada |
-| description | TEXT | Não | Descrição preservada para consulta |
-| location | VARCHAR(255) | Não | Localização declarada |
-| work_mode | VARCHAR(32) | Não | REMOTE, HYBRID ou ONSITE |
-| salary_min | NUMERIC(15,2) | Não | Limite inferior informado |
-| salary_max | NUMERIC(15,2) | Não | Limite superior informado |
-| salary_currency | VARCHAR(3) | Não | Código da moeda, por exemplo BRL |
-| salary_period | VARCHAR(32) | Não | HOUR, DAY, WEEK, MONTH ou YEAR |
-| salary_original_text | TEXT | Não | Texto do anúncio, inclusive “a combinar” |
-| created_at / updated_at | TIMESTAMP WITH TIME ZONE | Sim | Auditoria básica |
-| version | BIGINT | Sim | Controle de concorrência |
+| Campo                   | Tipo                     | Obrigatório | Finalidade                                          |
+| ----------------------- | ------------------------ | ----------- | --------------------------------------------------- |
+| id                      | BIGINT                   | Sim         | Identificador                                       |
+| user_id                 | BIGINT FK                | Sim         | Proprietário                                        |
+| title                   | VARCHAR(255)             | Sim         | Nome da vaga                                        |
+| company_name            | VARCHAR(255)             | Não         | Empresa; pode estar ausente no anúncio              |
+| source_url              | VARCHAR(2048)            | Não         | Link original; cadastro por texto pode não ter link |
+| normalized_url          | TEXT                     | Não         | URL após normalização conservadora                  |
+| url_hash                | VARCHAR(64)              | Não         | SHA-256 hexadecimal da URL normalizada              |
+| description             | TEXT                     | Não         | Descrição preservada para consulta                  |
+| location                | VARCHAR(255)             | Não         | Localização declarada                               |
+| work_mode               | VARCHAR(32)              | Não         | REMOTE, HYBRID ou ONSITE                            |
+| salary_min              | NUMERIC(15,2)            | Não         | Limite inferior informado                           |
+| salary_max              | NUMERIC(15,2)            | Não         | Limite superior informado                           |
+| salary_currency         | VARCHAR(3)               | Não         | Código da moeda, por exemplo BRL                    |
+| salary_period           | VARCHAR(32)              | Não         | HOUR, DAY, WEEK, MONTH ou YEAR                      |
+| salary_original_text    | TEXT                     | Não         | Texto do anúncio, inclusive “a combinar”            |
+| created_at / updated_at | TIMESTAMP WITH TIME ZONE | Sim         | Auditoria básica                                    |
+| version                 | BIGINT                   | Sim         | Controle de concorrência                            |
 
 Regras:
 
@@ -77,29 +77,29 @@ Regras:
 
 ## 3. tb_job_skill — habilidades da vaga
 
-| Campo | Tipo | Obrigatório | Finalidade |
-|---|---|---|---|
-| id | BIGINT | Sim | Identificador |
-| job_id | BIGINT FK | Sim | Vaga |
-| name | VARCHAR(150) | Sim | Nome apresentado, como Java ou Comunicação |
-| normalized_name | VARCHAR(150) | Sim | Nome normalizado para deduplicação |
-| type | VARCHAR(32) | Sim | HARD ou SOFT |
-| source_excerpt | TEXT | Não | Trecho que sustenta a extração |
+| Campo           | Tipo         | Obrigatório | Finalidade                                 |
+| --------------- | ------------ | ----------- | ------------------------------------------ |
+| id              | BIGINT       | Sim         | Identificador                              |
+| job_id          | BIGINT FK    | Sim         | Vaga                                       |
+| name            | VARCHAR(150) | Sim         | Nome apresentado, como Java ou Comunicação |
+| normalized_name | VARCHAR(150) | Sim         | Nome normalizado para deduplicação         |
+| type            | VARCHAR(32)  | Sim         | HARD ou SOFT                               |
+| source_excerpt  | TEXT         | Não         | Trecho que sustenta a extração             |
 
 `UNIQUE (job_id, type, normalized_name)`. Inicialmente, normalizar espaços e caixa; não unir sinônimos automaticamente. Habilidades inseridas manualmente podem não ter trecho de origem. Não armazenar habilidades como uma lista separada por vírgulas.
 
 ## 4. tb_application — acompanhamento pessoal
 
-| Campo | Tipo | Obrigatório | Finalidade |
-|---|---|---|---|
-| id | BIGINT | Sim | Identificador |
-| user_id | BIGINT FK | Sim | Proprietário |
-| job_id | BIGINT FK | Sim | Vaga acompanhada |
-| status | VARCHAR(32) | Sim | Estado atual |
-| applied_on | DATE | Não | Data de inscrição, quando conhecida |
-| notes | TEXT | Não | Observações pessoais |
-| created_at / updated_at | TIMESTAMP WITH TIME ZONE | Sim | Auditoria básica |
-| version | BIGINT | Sim | Controle de concorrência |
+| Campo                   | Tipo                     | Obrigatório | Finalidade                          |
+| ----------------------- | ------------------------ | ----------- | ----------------------------------- |
+| id                      | BIGINT                   | Sim         | Identificador                       |
+| user_id                 | BIGINT FK                | Sim         | Proprietário                        |
+| job_id                  | BIGINT FK                | Sim         | Vaga acompanhada                    |
+| status                  | VARCHAR(32)              | Sim         | Estado atual                        |
+| applied_on              | DATE                     | Não         | Data de inscrição, quando conhecida |
+| notes                   | TEXT                     | Não         | Observações pessoais                |
+| created_at / updated_at | TIMESTAMP WITH TIME ZONE | Sim         | Auditoria básica                    |
+| version                 | BIGINT                   | Sim         | Controle de concorrência            |
 
 Estados: `SAVED`, `APPLIED`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`, `REJECTED`, `WITHDRAWN`.
 
@@ -111,41 +111,41 @@ Estados: `SAVED`, `APPLIED`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`, `REJECT
 
 ## 5. tb_application_status_history — histórico
 
-| Campo | Tipo | Obrigatório | Finalidade |
-|---|---|---|---|
-| id | BIGINT | Sim | Identificador |
-| application_id | BIGINT FK | Sim | Acompanhamento |
-| from_status | VARCHAR(32) | Não | Estado anterior; nulo somente no evento inicial |
-| to_status | VARCHAR(32) | Sim | Estado registrado |
-| changed_at | TIMESTAMP WITH TIME ZONE | Sim | Momento do registro |
-| note | TEXT | Não | Explicação opcional |
+| Campo          | Tipo                     | Obrigatório | Finalidade                                      |
+| -------------- | ------------------------ | ----------- | ----------------------------------------------- |
+| id             | BIGINT                   | Sim         | Identificador                                   |
+| application_id | BIGINT FK                | Sim         | Acompanhamento                                  |
+| from_status    | VARCHAR(32)              | Não         | Estado anterior; nulo somente no evento inicial |
+| to_status      | VARCHAR(32)              | Sim         | Estado registrado                               |
+| changed_at     | TIMESTAMP WITH TIME ZONE | Sim         | Momento do registro                             |
+| note           | TEXT                     | Não         | Explicação opcional                             |
 
 Criar o primeiro evento junto com a candidatura. Mudanças de status atualizam `tb_application` e inserem o histórico na mesma transação. Rejeitar eventos sem mudança de estado; uma edição apenas de observações não cria evento de status. O histórico não é editado pelo CRUD comum. A consistência entre estado atual e último evento depende dessa transação; uma FK isolada não a garante.
 
 ## 6. tb_import_task — coleta e extração
 
-| Campo | Tipo | Obrigatório | Finalidade |
-|---|---|---|---|
-| id | BIGINT | Sim | Identificador |
-| user_id | BIGINT FK | Sim | Solicitante |
-| job_id | BIGINT FK | Não | Vaga de destino após confirmação |
-| input_type | VARCHAR(32) | Sim | URL ou TEXT |
-| source_url | TEXT | Não | URL de entrada |
-| input_text | TEXT | Não | Descrição colada |
-| collected_text | TEXT | Não | Texto obtido pelo coletor |
-| status | VARCHAR(32) | Sim | Estado do processamento |
-| attempt_count | INTEGER | Sim | Tentativas iniciadas, padrão 0 |
-| next_attempt_at | TIMESTAMP WITH TIME ZONE | Não | Próxima execução permitida |
-| locked_until | TIMESTAMP WITH TIME ZONE | Não | Validade da posse do processamento |
-| lock_token | VARCHAR(36) | Não | Token que identifica a execução atual |
-| started_at / finished_at | TIMESTAMP WITH TIME ZONE | Não | Execução mais recente |
-| extractor_provider / extractor_model | VARCHAR(100) | Não | Origem do resultado |
-| result_schema_version | INTEGER | Não | Versão do formato do resultado |
-| extracted_data | JSONB | Não | Proposta estruturada validada |
-| error_code | VARCHAR(100) | Não | Erro categorizado |
-| error_message | TEXT | Não | Diagnóstico sem credenciais |
-| reviewed_at | TIMESTAMP WITH TIME ZONE | Não | Confirmação do usuário |
-| created_at / updated_at | TIMESTAMP WITH TIME ZONE | Sim | Auditoria básica |
+| Campo                                | Tipo                     | Obrigatório | Finalidade                            |
+| ------------------------------------ | ------------------------ | ----------- | ------------------------------------- |
+| id                                   | BIGINT                   | Sim         | Identificador                         |
+| user_id                              | BIGINT FK                | Sim         | Solicitante                           |
+| job_id                               | BIGINT FK                | Não         | Vaga de destino após confirmação      |
+| input_type                           | VARCHAR(32)              | Sim         | URL ou TEXT                           |
+| source_url                           | TEXT                     | Não         | URL de entrada                        |
+| input_text                           | TEXT                     | Não         | Descrição colada                      |
+| collected_text                       | TEXT                     | Não         | Texto obtido pelo coletor             |
+| status                               | VARCHAR(32)              | Sim         | Estado do processamento               |
+| attempt_count                        | INTEGER                  | Sim         | Tentativas iniciadas, padrão 0        |
+| next_attempt_at                      | TIMESTAMP WITH TIME ZONE | Não         | Próxima execução permitida            |
+| locked_until                         | TIMESTAMP WITH TIME ZONE | Não         | Validade da posse do processamento    |
+| lock_token                           | VARCHAR(36)              | Não         | Token que identifica a execução atual |
+| started_at / finished_at             | TIMESTAMP WITH TIME ZONE | Não         | Execução mais recente                 |
+| extractor_provider / extractor_model | VARCHAR(100)             | Não         | Origem do resultado                   |
+| result_schema_version                | INTEGER                  | Não         | Versão do formato do resultado        |
+| extracted_data                       | JSONB                    | Não         | Proposta estruturada validada         |
+| error_code                           | VARCHAR(100)             | Não         | Erro categorizado                     |
+| error_message                        | TEXT                     | Não         | Diagnóstico sem credenciais           |
+| reviewed_at                          | TIMESTAMP WITH TIME ZONE | Não         | Confirmação do usuário                |
+| created_at / updated_at              | TIMESTAMP WITH TIME ZONE | Sim         | Auditoria básica                      |
 
 Estados: `PENDING`, `PROCESSING`, `READY_FOR_REVIEW`, `NEEDS_INPUT`, `FAILED`, `COMPLETED`.
 
@@ -183,20 +183,20 @@ Essas regras são decisões propostas de produto; não há soft delete nem prome
 
 ## Índices iniciais
 
-| Tabela | Índice | Consulta atendida |
-|---|---|---|
-| tb_job | UNIQUE (user_id, url_hash) | Duplicatas pessoais |
-| tb_job | (user_id, created_at DESC, id DESC) | Listagem paginada |
-| tb_job | UNIQUE (id, user_id) | Alvo das FKs compostas |
-| tb_job_skill | UNIQUE (job_id, type, normalized_name) | Habilidades e deduplicação |
-| tb_application | UNIQUE (user_id, job_id) | Acompanhamento único |
-| tb_application | (job_id, user_id) | Referência à vaga e exclusão |
-| tb_application | (user_id, status, updated_at DESC, id DESC) | Quadro por status |
-| tb_application_status_history | (application_id, changed_at, id) | Linha do tempo |
-| tb_import_task | (user_id, created_at DESC, id DESC) | Importações do usuário |
-| tb_import_task | (job_id, user_id) | Referência à vaga e exclusão |
-| tb_import_task | (status, next_attempt_at, id) | Tarefas prontas para execução |
-| tb_import_task | (status, locked_until, id) | Recuperação de tarefas interrompidas |
+| Tabela                        | Índice                                      | Consulta atendida                    |
+| ----------------------------- | ------------------------------------------- | ------------------------------------ |
+| tb_job                        | UNIQUE (user_id, url_hash)                  | Duplicatas pessoais                  |
+| tb_job                        | (user_id, created_at DESC, id DESC)         | Listagem paginada                    |
+| tb_job                        | UNIQUE (id, user_id)                        | Alvo das FKs compostas               |
+| tb_job_skill                  | UNIQUE (job_id, type, normalized_name)      | Habilidades e deduplicação           |
+| tb_application                | UNIQUE (user_id, job_id)                    | Acompanhamento único                 |
+| tb_application                | (job_id, user_id)                           | Referência à vaga e exclusão         |
+| tb_application                | (user_id, status, updated_at DESC, id DESC) | Quadro por status                    |
+| tb_application_status_history | (application_id, changed_at, id)            | Linha do tempo                       |
+| tb_import_task                | (user_id, created_at DESC, id DESC)         | Importações do usuário               |
+| tb_import_task                | (job_id, user_id)                           | Referência à vaga e exclusão         |
+| tb_import_task                | (status, next_attempt_at, id)               | Tarefas prontas para execução        |
+| tb_import_task                | (status, locked_until, id)                  | Recuperação de tarefas interrompidas |
 
 Avaliar novos índices a partir das consultas reais. Não criar índice em todo campo, nem GIN no JSONB sem necessidade de consulta.
 

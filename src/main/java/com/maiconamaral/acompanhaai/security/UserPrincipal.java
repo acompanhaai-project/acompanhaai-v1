@@ -1,10 +1,11 @@
 package com.maiconamaral.acompanhaai.security;
 
 import com.maiconamaral.acompanhaai.entities.User;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class UserPrincipal extends org.springframework.security.core.userdetails.User {
+
     private final Long id;
     private final long authVersion;
 
@@ -14,6 +15,11 @@ public class UserPrincipal extends org.springframework.security.core.userdetails
         this.authVersion = user.getAuthVersion();
     }
 
-    public Long getId() { return id; }
-    public long getAuthVersion() { return authVersion; }
+    public Long getId() {
+        return id;
+    }
+
+    public long getAuthVersion() {
+        return authVersion;
+    }
 }

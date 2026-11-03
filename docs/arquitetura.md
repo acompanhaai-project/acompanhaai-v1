@@ -27,13 +27,13 @@ possui autenticação, perfil e CRUD manual de candidaturas.
 
 Java 25 e Spring Boot 4.0+, com as seguintes responsabilidades:
 
-| Camada | Responsabilidade |
-|---|---|
-| Entities | Representar os dados e relacionamentos persistidos. |
-| Repositories | Consultar e persistir dados. |
-| Services | Executar regras de negócio e coordenar transações. |
-| Resources | Receber requisições HTTP e produzir respostas. |
-| DTOs | Definir os dados de entrada e saída da API. |
+| Camada       | Responsabilidade                                    |
+| ------------ | --------------------------------------------------- |
+| Entities     | Representar os dados e relacionamentos persistidos. |
+| Repositories | Consultar e persistir dados.                        |
+| Services     | Executar regras de negócio e coordenar transações.  |
+| Resources    | Receber requisições HTTP e produzir respostas.      |
+| DTOs         | Definir os dados de entrada e saída da API.         |
 
 As entidades não são retornadas diretamente pela API.
 Os DTOs controlam quais informações podem entrar e sair.

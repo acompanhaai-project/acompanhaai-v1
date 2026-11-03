@@ -1,16 +1,17 @@
 package com.maiconamaral.acompanhaai.entities;
 
-import jakarta.persistence.*;
 import com.maiconamaral.acompanhaai.entities.enums.*;
-import java.util.Objects;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "tb_import_task")
 public class ImportTask extends BaseEntity {
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
@@ -76,7 +77,7 @@ public class ImportTask extends BaseEntity {
     @Column(name = "error_message", columnDefinition = "text")
     private String errorMessage;
 
-    protected ImportTask() { }
+    protected ImportTask() {}
 
     public ImportTask(User user, ImportInputType inputType, String input) {
         this.user = Objects.requireNonNull(user);
@@ -87,45 +88,159 @@ public class ImportTask extends BaseEntity {
         this.status = ImportStatus.PENDING;
     }
 
-    public User getUser() { return user; }
-    public Job getJob() { return job; }
-    public ImportInputType getInputType() { return inputType; }
-    public String getSourceUrl() { return sourceUrl; }
-    public String getInputText() { return inputText; }
-    public String getCollectedText() { return collectedText; }
-    public ImportStatus getStatus() { return status; }
-    public int getAttemptCount() { return attemptCount; }
-    public Instant getNextAttemptAt() { return nextAttemptAt; }
-    public Instant getLockedUntil() { return lockedUntil; }
-    public Instant getStartedAt() { return startedAt; }
-    public Instant getFinishedAt() { return finishedAt; }
-    public Instant getReviewedAt() { return reviewedAt; }
-    public String getLockToken() { return lockToken; }
-    public String getExtractorProvider() { return extractorProvider; }
-    public String getExtractorModel() { return extractorModel; }
-    public Integer getResultSchemaVersion() { return resultSchemaVersion; }
-    public Map<String, Object> getExtractedData() { return extractedData; }
-    public String getErrorCode() { return errorCode; }
-    public String getErrorMessage() { return errorMessage; }
+    public User getUser() {
+        return user;
+    }
 
-    public void setJob(Job job) { this.job = job; }
-    public void setInputType(ImportInputType inputType) { this.inputType = inputType; }
-    public void setSourceUrl(String sourceUrl) { this.sourceUrl = sourceUrl; }
-    public void setInputText(String inputText) { this.inputText = inputText; }
-    public void setCollectedText(String collectedText) { this.collectedText = collectedText; }
-    public void setStatus(ImportStatus status) { this.status = status; }
-    public void setAttemptCount(int attemptCount) { this.attemptCount = attemptCount; }
-    public void setNextAttemptAt(Instant nextAttemptAt) { this.nextAttemptAt = nextAttemptAt; }
-    public void setLockedUntil(Instant lockedUntil) { this.lockedUntil = lockedUntil; }
-    public void setStartedAt(Instant startedAt) { this.startedAt = startedAt; }
-    public void setFinishedAt(Instant finishedAt) { this.finishedAt = finishedAt; }
-    public void setReviewedAt(Instant reviewedAt) { this.reviewedAt = reviewedAt; }
-    public void setLockToken(String lockToken) { this.lockToken = lockToken; }
-    public void setExtractorProvider(String extractorProvider) { this.extractorProvider = extractorProvider; }
-    public void setExtractorModel(String extractorModel) { this.extractorModel = extractorModel; }
-    public void setResultSchemaVersion(Integer resultSchemaVersion) { this.resultSchemaVersion = resultSchemaVersion; }
-    public void setExtractedData(Map<String, Object> extractedData) { this.extractedData = extractedData; }
-    public void setErrorCode(String errorCode) { this.errorCode = errorCode; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public Job getJob() {
+        return job;
+    }
+
+    public ImportInputType getInputType() {
+        return inputType;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public String getInputText() {
+        return inputText;
+    }
+
+    public String getCollectedText() {
+        return collectedText;
+    }
+
+    public ImportStatus getStatus() {
+        return status;
+    }
+
+    public int getAttemptCount() {
+        return attemptCount;
+    }
+
+    public Instant getNextAttemptAt() {
+        return nextAttemptAt;
+    }
+
+    public Instant getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public Instant getStartedAt() {
+        return startedAt;
+    }
+
+    public Instant getFinishedAt() {
+        return finishedAt;
+    }
+
+    public Instant getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public String getLockToken() {
+        return lockToken;
+    }
+
+    public String getExtractorProvider() {
+        return extractorProvider;
+    }
+
+    public String getExtractorModel() {
+        return extractorModel;
+    }
+
+    public Integer getResultSchemaVersion() {
+        return resultSchemaVersion;
+    }
+
+    public Map<String, Object> getExtractedData() {
+        return extractedData;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
+
+    public void setInputType(ImportInputType inputType) {
+        this.inputType = inputType;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
+    }
+
+    public void setInputText(String inputText) {
+        this.inputText = inputText;
+    }
+
+    public void setCollectedText(String collectedText) {
+        this.collectedText = collectedText;
+    }
+
+    public void setStatus(ImportStatus status) {
+        this.status = status;
+    }
+
+    public void setAttemptCount(int attemptCount) {
+        this.attemptCount = attemptCount;
+    }
+
+    public void setNextAttemptAt(Instant nextAttemptAt) {
+        this.nextAttemptAt = nextAttemptAt;
+    }
+
+    public void setLockedUntil(Instant lockedUntil) {
+        this.lockedUntil = lockedUntil;
+    }
+
+    public void setStartedAt(Instant startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public void setFinishedAt(Instant finishedAt) {
+        this.finishedAt = finishedAt;
+    }
+
+    public void setReviewedAt(Instant reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
+    public void setLockToken(String lockToken) {
+        this.lockToken = lockToken;
+    }
+
+    public void setExtractorProvider(String extractorProvider) {
+        this.extractorProvider = extractorProvider;
+    }
+
+    public void setExtractorModel(String extractorModel) {
+        this.extractorModel = extractorModel;
+    }
+
+    public void setResultSchemaVersion(Integer resultSchemaVersion) {
+        this.resultSchemaVersion = resultSchemaVersion;
+    }
+
+    public void setExtractedData(Map<String, Object> extractedData) {
+        this.extractedData = extractedData;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }
-

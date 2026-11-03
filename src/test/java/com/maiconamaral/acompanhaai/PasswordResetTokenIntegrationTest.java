@@ -1,9 +1,12 @@
 package com.maiconamaral.acompanhaai;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.maiconamaral.acompanhaai.entities.PasswordResetToken;
 import com.maiconamaral.acompanhaai.entities.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,18 +15,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class PasswordResetTokenIntegrationTest {
+
     private static final Instant ISSUED_AT = Instant.parse("2026-11-02T00:00:00Z");
     private static final String HASH = "a".repeat(64);
 
-    @Autowired private EntityManager em;
+    @Autowired
+    private EntityManager em;
 
     @Test
     void persistsOwnerHashExpiryAndVersionedUsage() {
@@ -87,13 +88,14 @@ class PasswordResetTokenIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {-1, 0, 31})
+    @ValueSource(ints = { -1, 0, 31 })
     void databaseRejectsInvalidExpirationWindow(int lifetimeMinutes) {
         User user = user("invalid-expiry@example.test");
         em.flush();
 
-        assertThatThrownBy(() -> insertDirectly(user, HASH, ISSUED_AT.plusSeconds(lifetimeMinutes * 60L)))
-                .isInstanceOf(PersistenceException.class);
+        assertThatThrownBy(() -> insertDirectly(user, HASH, ISSUED_AT.plusSeconds(lifetimeMinutes * 60L))).isInstanceOf(
+            PersistenceException.class
+        );
     }
 
     @Test
@@ -101,19 +103,21 @@ class PasswordResetTokenIntegrationTest {
         User user = user("invalid-hash@example.test");
         em.flush();
 
-        assertThatThrownBy(() -> insertDirectly(user, "token-em-texto", ISSUED_AT.plusSeconds(1800)))
-                .isInstanceOf(PersistenceException.class);
+        assertThatThrownBy(() -> insertDirectly(user, "token-em-texto", ISSUED_AT.plusSeconds(1800))).isInstanceOf(
+            PersistenceException.class
+        );
     }
 
     @Test
     void rejectsInvalidHashAndLifetimeBeforePersistence() {
         User user = user("invalid-constructor@example.test");
         assertThatIllegalArgumentException().isThrownBy(() ->
-                new PasswordResetToken(user, "token-em-texto", ISSUED_AT, ISSUED_AT.plusSeconds(1800)));
+            new PasswordResetToken(user, "token-em-texto", ISSUED_AT, ISSUED_AT.plusSeconds(1800))
+        );
+        assertThatIllegalArgumentException().isThrownBy(() -> new PasswordResetToken(user, HASH, ISSUED_AT, ISSUED_AT));
         assertThatIllegalArgumentException().isThrownBy(() ->
-                new PasswordResetToken(user, HASH, ISSUED_AT, ISSUED_AT));
-        assertThatIllegalArgumentException().isThrownBy(() ->
-                new PasswordResetToken(user, HASH, ISSUED_AT, ISSUED_AT.plusSeconds(1801)));
+            new PasswordResetToken(user, HASH, ISSUED_AT, ISSUED_AT.plusSeconds(1801))
+        );
     }
 
     @Test
@@ -135,15 +139,17 @@ class PasswordResetTokenIntegrationTest {
     }
 
     private void insertDirectly(User user, String hash, Instant expiry) {
-        em.createNativeQuery("""
-                INSERT INTO tb_password_reset_token
-                    (user_id, token_hash, created_at, expires_at, version)
-                VALUES (:owner, :hash, :created, :expires, 0)
-                """)
-                .setParameter("owner", user.getId())
-                .setParameter("hash", hash)
-                .setParameter("created", ISSUED_AT)
-                .setParameter("expires", expiry)
-                .executeUpdate();
+        em.createNativeQuery(
+            """
+            INSERT INTO tb_password_reset_token
+                (user_id, token_hash, created_at, expires_at, version)
+            VALUES (:owner, :hash, :created, :expires, 0)
+            """
+        )
+            .setParameter("owner", user.getId())
+            .setParameter("hash", hash)
+            .setParameter("created", ISSUED_AT)
+            .setParameter("expires", expiry)
+            .executeUpdate();
     }
 }
