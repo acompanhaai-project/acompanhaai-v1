@@ -25,13 +25,17 @@ evidências de execução: registrar resultados somente após executar cada rote
 
 ## Como usar
 
+O [fluxo de Bugs — KAN-28](bugs.md) e o [modelo copiável](templates/bug.md)
+definem severidade, prioridade, prazos didáticos de triagem, revisão e reteste.
+Processo documentado; janela de trabalho, mapeamento no Jira e aceite pendentes.
+
 O [guia de credenciais — KAN-29](credenciais.md) explica provisionamento,
 adoção dos objetos, configuração, rotação e validação com usuário restrito.
 
 A [revisão inicial de credenciais — KAN-29](revisao-credenciais-kan-29.md)
-registra a configuração atual, as permissões fornecidas pelo pgAdmin e o
-roteiro de auditoria; V6 confirmada, separação de identidades validada em QA
-e aplicação no banco local pendente.
+registra a configuração e as permissões fornecidas pelo pgAdmin. A V6 e o
+provisionamento local foram executados, e o smoke da API foi aprovado;
+CI do PR e aceite continuam pendentes.
 
 1. Selecionar o cartão de execução no Jira; a Feature é o índice da entrega.
 2. Consultar o guia correspondente e executar o que estiver no seu escopo.
