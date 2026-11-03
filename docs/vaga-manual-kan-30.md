@@ -140,7 +140,7 @@ As restrições das migrações históricas não foram alteradas.
 | Salário único, BRL, periodicidade e ausência como null               | `acceptsOldPayloadAndLeavesUnknownSalaryNull`, casos parametrizados `rejectsInvalidDetailsWithoutCreatingPartialData` |
 | Tamanhos, precisão e habilidades sem duplicidade                     | Casos parametrizados de `invalidDetails`, incluindo duplicatas entre tipos e caixa/espaços                            |
 | Isolamento por conta e remoção de habilidades                        | `otherAccountCannotReadOrChangeDetailsAndDeletionRemovesSkills`                                                       |
-| Consistência em edição inválida, versão antiga e conflito no banco   | `invalidEditAndStaleVersionPreserveSalarySkillsAndHistory`, `databaseConflictRollsBackJobSkillsAndStatusHistory`      |
+| Consistência em edição inválida, versão antiga e conflito de URL     | `invalidEditAndStaleVersionPreserveSalarySkillsAndHistory`, `conflictingUrlEditPreservesJobSkillsAndStatusHistory`    |
 | Preservação de dados e migração limpa                                | `SingleSalaryMigrationIntegrationTest` e `DatabaseRoleMigrationIntegrationTest`                                       |
 
 A revisão do diff, o CI remoto e o aceite da história permanecem pendentes.

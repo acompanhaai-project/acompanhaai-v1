@@ -171,7 +171,7 @@ class ManualJobDetailsIntegrationTest {
     }
 
     @Test
-    void databaseConflictRollsBackJobSkillsAndStatusHistory() throws Exception {
+    void conflictingUrlEditPreservesJobSkillsAndStatusHistory() throws Exception {
         var session = account("transaction@example.test");
         String first = DETAILS.replace(
             "\"title\":\"Java\"",

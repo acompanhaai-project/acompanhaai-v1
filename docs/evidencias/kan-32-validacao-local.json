@@ -1,0 +1,49 @@
+{
+  "task": "KAN-32",
+  "validatedOn": "2026-11-03",
+  "branch": "fix/KAN-32-consistencia-candidaturas",
+  "java": "Amazon Corretto 25.0.4.1",
+  "springBoot": "4.0.9",
+  "schemaVersion": "7, sem nova migração",
+  "h2": {
+    "database": "H2 2.4.240",
+    "total": 196,
+    "passed": 189,
+    "skipped": 7,
+    "failures": 0,
+    "errors": 0,
+    "command": "mvnw.cmd verify com spring.config.location em cópias versionadas sem import local",
+    "result": "BUILD SUCCESS"
+  },
+  "postgres": {
+    "database": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "total": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "startedAtUtc": "2026-11-03T21:57:36.1779513+00:00",
+    "finishedAtUtc": "2026-11-03T21:58:56.8809166+00:00",
+    "command": "./scripts/test-database-roles.ps1",
+    "configuration": "versioned-copy-without-local-import",
+    "migrationTests": 2,
+    "regressionTests": 193,
+    "note": "A execução inclui testes unitários sem banco e SingleSalaryMigrationIntegrationTest, exclusivamente H2. Testes Spring da API e de permissões usam PostgreSQL com contas separadas.",
+    "mavenExitCode": 0,
+    "clusterStopped": true
+  },
+  "newCoverage": {
+    "normalizationUnitCases": 28,
+    "integrationCasesPerDatabase": 13,
+    "sameAccountConcurrentStatuses": [201, 409],
+    "differentAccountsConcurrentStatuses": [201, 201],
+    "collision": "Hash forçado por Mockito; URLs comparadas e gravação rejeitada sem unir vagas.",
+    "deletionRollback": "Falha simulada em JobRepository.delete após flush da candidatura; restauração verificada no banco.",
+    "linkedTaskData": "Tarefas PENDING fictícias vinculadas e sem vínculo; sem worker externo em execução."
+  },
+  "fixtureV1": {
+    "sha256FilesChecked": 9,
+    "modified": false,
+    "collectionExecuted": false
+  },
+  "pending": ["Revisão do PR", "CI remoto", "Aceite no Jira"]
+}

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.data.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -22,17 +23,20 @@ public class ApplicationService {
     private final JobRepository jobs;
     private final UserRepository users;
     private final ApplicationStatusHistoryRepository history;
+    private final JobUrlService urls;
 
     public ApplicationService(
         ApplicationRepository repository,
         JobRepository jobs,
         UserRepository users,
-        ApplicationStatusHistoryRepository history
+        ApplicationStatusHistoryRepository history,
+        JobUrlService urls
     ) {
         this.repository = repository;
         this.jobs = jobs;
         this.users = users;
         this.history = history;
+        this.urls = urls;
     }
 
     @Transactional
@@ -40,8 +44,10 @@ public class ApplicationService {
         var status = dto.status() == null ? ApplicationStatus.APPLIED : dto.status();
         validate(status, dto.appliedOn());
         validateJob(dto.job());
-        var user = users.getReferenceById(userId);
-        var job = jobs.save(new Job(user, dto.job()));
+        var user = lockUser(userId);
+        var job = new Job(user, dto.job());
+        assignUrl(userId, job, dto.job().sourceUrl());
+        jobs.save(job);
         var application = repository.saveAndFlush(new Application(user, job, status, dto.appliedOn(), dto.notes()));
         history.save(new ApplicationStatusHistory(application, null));
         return new ApplicationDTO(application);
@@ -61,6 +67,7 @@ public class ApplicationService {
 
     @Transactional
     public ApplicationDTO update(Long userId, Long id, ApplicationUpdateDTO dto) {
+        lockUser(userId);
         var application = findEntity(userId, id);
         if (application.getVersion() != dto.version()) {
             throw new ObjectOptimisticLockingFailureException(Application.class, id);
@@ -68,6 +75,7 @@ public class ApplicationService {
         validate(dto.status(), dto.appliedOn());
         validateJob(dto.job());
         var previous = application.getStatus();
+        assignUrl(userId, application.getJob(), dto.job().sourceUrl());
         application.getJob().update(dto.job());
         application.update(dto.status(), dto.appliedOn(), dto.notes());
         repository.saveAndFlush(application);
@@ -89,11 +97,45 @@ public class ApplicationService {
 
     @Transactional
     public void delete(Long userId, Long id) {
+        lockUser(userId);
         var application = findEntity(userId, id);
         var job = application.getJob();
         repository.delete(application);
         repository.flush();
         jobs.delete(job);
+    }
+
+    private User lockUser(Long userId) {
+        return users
+            .findByIdForUpdate(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+    }
+
+    private void assignUrl(Long userId, Job job, String sourceUrl) {
+        String normalized = urls.normalize(sourceUrl);
+        String hash = urls.hash(normalized);
+        if (normalized != null) {
+            for (var candidate : jobs.findUrlCandidates(userId)) {
+                if (Objects.equals(candidate.id(), job.getId())) {
+                    continue;
+                }
+                String existing;
+                try {
+                    existing = urls.normalize(candidate.sourceUrl());
+                } catch (InvalidDataException exception) {
+                    // Preserve malformed legacy links without blocking unrelated valid URLs.
+                    existing = candidate.sourceUrl();
+                }
+                if (normalized.equals(existing)) {
+                    throw JobUrlConflictException.duplicate();
+                }
+                if (hash.equals(candidate.urlHash())) {
+                    throw JobUrlConflictException.hashCollision();
+                }
+            }
+        }
+        job.setNormalizedUrl(normalized);
+        job.setUrlHash(hash);
     }
 
     private Application findEntity(Long userId, Long id) {

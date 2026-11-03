@@ -15,6 +15,13 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @RestControllerAdvice
 public class ResourceExceptionHandler {
 
+    @ExceptionHandler(JobUrlConflictException.class)
+    public ProblemDetail jobUrlConflict(JobUrlConflictException exception) {
+        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setProperty("code", exception.getCode());
+        return problem;
+    }
+
     @ExceptionHandler(PasswordResetRateLimitException.class)
     public ResponseEntity<ProblemDetail> passwordResetLimit(PasswordResetRateLimitException exception) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)

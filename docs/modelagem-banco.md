@@ -72,10 +72,10 @@ Regras:
 - KAN-30: o CRUD usa `salary`, valor único positivo em BRL, com periodicidade explícita e até duas casas decimais. Ver [contrato](vaga-manual-kan-30.md).
 - Mínimo e máximo são colunas legadas preservadas. Na V7, somente limites iguais e positivos, em BRL e com periodicidade, são copiados para `salary`; faixas não são convertidas em médias.
 - As restrições dos limites legados permanecem: valores não negativos e máximo maior ou igual ao mínimo quando ambos existem.
-- Novos registros pelo CRUD preenchem link, URL normalizada e hash juntos. A migração permite registros legados com apenas o link; é necessário preencher o hash desses registros antes de obter deduplicação completa da base antiga.
+- Novos registros pelo CRUD preenchem link, URL normalizada e hash juntos. A KAN-32 compara também links legados com hash antigo ou nulo, sem regravá-los automaticamente.
 - `UNIQUE (user_id, url_hash)` evita duplicatas por URL normalizada no conjunto pessoal. Cadastros sem URL não são deduplicados automaticamente.
 - Ao detectar o mesmo hash, conferir também a URL normalizada e rejeitar eventual colisão sem unir registros.
-- A implementação inicial calcula o hash da URL recebida, após remover espaços nas extremidades. Uma normalização futura pode remover parâmetros reconhecidos de rastreamento, preservando os que identificam a oportunidade. URLs diferentes para a mesma vaga ainda podem gerar registros distintos.
+- A KAN-32 normaliza esquema, host, porta padrão e caminho raiz. Preserva caminho, query e fragmento, sem remover parâmetros de rastreamento. Colisões de hash não unem vagas. Ver [política e concorrência](consistencia-candidaturas-kan-32.md).
 
 ## 3. tb_job_skill — habilidades da vaga
 

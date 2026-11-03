@@ -402,7 +402,11 @@ paths:
         "422": { $ref: "#/components/responses/ValidationError" }
     delete:
       operationId: deleteApplication
-      summary: Excluir candidatura, sua vaga pessoal e histórico
+      summary: Excluir candidatura, vaga pessoal e dados vinculados
+      description: >-
+        Remove a vaga pessoal, habilidades, histórico e tarefas de importação vinculadas,
+        na mesma transação. Tarefas sem vínculo com essa vaga e outras candidaturas são preservadas.
+        Repetição após remoção retorna 404.
       security:
         - sessionCookie: []
           csrfHeader: []
@@ -411,6 +415,11 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Conflito de integridade; exclusão desfeita pela transação.
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
   /api/applications/{id}/history:
     parameters:
       - { $ref: "#/components/parameters/ApplicationId" }
@@ -500,12 +509,13 @@ components:
         title: { type: string, minLength: 1, maxLength: 255 }
         companyName: { type: string, maxLength: 255, nullable: true }
         sourceUrl:
-          {
-            type: string,
-            maxLength: 2048,
-            nullable: true,
-            description: Link HTTP/HTTPS opcional. Não é acessado; link idêntico é único por usuário.
-          }
+          type: string
+          maxLength: 2048
+          nullable: true
+          description: >-
+            Link HTTP/HTTPS opcional, não acessado. Esquema e host normalizados para minúsculas,
+            porta padrão omitida e caminho vazio representado por /. Caminho, query e fragmento
+            permanecem preservados. Links equivalentes são únicos por conta; credenciais embutidas são rejeitadas.
         description: { type: string, maxLength: 30000, nullable: true }
         location: { type: string, maxLength: 255, nullable: true }
         workMode:
@@ -619,6 +629,11 @@ components:
         status: { type: integer }
         detail: { type: string }
         instance: { type: string }
+        code:
+          type: string
+          description: >-
+            Código opcional. Conflitos de URL detectados pelo serviço usam JOB_URL_ALREADY_EXISTS
+            ou JOB_URL_HASH_COLLISION. Erros de integridade e versão podem não conter este campo.
         errors:
           type: array
           items:
@@ -638,7 +653,9 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/Application" }
     ApplicationConflict:
-      description: Versão antiga ou link já cadastrado. Consulte o registro atualizado ou a candidatura existente antes de reenviar.
+      description: >-
+        Versão antiga, link equivalente já cadastrado ou colisão de hash. Uma colisão não une vagas.
+        Consulte os dados existentes antes de repetir. Falhas de integridade também retornam 409.
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }

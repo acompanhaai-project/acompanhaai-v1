@@ -31,6 +31,9 @@ em BRL, localização, modalidade e habilidades, incluindo substituição e vali
 O [acompanhamento — KAN-31](acompanhamento-kan-31.md) descreve busca por título
 ou empresa, filtros, paginação e a matriz de testes de etapas e histórico.
 
+A [consistência — KAN-32](consistencia-candidaturas-kan-32.md) define normalização
+de URLs, conflitos, concorrência por conta e exclusão dos dados vinculados.
+
 O [fluxo de Bugs — KAN-28](bugs.md) e o [modelo copiável](templates/bug.md)
 definem severidade, prioridade, prazos didáticos de triagem, revisão e reteste.
 Processo documentado; janela de trabalho, mapeamento no Jira e aceite pendentes.
