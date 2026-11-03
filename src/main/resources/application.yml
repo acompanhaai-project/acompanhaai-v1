@@ -18,6 +18,9 @@ spring:
       max-file-size: 2MB
       max-request-size: 3MB
 server:
+  tomcat:
+    # Descarte limitado do corpo rejeitado para permitir a entrega do erro 413.
+    max-swallow-size: 4MB
   forward-headers-strategy: none
   servlet:
     session:
