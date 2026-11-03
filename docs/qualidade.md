@@ -122,6 +122,10 @@ pessoais e informações privadas antes de anexar evidências ao Jira ou PR.
 
 ## Bug e reteste
 
+O [fluxo de Bugs da KAN-28](bugs.md) detalha classificação, prazo didático de
+triagem, checkpoints no quadro atual, vínculos com história/release e fechamento.
+Usar o [modelo copiável](templates/bug.md) ao registrar um defeito real.
+
 Registrar defeitos reais como `Problema`, com ambiente, versão, passos,
 esperado/obtido, frequência, severidade, prioridade e vínculo com a tarefa.
 Severidade descreve o impacto; prioridade determina a ordem de tratamento.
