@@ -59,6 +59,7 @@ O email deve ser normalizado da mesma forma no cadastro, edição e login. A uni
 | work_mode               | VARCHAR(32)              | Não         | REMOTE, HYBRID ou ONSITE                            |
 | salary_min              | NUMERIC(15,2)            | Não         | Limite inferior informado                           |
 | salary_max              | NUMERIC(15,2)            | Não         | Limite superior informado                           |
+| salary                  | NUMERIC(15,2)            | Não         | Valor único ativo a partir da V7/KAN-30             |
 | salary_currency         | VARCHAR(3)               | Não         | Código da moeda, por exemplo BRL                    |
 | salary_period           | VARCHAR(32)              | Não         | HOUR, DAY, WEEK, MONTH ou YEAR                      |
 | salary_original_text    | TEXT                     | Não         | Texto do anúncio, inclusive “a combinar”            |
@@ -68,8 +69,9 @@ O email deve ser normalizado da mesma forma no cadastro, edição e login. A uni
 Regras:
 
 - Ausência de salário é `NULL`. Nunca preencher com zero, salário estimado, moeda ou periodicidade presumidas.
-- Salário exato preenche mínimo e máximo com o mesmo valor; “a partir de” preenche apenas mínimo; “até” preenche apenas máximo.
-- Valores presentes devem ser não negativos; se ambos existirem, máximo deve ser maior ou igual ao mínimo.
+- KAN-30: o CRUD usa `salary`, valor único positivo em BRL, com periodicidade explícita e até duas casas decimais. Ver [contrato](vaga-manual-kan-30.md).
+- Mínimo e máximo são colunas legadas preservadas. Na V7, somente limites iguais e positivos, em BRL e com periodicidade, são copiados para `salary`; faixas não são convertidas em médias.
+- As restrições dos limites legados permanecem: valores não negativos e máximo maior ou igual ao mínimo quando ambos existem.
 - Novos registros pelo CRUD preenchem link, URL normalizada e hash juntos. A migração permite registros legados com apenas o link; é necessário preencher o hash desses registros antes de obter deduplicação completa da base antiga.
 - `UNIQUE (user_id, url_hash)` evita duplicatas por URL normalizada no conjunto pessoal. Cadastros sem URL não são deduplicados automaticamente.
 - Ao detectar o mesmo hash, conferir também a URL normalizada e rejeitar eventual colisão sem unir registros.
@@ -86,7 +88,7 @@ Regras:
 | type            | VARCHAR(32)  | Sim         | HARD ou SOFT                               |
 | source_excerpt  | TEXT         | Não         | Trecho que sustenta a extração             |
 
-`UNIQUE (job_id, type, normalized_name)`. Inicialmente, normalizar espaços e caixa; não unir sinônimos automaticamente. Habilidades inseridas manualmente podem não ter trecho de origem. Não armazenar habilidades como uma lista separada por vírgulas.
+`UNIQUE (job_id, type, normalized_name)`. Normalizar espaços e caixa; não unir sinônimos automaticamente. A KAN-30 rejeita duplicatas pela API inclusive entre tipos, mantendo a restrição legada do banco. Habilidades inseridas manualmente podem não ter trecho de origem. Não armazenar habilidades como uma lista separada por vírgulas.
 
 ## 4. tb_application — acompanhamento pessoal
 

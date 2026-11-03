@@ -49,9 +49,9 @@ class PostgresMigrationIntegrationTest {
                     .schemas(schema)
                     .defaultSchema(schema)
                     .load();
-                assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
+                assertThat(current.migrate().migrationsExecuted).isEqualTo(2);
                 current.validate();
-                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("6");
+                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("7");
                 try (
                     var row = sql.executeQuery(
                         "SELECT name, email, password_hash, auth_version FROM tb_user WHERE id=1001"

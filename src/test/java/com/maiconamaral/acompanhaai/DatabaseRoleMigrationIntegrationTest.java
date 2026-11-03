@@ -19,7 +19,7 @@ class DatabaseRoleMigrationIntegrationTest {
 
     @Test
     @Order(1)
-    void adoptsExistingV5AndMigratesV6WithoutLosingUser() throws Exception {
+    void adoptsExistingV5AndMigratesCurrentSchemaWithoutLosingData() throws Exception {
         String url = System.getProperty("spring.datasource.url");
         var old = Flyway.configure().dataSource(url, "acompanhaai_qa_admin", "").target("5").load();
         assertThat(old.migrate().migrationsExecuted).isEqualTo(5);
@@ -30,10 +30,17 @@ class DatabaseRoleMigrationIntegrationTest {
                 VALUES (1001, 'QA preservado', 'kan29-preservado@example.test', 'hash-ficticio', 7, now())
                 """
             );
+            sql.executeUpdate(
+                """
+                INSERT INTO public.tb_job(id, user_id, title, salary_min, salary_max, salary_currency, salary_period)
+                VALUES (1001, 1001, 'Salário exato', 5000.25, 5000.25, 'BRL', 'MONTH'),
+                       (1002, 1001, 'Faixa preservada', 4000, 6000, 'BRL', 'MONTH')
+                """
+            );
             provision(admin, "acompanhaai");
         }
         var upgraded = migration(url);
-        assertThat(upgraded.migrate().migrationsExecuted).isEqualTo(1);
+        assertThat(upgraded.migrate().migrationsExecuted).isEqualTo(2);
         upgraded.validate();
         try (
             var runtime = DriverManager.getConnection(url, "acompanhaai_app", "");
@@ -43,6 +50,18 @@ class DatabaseRoleMigrationIntegrationTest {
             assertThat(row.next()).isTrue();
             assertThat(row.getString(1)).isEqualTo("QA preservado");
             assertThat(row.getLong(2)).isEqualTo(7);
+        }
+        try (
+            var runtime = DriverManager.getConnection(url, "acompanhaai_app", "");
+            var sql = runtime.createStatement();
+            var row = sql.executeQuery("SELECT id, salary, salary_min, salary_max FROM public.tb_job ORDER BY id")
+        ) {
+            assertThat(row.next()).isTrue();
+            assertThat(row.getBigDecimal("salary")).isEqualByComparingTo("5000.25");
+            assertThat(row.next()).isTrue();
+            assertThat(row.getBigDecimal("salary")).isNull();
+            assertThat(row.getBigDecimal("salary_min")).isEqualByComparingTo("4000");
+            assertThat(row.getBigDecimal("salary_max")).isEqualByComparingTo("6000");
         }
         assertThat(upgraded.migrate().migrationsExecuted).isZero();
     }
@@ -59,7 +78,7 @@ class DatabaseRoleMigrationIntegrationTest {
             provision(admin, "acompanhaai_kan29_clean");
         }
         var flyway = migration(clean);
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(6);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
         flyway.validate();
         try (
             var runtime = DriverManager.getConnection(clean, "acompanhaai_app", "");

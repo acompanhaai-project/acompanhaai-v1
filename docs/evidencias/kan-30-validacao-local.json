@@ -1,0 +1,39 @@
+{
+  "task": "KAN-30",
+  "validatedOn": "2026-11-03",
+  "java": "Amazon Corretto 25.0.4.1",
+  "springBoot": "4.0.9",
+  "h2": {
+    "database": "H2 2.4.240",
+    "total": 130,
+    "passed": 123,
+    "skipped": 7,
+    "failures": 0,
+    "errors": 0,
+    "newCrudScenarios": 25,
+    "command": "mvnw.cmd verify com cópias versionadas de application.yml e application-test.yml em target/kan30-h2-config, removendo o import local",
+    "result": "BUILD SUCCESS"
+  },
+  "postgres": {
+    "database": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "total": 129,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "startedAtUtc": "2026-11-03T20:48:54.9536251+00:00",
+    "finishedAtUtc": "2026-11-03T20:50:26.0232622+00:00",
+    "command": "./scripts/test-database-roles.ps1",
+    "configuration": "versioned-copy-without-local-import",
+    "migrationTests": 2,
+    "regressionTests": 127,
+    "note": "A execução inclui 1 teste de migração exclusivamente H2. Os outros 128 testes usam PostgreSQL. PostgresMigrationIntegrationTest é substituído nesta execução pelos testes de migração com roles separadas.",
+    "mavenExitCode": 0,
+    "clusterStopped": true
+  },
+  "fixtureV1": {
+    "sha256FilesChecked": 9,
+    "modified": false,
+    "collectionExecuted": false
+  },
+  "pending": ["CI remoto", "Revisão do PR", "Aceite no Jira, refletindo a decisão de salário único"]
+}
