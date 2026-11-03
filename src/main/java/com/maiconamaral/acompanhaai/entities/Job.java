@@ -4,11 +4,7 @@ import com.maiconamaral.acompanhaai.dto.JobInputDTO;
 import com.maiconamaral.acompanhaai.entities.enums.*;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -98,17 +94,6 @@ public class Job extends BaseEntity {
         this.salaryCurrency = dto.salaryCurrency();
         this.salaryPeriod = dto.salaryPeriod();
         updateSkills(dto.hardSkills(), dto.softSkills());
-        this.normalizedUrl = sourceUrl;
-        try {
-            this.urlHash =
-                sourceUrl == null
-                    ? null
-                    : HexFormat.of().formatHex(
-                          MessageDigest.getInstance("SHA-256").digest(sourceUrl.getBytes(StandardCharsets.UTF_8))
-                      );
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 unavailable", exception);
-        }
     }
 
     public User getUser() {

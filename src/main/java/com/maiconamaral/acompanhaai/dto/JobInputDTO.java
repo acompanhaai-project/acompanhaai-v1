@@ -10,7 +10,7 @@ public record JobInputDTO(
     @NotBlank @Size(max = 255) String title,
     @Size(max = 255) String companyName,
     @Size(max = 2048)
-    @Pattern(regexp = "https?://[^\\s]+", message = "Informe um link HTTP ou HTTPS.")
+    @Pattern(regexp = "(?i:https?)://[^\\s]+", message = "Informe um link HTTP ou HTTPS.")
     String sourceUrl,
     @Size(max = 30000) String description,
     @Size(max = 255) String location,
