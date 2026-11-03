@@ -48,12 +48,9 @@ public class ApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public PageDTO<ApplicationDTO> findAll(Long userId, ApplicationStatus status, int page, int size) {
+    public PageDTO<ApplicationDTO> findAll(Long userId, ApplicationStatus status, String query, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("updatedAt"), Sort.Order.desc("id")));
-        var result =
-            status == null
-                ? repository.findByUser_Id(userId, pageable)
-                : repository.findByUser_IdAndStatus(userId, status, pageable);
+        var result = repository.search(userId, status, searchPattern(query), pageable);
         return new PageDTO<>(result.map(ApplicationDTO::new));
     }
 
@@ -103,6 +100,14 @@ public class ApplicationService {
         return repository
             .findByIdAndUser_Id(id, userId)
             .orElseThrow(() -> new ResourceNotFoundException("Candidatura não encontrada."));
+    }
+
+    private String searchPattern(String query) {
+        if (query == null || query.isBlank()) {
+            return "%";
+        }
+        String escaped = query.strip().replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        return "%" + escaped + "%";
     }
 
     private void validate(ApplicationStatus status, LocalDate appliedOn) {

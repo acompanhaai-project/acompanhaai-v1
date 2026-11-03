@@ -28,6 +28,9 @@ evidências de execução: registrar resultados somente após executar cada rote
 O [contrato da vaga manual — KAN-30](vaga-manual-kan-30.md) registra salário único
 em BRL, localização, modalidade e habilidades, incluindo substituição e validações.
 
+O [acompanhamento — KAN-31](acompanhamento-kan-31.md) descreve busca por título
+ou empresa, filtros, paginação e a matriz de testes de etapas e histórico.
+
 O [fluxo de Bugs — KAN-28](bugs.md) e o [modelo copiável](templates/bug.md)
 definem severidade, prioridade, prazos didáticos de triagem, revisão e reteste.
 Processo documentado; janela de trabalho, mapeamento no Jira e aceite pendentes.
