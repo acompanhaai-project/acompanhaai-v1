@@ -114,18 +114,17 @@ nem o usuário do PostgreSQL. Para a porta padrão de outra instalação, defina
 
 Para executar pela IDE sem depender de variáveis do terminal, preencha
 `application-local.properties`, na raiz do projeto, com as propriedades
-`spring.datasource.username` e `spring.datasource.password` do seu PostgreSQL.
-Remova o `#` dessas duas linhas para ativá-las. Esse arquivo é carregado
+de aplicação e migração descritas no [guia de credenciais](docs/credenciais.md).
+Provisione as contas antes de usar o novo exemplo. Esse arquivo é carregado
 automaticamente e está ignorado pelo Git. Há um modelo em
 `application-local.properties.example`. Use a pasta do projeto como diretório de
 trabalho da execução. Nunca preencha credenciais reais no arquivo `.example`.
 
-Crie um banco `acompanhaai` e forneça as configurações por variáveis de ambiente:
+Depois de provisionar o banco e preencher as credenciais separadas no arquivo
+privado, execute:
 
 ```powershell
 $env:DB_URL = "jdbc:postgresql://localhost:5433/acompanhaai"
-$env:DB_USERNAME = "acompanhaai"
-$env:DB_PASSWORD = "sua-senha-do-banco"
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -139,7 +138,7 @@ Para a instalação nativa do PostgreSQL 18 neste Windows, a porta configurada �
 O perfil `postgres-local` usa essa porta por padrão:
 
 ```powershell
-# Configure DB_USERNAME e DB_PASSWORD com as credenciais do seu PostgreSQL.
+# Configure as contas app/migrator conforme docs/credenciais.md.
 $env:DB_URL = "jdbc:postgresql://localhost:5433/acompanhaai"
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=postgres-local"
 ```
@@ -155,21 +154,21 @@ Para usar Docker Compose na porta 5432, siga as instruções abaixo.
 Requer Docker Desktop com o mecanismo de containers iniciado. Na pasta do projeto:
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) {
+    Copy-Item .env.example .env
+}
 notepad .env
-# Preencha DB_PASSWORD no arquivo .env antes de continuar.
+# Preencha POSTGRES_ADMIN_PASSWORD no arquivo .env antes de continuar.
 docker compose up -d postgres
 docker compose ps
-
-# Informe no terminal a mesma senha definida no .env.
-$dbCredential = Get-Credential -UserName acompanhaai -Message "Senha local do PostgreSQL"
-$env:DB_PASSWORD = $dbCredential.GetNetworkCredential().Password
-$env:DB_USERNAME = "acompanhaai"
-$env:DB_URL = "jdbc:postgresql://localhost:5432/acompanhaai"
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=postgres-local"
 ```
 
-O Compose lê o arquivo `.env`; o Spring Boot recebe as variáveis do terminal.
+Em volume novo, o Compose cria o administrador `acompanhaai_admin`. Antes de
+iniciar a API, seguir [credenciais](docs/credenciais.md) para criar as contas,
+definir senhas diferentes e configurar o datasource/Flyway. Usar a porta 5432
+na URL da API se mantiver o padrão do Compose. Não reutilizar a senha administrativa.
+
+O Compose lê o arquivo `.env`; o Spring Boot recebe o arquivo privado ou variáveis do processo.
 Se alterar `DB_PORT`, ajuste também a porta em `DB_URL`.
 O perfil `postgres-local` usa PostgreSQL e permite cookie de sessão em HTTP local.
 O perfil `dev` continua usando H2. Não combine os dois perfis.

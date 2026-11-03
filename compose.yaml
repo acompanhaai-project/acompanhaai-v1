@@ -3,14 +3,14 @@ services:
     image: postgres:18
     environment:
       POSTGRES_DB: acompanhaai
-      POSTGRES_USER: acompanhaai
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+      POSTGRES_USER: acompanhaai_admin
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Defina POSTGRES_ADMIN_PASSWORD no arquivo .env}
     ports:
       - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U acompanhaai -d acompanhaai"]
+      test: ["CMD-SHELL", "pg_isready -U acompanhaai_admin -d acompanhaai"]
       interval: 5s
       timeout: 5s
       retries: 10

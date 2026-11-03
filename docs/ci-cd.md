@@ -1,39 +1,72 @@
 # Integração e entrega contínuas
 
-Relacionamento: KAN-23 e evoluções de DevOps.
-**Estado: especificação planejada.** Nesta revisão, `.github/` contém o
-template de PR, mas não contém um workflow de CI. Este documento não cria
-um pipeline nem demonstra build aprovado no GitHub.
+Relacionamento: KAN-23 e evoluções de DevOps. Revisado em 03/11/2026.
+**Estado: CI implementado; deploy pendente.** A configuração está em
+[Backend CI](../.github/workflows/backend-ci.yml). Os jobs de H2 e PostgreSQL
+já existem; a KAN-29 acrescenta isolamento de privilégios, cuja execução remota
+ainda depende do PR. A documentação não comprova a aprovação do commit atual.
 
-## Pipeline inicial do backend
+## Pipeline do backend
 
-Implementar um workflow em `.github/workflows/` durante o KAN-23.
+Fonte: `.github/workflows/backend-ci.yml`.
 
-| Item              | Decisão proposta                                         |
+| Item              | Configuração implementada                                |
 | ----------------- | -------------------------------------------------------- |
 | Provedor          | GitHub Actions                                           |
-| Gatilhos          | PR para `main` e push em `main`                          |
-| Runtime           | JDK 25                                                   |
+| Gatilhos          | PR para main, push em main e execução manual             |
+| Runtime           | Amazon Corretto JDK 25, ubuntu-latest                    |
 | Build             | Maven Wrapper versionado                                 |
 | Permissão inicial | Leitura do conteúdo; ampliar somente se necessário       |
-| Banco inicial     | H2 em memória, com datasource explícito de teste         |
+| Bancos            | H2 em memória e PostgreSQL 18 efêmero, em jobs separados |
 | Resultado         | Build/testes, relatórios e JAR identificados pelo commit |
 
-Etapas: checkout, preparação do JDK, cache de dependências, execução de
-`verify`, publicação dos relatórios mesmo em falha e publicação do pacote
-somente após sucesso. Usar o comando H2 do [guia de qualidade](qualidade.md),
-adaptando `mvnw.cmd` para `./mvnw` em runner Linux.
-Conferir também a permissão de execução do wrapper no checkout Linux.
+Os três jobs fazem checkout sem persistir credenciais, configuram Java com
+cache Maven, habilitam execução de mvnw e executam verify com datasource
+explícito. Cada job tem limite de 15 minutos; os artefatos têm retenção de 7 dias.
 
-Ao implementar, conferir versões e permissões das Actions e fixar suas
-referências de acordo com a política do repositório. Não copiar segredos
-locais, diretório H2 ou relatórios Postman para o runner.
+| Job                     | Check publicado                 | Validação e artefatos                                                              |
+| ----------------------- | ------------------------------- | ---------------------------------------------------------------------------------- |
+| build-test              | backend-build-test              | Suíte H2; relatórios testes-COMMIT e JAR backend-COMMIT                            |
+| postgres-test           | backend-postgres-test           | Suíte PostgreSQL, inclusive migrações; relatórios testes-postgres-COMMIT           |
+| database-role-isolation | backend-database-role-isolation | Provisionamento, migrações e runtime restrito; relatórios testes-permissoes-COMMIT |
+
+COMMIT representa github.sha no nome dos artefatos. Relatórios Surefire XML e
+texto são publicados com if: always(), se tiverem sido gerados. O JAR
+target/acompanhaai-0.0.1-SNAPSHOT.jar é publicado somente após sucesso do job H2.
+Os jobs são independentes: esse artefato não comprova aprovação dos outros checks.
+
+O job de isolamento usa um serviço PostgreSQL próprio com autenticação trust
+exclusivamente de teste e porta publicada no loopback do runner. A primeira
+etapa valida adoção/instalação limpa como administrador de QA; a segunda usa
+acompanhaai_app no datasource e acompanhaai_migrator no Flyway. Essa validação
+de privilégios não testa senhas reais nem autenticação SCRAM do ambiente local.
+Consultar [credenciais](credenciais.md) para configuração, rotação e limitações.
+
+Os jobs H2/PostgreSQL tradicionais não habilitam kan29.isolated. Os seis novos
+testes condicionais só executam no job de isolamento, sem serem considerados
+aprovados quando ignorados nos outros jobs. A coleção Postman não é executada
+por esse workflow e segue seu [procedimento de qualidade](qualidade.md).
+
+## Consultar execuções
+
+No PR, abrir Checks e conferir os três resultados. Em Actions → Backend CI,
+selecionar a execução do commit para consultar logs e baixar Artifacts.
+Para executar manualmente, usar Run workflow e selecionar a branch. Um push
+isolado para branch de trabalho sem PR não aciona o gatilho push limitado à main.
+Registrar no cartão URL da execução, commit, resultado e evidência sanitizada.
+
+Não copiar segredos locais, diretório H2 ou relatórios Postman para o runner.
+O perfil test suprime dumps automáticos do MockMvc e logs informativos do
+GreenMail para reduzir exposição de dados de teste em falhas. Revisar os
+relatórios antes de compartilhar; isso não garante ausência de dados sensíveis
+em qualquer mensagem de erro futura.
 
 ## Proteção da main
 
-A proteção foi informada como ativada pelo usuário. Durante a implementação
-do CI, conferir a regra no GitHub e exigir o nome real do check que o workflow
-publicar. Não exigir um check inexistente, pois o merge ficará bloqueado.
+A proteção foi informada como ativada pelo usuário com backend-build-test
+obrigatório. Conferir se backend-postgres-test também é exigido e, após a primeira
+execução aprovada do novo job, incluir backend-database-role-isolation conforme
+a política de proteção. As regras atuais do GitHub não foram consultadas aqui.
 
 Continuar exigindo PR, resolução de conversas e bloqueio de force push e
 exclusão. No trabalho individual, zero aprovações externas permite manter
@@ -53,7 +86,8 @@ do produto a cadastrar como Bug. Não deixá-lo na main.
 
 ## Evolução por etapa
 
-- KAN-34: PostgreSQL efêmero no CI, migrações e comportamento específico.
+- PostgreSQL efêmero, migrações e comportamento específico já estão no workflow;
+  isso não encerra automaticamente todos os critérios da KAN-34.
 - KAN-41: build, verificações e artefato Angular, quando o frontend existir.
 - Homologação: artefato imutável promovido para ambiente separado.
 - Produção: aprovação da release, migração, implantação, smoke e recuperação.
@@ -72,6 +106,9 @@ autorizada por este documento. O procedimento futuro está em
 [operação](operacao.md).
 
 ## Evidências de validação — KAN-23
+
+Histórico informado na execução da KAN-23; não substitui os checks de novos
+PRs. A alteração da KAN-29 foi validada localmente, sem execução remota nesta revisão.
 
 - Pipeline executado com sucesso no PR.
 - Check backend-build-test configurado como obrigatório na main.

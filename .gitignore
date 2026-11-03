@@ -7,6 +7,7 @@ target/
 .settings/
 .env
 application-local.properties
+application-migrations.properties
 data/
 *.log
 postman/node_modules/

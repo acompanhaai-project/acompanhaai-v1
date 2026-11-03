@@ -62,6 +62,71 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  database-role-isolation:
+    name: backend-database-role-isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: acompanhaai
+          POSTGRES_USER: acompanhaai_qa_admin
+          POSTGRES_PASSWORD: ci-disposable-only
+          # Exclusivo para o serviço descartável deste job; não usar em produção.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U acompanhaai_qa_admin -d acompanhaai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_PASSWORD: ""
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Configurar Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: "25"
+          cache: maven
+      - name: Permitir execução do Maven Wrapper
+        run: chmod +x mvnw
+      - name: Validar provisionamento e migrações com identidades separadas
+        run: |
+          ./mvnw --batch-mode --no-transfer-progress verify \
+            "-Dkan29.isolated=true" \
+            "-Dtest=DatabaseRoleMigrationIntegrationTest" \
+            "-Dspring.datasource.url=jdbc:postgresql://127.0.0.1:5432/acompanhaai" \
+            "-Dspring.datasource.username=acompanhaai_qa_admin" \
+            "-Dspring.datasource.password="
+      - name: Validar API e permissões com runtime restrito
+        run: |
+          ./mvnw --batch-mode --no-transfer-progress verify \
+            "-Dkan29.isolated=true" \
+            "-Dtest=*,!PostgresMigrationIntegrationTest,!DatabaseRoleMigrationIntegrationTest" \
+            "-Dspring.datasource.url=jdbc:postgresql://127.0.0.1:5432/acompanhaai" \
+            "-Dspring.datasource.username=acompanhaai_app" \
+            "-Dspring.datasource.password=" \
+            "-Dspring.flyway.user=acompanhaai_migrator" \
+            "-Dspring.flyway.password=" \
+            "-Dspring.flyway.locations=classpath:db/migration,classpath:db/callback"
+      - name: Disponibilizar relatórios de isolamento de permissões
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testes-permissoes-${{ github.sha }}
+          path: |
+            target/surefire-reports/*.xml
+            target/surefire-reports/*.txt
+          if-no-files-found: warn
+          retention-days: 7
+
   postgres-test:
     name: backend-postgres-test
     runs-on: ubuntu-latest

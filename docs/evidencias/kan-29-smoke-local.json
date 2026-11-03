@@ -1,0 +1,106 @@
+{
+  "target": "http://localhost:8080",
+  "runId": "c651632e62fe4c8b91070a976eb4de67",
+  "testEmail": "qa.kan29.c651632e62fe4c8b91070a976eb4de67@example.test",
+  "finishedAt": "2026-11-03T15:21:23.3146534-03:00",
+  "passed": true,
+  "assertions": 35,
+  "requests": 15,
+  "cleanup": "confirmed",
+  "failure": null,
+  "errorType": null,
+  "errorLine": null,
+  "failedStage": null,
+  "results": [
+    {
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/users",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/me",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/users/me",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/28",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/28",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/28/history",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications?status=INTERVIEW&page=0&size=20",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/applications/28",
+      "expected": 204,
+      "actual": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/28",
+      "expected": 404,
+      "actual": 404
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/users/me",
+      "expected": 204,
+      "actual": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/me",
+      "expected": 401,
+      "actual": 401
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Inicialização local/homologação com identidades separadas.
+# As duas credenciais ficam no processo durante esta inicialização.
+spring:
+  datasource:
+    username: acompanhaai_app
+    password: ${APP_DB_PASSWORD}
+  flyway:
+    enabled: true
+    user: acompanhaai_migrator
+    password: ${MIGRATION_DB_PASSWORD}
+    locations:
+      - classpath:db/migration
+      - classpath:db/callback

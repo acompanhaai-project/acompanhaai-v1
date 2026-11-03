@@ -3,6 +3,8 @@ spring:
     url: jdbc:h2:file:./data/acompanhaai;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
     username: sa
     password: ""
+  flyway:
+    locations: classpath:db/migration
 server:
   servlet:
     session:

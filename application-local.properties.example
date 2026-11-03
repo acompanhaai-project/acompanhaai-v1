@@ -1,6 +1,9 @@
-# Copie para application-local.properties e preencha com suas credenciais reais.
+# Antes de usar: provisionar roles e adotar objetos conforme docs/credenciais.md.
+# Copie para application-local.properties e preencha com senhas diferentes.
 # O arquivo application-local.properties e ignorado pelo Git e carregado automaticamente.
-spring.datasource.username=SEU_USUARIO_POSTGRESQL
-spring.datasource.password=SUA_SENHA_POSTGRESQL
+spring.datasource.username=acompanhaai_app
+spring.datasource.password=SENHA_EXCLUSIVA_DA_APLICACAO
+# Credenciais Flyway ficam em application-migrations.properties (outro exemplo).
+# Esse segundo arquivo e importado somente pelo perfil postgres-local.
 # Sobrescreva a URL somente se usar outra instancia:
 # spring.datasource.url=jdbc:postgresql://localhost:5433/acompanhaai

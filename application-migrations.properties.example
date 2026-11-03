@@ -1,0 +1,5 @@
+# Copiar para application-migrations.properties, ignorado pelo Git.
+# Importado somente pelo perfil postgres-local; H2 nao carrega estas credenciais.
+spring.flyway.user=acompanhaai_migrator
+spring.flyway.password=SENHA_EXCLUSIVA_DAS_MIGRACOES
+spring.flyway.locations=classpath:db/migration,classpath:db/callback
