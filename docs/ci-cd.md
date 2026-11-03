@@ -9,15 +9,15 @@ um pipeline nem demonstra build aprovado no GitHub.
 
 Implementar um workflow em `.github/workflows/` durante o KAN-23.
 
-| Item | Decisão proposta |
-|---|---|
-| Provedor | GitHub Actions |
-| Gatilhos | PR para `main` e push em `main` |
-| Runtime | JDK 25 |
-| Build | Maven Wrapper versionado |
-| Permissão inicial | Leitura do conteúdo; ampliar somente se necessário |
-| Banco inicial | H2 em memória, com datasource explícito de teste |
-| Resultado | Build/testes, relatórios e JAR identificados pelo commit |
+| Item              | Decisão proposta                                         |
+| ----------------- | -------------------------------------------------------- |
+| Provedor          | GitHub Actions                                           |
+| Gatilhos          | PR para `main` e push em `main`                          |
+| Runtime           | JDK 25                                                   |
+| Build             | Maven Wrapper versionado                                 |
+| Permissão inicial | Leitura do conteúdo; ampliar somente se necessário       |
+| Banco inicial     | H2 em memória, com datasource explícito de teste         |
+| Resultado         | Build/testes, relatórios e JAR identificados pelo commit |
 
 Etapas: checkout, preparação do JDK, cache de dependências, execução de
 `verify`, publicação dos relatórios mesmo em falha e publicação do pacote
@@ -80,4 +80,3 @@ autorizada por este documento. O procedimento futuro está em
 - Teste temporário removido.
 - Nova execução aprovada após a remoção.
 - Relatórios de testes e JAR disponíveis na execução bem-sucedida.
-

@@ -6,6 +6,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 public class PasswordResetRequestConfig {
+
     @Bean("passwordResetRequestExecutor")
     public ThreadPoolTaskExecutor passwordResetRequestExecutor() {
         var executor = new ThreadPoolTaskExecutor();

@@ -1,0 +1,121 @@
+{
+  "postgres": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+  "database": "acompanhaai_kan27",
+  "configuration": "versioned-copy-without-local-import",
+  "host": "127.0.0.1",
+  "port": 51879,
+  "startedAtUtc": "2026-11-03T05:23:40.7266236+00:00",
+  "finishedAtUtc": "2026-11-03T05:26:56.4707227+00:00",
+  "mavenExitCode": 0,
+  "tests": 98.0,
+  "failures": 0.0,
+  "errors": 0.0,
+  "skipped": 0.0,
+  "suites": [
+    {
+      "name": "com.maiconamaral.acompanhaai.AccountSessionHttpIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.DatabaseMappingIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetConsumptionIntegrationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetDispatcherTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetHttpIntegrationTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetLimitsHttpIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetMailIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetServiceIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PasswordResetTokenIntegrationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.PostgresMigrationIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.ProfileAndApplicationIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.security.PasswordResetRateLimiterTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.UserAuthenticationIntegrationTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.UserPhotoHttpIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.maiconamaral.acompanhaai.UserPhotoIntegrationTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

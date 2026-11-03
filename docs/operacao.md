@@ -6,12 +6,12 @@ Não usar este roteiro como registro de uma publicação realizada.
 
 ## Ambientes e decisões pendentes
 
-| Ambiente | Finalidade | Dados |
-|---|---|---|
+| Ambiente        | Finalidade                       | Dados                                     |
+| --------------- | -------------------------------- | ----------------------------------------- |
 | Desenvolvimento | Implementação e exploração local | Fictícios ou pessoais locais, fora do Git |
-| Testes | Suítes que criam/excluem dados | Exclusivamente descartáveis |
-| Homologação | Validar a release candidate | Massa controlada, separada de produção |
-| Produção | Uso real da versão aprovada | Banco dedicado, acesso restrito |
+| Testes          | Suítes que criam/excluem dados   | Exclusivamente descartáveis               |
+| Homologação     | Validar a release candidate      | Massa controlada, separada de produção    |
+| Produção        | Uso real da versão aprovada      | Banco dedicado, acesso restrito           |
 
 Antes de provisionar, registrar provedor, custo, região, domínio, responsáveis,
 credenciais de serviço, retenção e conectividade. Custos exigem decisão

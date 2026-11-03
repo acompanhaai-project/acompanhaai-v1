@@ -25,18 +25,18 @@ duas contas e multipart real. O Service e a migração V2 foram preservados.
 
 Classe principal: [UserPhotoIntegrationTest](../src/test/java/com/maiconamaral/acompanhaai/UserPhotoIntegrationTest.java).
 
-| Critério | Cenário e teste |
-|---|---|
-| JPEG/PNG por conteúdo | detectsAllowedFormatFromContentInsteadOfFilenameOrDeclaredMime, parametrizado nos dois formatos, com nome .svg e MIME application/octet-stream |
-| Rejeitar conteúdo inválido | invalidEmptyCorruptAndUnsupportedContentDoesNotOverwriteValidPhoto: vazio, SVG, texto, GIF, PNG/JPEG truncados e arquivo acima de 2 MiB declarados como JPEG |
-| Limite inclusivo de bytes | acceptsExactlyTwoMiBAndReencodesDiscardingTrailingContent: 2 MiB aceitos, imagem regravada e marcador extra removido |
-| Limite inclusivo de pixels | acceptsExactlyFourMillionPixelsAndRejectsLargerWithoutReplacingPhoto: 2000×2000 aceitos; 2001×2000 rejeitados preservando os bytes antigos |
-| Substituição | replacementChangesActualContentAndFormatWithoutCreatingAnotherRecord: PNG substituído por JPEG de outras dimensões; somente um registro |
-| Acesso apenas à própria foto | twoAccountsReadReplaceAndDeleteOnlyTheirOwnPhoto: duas contas com fotos diferentes, userId de outra conta ignorado em PUT/DELETE; foto alheia preservada |
-| Autenticação e CSRF | anonymousAccessAndWritesWithoutValidCsrfDoNotChangePhoto: GET/PUT/DELETE anônimos; PUT/DELETE com CSRF ausente e inválido; foto preservada |
-| Multipart sem arquivo | missingMultipartFileIsRejectedWithoutRemovingPhoto: 400 sem alteração |
-| Remoção idempotente e foto opcional | removalIsIdempotentAndProfileKeepsExplicitNullPhotoUrl: DELETE antes do primeiro upload e repetido após upload retorna 204; GET da foto ausente retorna 404; photoUrl existe com valor null |
-| Exclusão da conta remove somente sua foto | deletingAccountCascadesOnlyItsPhotoAndPreservesOtherAccount: FK remove foto da conta excluída, foto da outra conta continua acessível |
+| Critério                                  | Cenário e teste                                                                                                                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JPEG/PNG por conteúdo                     | detectsAllowedFormatFromContentInsteadOfFilenameOrDeclaredMime, parametrizado nos dois formatos, com nome .svg e MIME application/octet-stream                                              |
+| Rejeitar conteúdo inválido                | invalidEmptyCorruptAndUnsupportedContentDoesNotOverwriteValidPhoto: vazio, SVG, texto, GIF, PNG/JPEG truncados e arquivo acima de 2 MiB declarados como JPEG                                |
+| Limite inclusivo de bytes                 | acceptsExactlyTwoMiBAndReencodesDiscardingTrailingContent: 2 MiB aceitos, imagem regravada e marcador extra removido                                                                        |
+| Limite inclusivo de pixels                | acceptsExactlyFourMillionPixelsAndRejectsLargerWithoutReplacingPhoto: 2000×2000 aceitos; 2001×2000 rejeitados preservando os bytes antigos                                                  |
+| Substituição                              | replacementChangesActualContentAndFormatWithoutCreatingAnotherRecord: PNG substituído por JPEG de outras dimensões; somente um registro                                                     |
+| Acesso apenas à própria foto              | twoAccountsReadReplaceAndDeleteOnlyTheirOwnPhoto: duas contas com fotos diferentes, userId de outra conta ignorado em PUT/DELETE; foto alheia preservada                                    |
+| Autenticação e CSRF                       | anonymousAccessAndWritesWithoutValidCsrfDoNotChangePhoto: GET/PUT/DELETE anônimos; PUT/DELETE com CSRF ausente e inválido; foto preservada                                                  |
+| Multipart sem arquivo                     | missingMultipartFileIsRejectedWithoutRemovingPhoto: 400 sem alteração                                                                                                                       |
+| Remoção idempotente e foto opcional       | removalIsIdempotentAndProfileKeepsExplicitNullPhotoUrl: DELETE antes do primeiro upload e repetido após upload retorna 204; GET da foto ausente retorna 404; photoUrl existe com valor null |
+| Exclusão da conta remove somente sua foto | deletingAccountCascadesOnlyItsPhotoAndPreservesOtherAccount: FK remove foto da conta excluída, foto da outra conta continua acessível                                                       |
 
 O teste parametrizado soma duas execuções: onze cenários na classe principal.
 Os testes anteriores em ProfileAndApplicationIntegrationTest foram preservados.

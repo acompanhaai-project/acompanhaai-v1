@@ -7,9 +7,9 @@ As duas rotas possuem cotas independentes. Por padrão, cada rota admite até
 O intervalo de emissão de 60 segundos por conta continua no Service/banco.
 Ele é separado das cotas HTTP, que também contam e-mails desconhecidos.
 
-| Rota | Quando excede o limite |
-|---|---|
-| POST /api/auth/password-reset/request | Mesmo 202 e mensagem genérica; pedido descartado sem consultar a conta |
+| Rota                                  | Quando excede o limite                                                             |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| POST /api/auth/password-reset/request | Mesmo 202 e mensagem genérica; pedido descartado sem consultar a conta             |
 | POST /api/auth/password-reset/confirm | 429 ProblemDetail com Retry-After em segundos, antes de consultar/consumir o token |
 
 Os valores são configuráveis em `app.password-reset.limits.per-ip` e

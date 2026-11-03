@@ -4,15 +4,16 @@ import com.maiconamaral.acompanhaai.dto.PhotoDTO;
 import com.maiconamaral.acompanhaai.entities.UserPhoto;
 import com.maiconamaral.acompanhaai.repositories.*;
 import com.maiconamaral.acompanhaai.services.exceptions.*;
+import java.io.*;
+import java.util.Locale;
+import javax.imageio.ImageIO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import javax.imageio.ImageIO;
-import java.io.*;
-import java.util.Locale;
 
 @Service
 public class UserPhotoService {
+
     public static final int MAX_BYTES = 2 * 1024 * 1024;
     private final UserPhotoRepository repository;
     private final UserRepository users;
@@ -35,13 +36,16 @@ public class UserPhotoService {
 
     @Transactional(readOnly = true)
     public PhotoDTO find(Long userId) {
-        var photo = repository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Foto de perfil não cadastrada."));
+        var photo = repository
+            .findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Foto de perfil não cadastrada."));
         return new PhotoDTO(photo.getContent(), photo.getContentType());
     }
 
     @Transactional
-    public void delete(Long userId) { repository.deleteById(userId); }
+    public void delete(Long userId) {
+        repository.deleteById(userId);
+    }
 
     private PhotoDTO decode(MultipartFile file) {
         // O formato é identificado pelos bytes, sem confiar no nome ou MIME enviado pelo cliente.

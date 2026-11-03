@@ -1,17 +1,21 @@
 package com.maiconamaral.acompanhaai.security;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.LongSupplier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PasswordResetRateLimiter {
-    public enum Route { REQUEST, CONFIRM }
+
+    public enum Route {
+        REQUEST,
+        CONFIRM
+    }
+
     private static final long WINDOW = Duration.ofMinutes(1).toNanos();
     private final int perIp;
     private final int global;
@@ -20,8 +24,9 @@ public class PasswordResetRateLimiter {
 
     @org.springframework.beans.factory.annotation.Autowired
     public PasswordResetRateLimiter(
-            @Value("${app.password-reset.limits.per-ip:10}") int perIp,
-            @Value("${app.password-reset.limits.global:100}") int global) {
+        @Value("${app.password-reset.limits.per-ip:10}") int perIp,
+        @Value("${app.password-reset.limits.global:100}") int global
+    ) {
         this(perIp, global, System::nanoTime);
     }
 
@@ -50,10 +55,14 @@ public class PasswordResetRateLimiter {
     }
 
     private static class Window {
+
         final long startedAt;
         int total;
         // Número de chaves limitado pela cota global; descartadas na próxima janela.
         final Map<String, Integer> byIp = new HashMap<>();
-        Window(long startedAt) { this.startedAt = startedAt; }
+
+        Window(long startedAt) {
+            this.startedAt = startedAt;
+        }
     }
 }

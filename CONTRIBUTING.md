@@ -29,15 +29,15 @@ Formato:
 Usar descrição em minúsculas, sem espaços ou acentos,
 com palavras separadas por hífen. Manter a chave Jira em maiúsculas.
 
-| Tipo | Finalidade |
-|---|---|
-| feature | Nova funcionalidade |
-| fix | Correção de defeito |
-| docs | Documentação |
+| Tipo     | Finalidade                                        |
+| -------- | ------------------------------------------------- |
+| feature  | Nova funcionalidade                               |
+| fix      | Correção de defeito                               |
+| docs     | Documentação                                      |
 | refactor | Reorganização de código sem alterar comportamento |
-| test | Criação ou ajuste de testes |
-| chore | Configuração, ferramentas e manutenção |
-| ci | Pipeline de integração e entrega |
+| test     | Criação ou ajuste de testes                       |
+| chore    | Configuração, ferramentas e manutenção            |
+| ci       | Pipeline de integração e entrega                  |
 
 Exemplos:
 

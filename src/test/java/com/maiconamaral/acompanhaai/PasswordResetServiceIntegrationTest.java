@@ -1,18 +1,12 @@
 package com.maiconamaral.acompanhaai;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 import com.maiconamaral.acompanhaai.entities.User;
 import com.maiconamaral.acompanhaai.repositories.PasswordResetTokenRepository;
 import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.PasswordResetService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import tools.jackson.databind.ObjectMapper;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Clock;
@@ -24,21 +18,36 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @ActiveProfiles("test")
 class PasswordResetServiceIntegrationTest {
+
     private static final String EMAIL = "reset-service@example.test";
     private static final Instant NOW = Instant.parse("2026-11-02T03:00:00Z");
 
-    @Autowired private PasswordResetService service;
-    @Autowired private PasswordResetTokenRepository tokens;
-    @Autowired private UserRepository users;
-    @Autowired private ObjectMapper mapper;
-    @MockitoBean private Clock clock;
+    @Autowired
+    private PasswordResetService service;
+
+    @Autowired
+    private PasswordResetTokenRepository tokens;
+
+    @Autowired
+    private UserRepository users;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @MockitoBean
+    private Clock clock;
 
     @BeforeEach
     void prepareIsolatedDatabaseAndClock() {
@@ -138,8 +147,7 @@ class PasswordResetServiceIntegrationTest {
 
         service.issueToken(EMAIL).orElseThrow();
 
-        assertThat(tokens.findByTokenHash(hash(first.token())).orElseThrow().getUsedAt())
-                .isEqualTo(NOW.plusSeconds(1));
+        assertThat(tokens.findByTokenHash(hash(first.token())).orElseThrow().getUsedAt()).isEqualTo(NOW.plusSeconds(1));
         assertThat(tokens.count()).isEqualTo(2);
     }
 
@@ -192,7 +200,8 @@ class PasswordResetServiceIntegrationTest {
     }
 
     private String hash(String token) throws Exception {
-        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                .digest(token.getBytes(StandardCharsets.UTF_8)));
+        return HexFormat.of().formatHex(
+            MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8))
+        );
     }
 }

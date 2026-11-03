@@ -21,12 +21,12 @@ java -version
 
 ## Matriz de ambientes
 
-| Perfil | Banco configurado | Persistência | Cookie Secure |
-|---|---|---|---|
-| `dev` | H2 em `./data/acompanhaai` | Arquivo local | `false`, apenas local |
-| `test` | H2 em memória | Vida do contexto de teste | `false`, apenas teste |
-| `postgres-local` | PostgreSQL, porta padrão local 5433 | Servidor/volume | `false`, apenas local |
-| Sem perfil | PostgreSQL, porta padrão local 5433 | Servidor/volume | `true` por padrão |
+| Perfil           | Banco configurado                   | Persistência              | Cookie Secure         |
+| ---------------- | ----------------------------------- | ------------------------- | --------------------- |
+| `dev`            | H2 em `./data/acompanhaai`          | Arquivo local             | `false`, apenas local |
+| `test`           | H2 em memória                       | Vida do contexto de teste | `false`, apenas teste |
+| `postgres-local` | PostgreSQL, porta padrão local 5433 | Servidor/volume           | `false`, apenas local |
+| Sem perfil       | PostgreSQL, porta padrão local 5433 | Servidor/volume           | `true` por padrão     |
 
 Produção ainda não está provisionada. O perfil padrão não transforma um banco
 local em banco de produção. Não combinar `dev` e `postgres-local`.
@@ -129,14 +129,14 @@ a senha de um volume já inicializado.
 
 ## Diagnóstico
 
-| Sintoma | Verificação |
-|---|---|
-| Conexão recusada | Serviço iniciado, porta correta e URL efetiva |
-| Autenticação PostgreSQL recusada | Usuário/banco corretos e origem da senha; não colar a senha em logs |
-| Tabelas não criadas | Aplicação chegou a iniciar? Flyway concluiu? Banco/usuário já existem? |
-| Login local não persiste | Perfil local e cookie; Secure exige HTTPS |
-| H2 inesperadamente abre PostgreSQL | Sobrescritas privadas, ambiente e parâmetros da IDE |
-| Perfil não encontrado | Diretório de execução e grafia do argumento |
+| Sintoma                            | Verificação                                                            |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| Conexão recusada                   | Serviço iniciado, porta correta e URL efetiva                          |
+| Autenticação PostgreSQL recusada   | Usuário/banco corretos e origem da senha; não colar a senha em logs    |
+| Tabelas não criadas                | Aplicação chegou a iniciar? Flyway concluiu? Banco/usuário já existem? |
+| Login local não persiste           | Perfil local e cookie; Secure exige HTTPS                              |
+| H2 inesperadamente abre PostgreSQL | Sobrescritas privadas, ambiente e parâmetros da IDE                    |
+| Perfil não encontrado              | Diretório de execução e grafia do argumento                            |
 
 ## Registro de execução
 

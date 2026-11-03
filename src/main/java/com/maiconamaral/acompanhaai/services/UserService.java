@@ -2,18 +2,19 @@ package com.maiconamaral.acompanhaai.services;
 
 import com.maiconamaral.acompanhaai.dto.*;
 import com.maiconamaral.acompanhaai.entities.User;
-import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.repositories.UserPhotoRepository;
+import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.exceptions.*;
+import java.util.Locale;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Locale;
 
 @Service
 public class UserService {
+
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final UserPhotoRepository photos;
@@ -33,7 +34,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDTO findById(Long id) { return new UserDTO(findEntity(id), photos.existsById(id)); }
+    public UserDTO findById(Long id) {
+        return new UserDTO(findEntity(id), photos.existsById(id));
+    }
 
     @Transactional
     public UserDTO update(Long id, UserUpdateDTO dto) {
@@ -55,11 +58,12 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long id) { repository.delete(findEntity(id)); }
+    public void delete(Long id) {
+        repository.delete(findEntity(id));
+    }
 
     private User findEntity(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
     }
 
     private UserDTO save(User user) {

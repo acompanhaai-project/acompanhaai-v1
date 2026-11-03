@@ -1,25 +1,26 @@
 package com.maiconamaral.acompanhaai;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.maiconamaral.acompanhaai.entities.*;
 import com.maiconamaral.acompanhaai.entities.enums.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
+import java.math.BigDecimal;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class DatabaseMappingIntegrationTest {
-    @Autowired private EntityManager em;
+
+    @Autowired
+    private EntityManager em;
 
     private User user(String email) {
         User user = new User("Teste", email, "hash-only-for-persistence-test");
@@ -45,7 +46,11 @@ class DatabaseMappingIntegrationTest {
         Application application = new Application(job);
         em.persist(application);
         ApplicationStatusHistory history = new ApplicationStatusHistory(
-                application, null, ApplicationStatus.SAVED, "Registro inicial");
+            application,
+            null,
+            ApplicationStatus.SAVED,
+            "Registro inicial"
+        );
         em.persist(history);
         ImportTask task = new ImportTask(job.getUser(), ImportInputType.TEXT, "Vaga Java");
         task.setExtractedData(Map.of("title", "Java Developer", "skills", java.util.List.of("Java")));
@@ -63,12 +68,10 @@ class DatabaseMappingIntegrationTest {
         assertThat(loaded.getSalaryMin()).isEqualByComparingTo("4000.00");
         assertThat(loaded.getSalaryPeriod()).isEqualTo(SalaryPeriod.MONTH);
         assertThat(loaded.getCreatedAt()).isNotNull();
-        assertThat(em.find(ImportTask.class, taskId).getExtractedData())
-                .containsEntry("title", "Java Developer");
+        assertThat(em.find(ImportTask.class, taskId).getExtractedData()).containsEntry("title", "Java Developer");
         assertThat(em.find(Application.class, applicationId).getJob().getId()).isEqualTo(jobId);
         assertThat(em.find(JobSkill.class, skillId).getType()).isEqualTo(SkillType.HARD);
-        assertThat(em.find(ApplicationStatusHistory.class, historyId).getToStatus())
-                .isEqualTo(ApplicationStatus.SAVED);
+        assertThat(em.find(ApplicationStatusHistory.class, historyId).getToStatus()).isEqualTo(ApplicationStatus.SAVED);
         loaded.setTitle("Senior Java Developer");
         em.flush();
         assertThat(loaded.getVersion()).isGreaterThan(originalVersion);
@@ -81,8 +84,10 @@ class DatabaseMappingIntegrationTest {
         User other = user("other@example.com");
         ImportTask task = new ImportTask(other, ImportInputType.TEXT, "Descricao");
         task.setJob(job);
-        assertThatThrownBy(() -> { em.persist(task); em.flush(); })
-                .isInstanceOf(PersistenceException.class);
+        assertThatThrownBy(() -> {
+            em.persist(task);
+            em.flush();
+        }).isInstanceOf(PersistenceException.class);
     }
 
     @Test
@@ -90,11 +95,18 @@ class DatabaseMappingIntegrationTest {
         Job job = job(user("owner@example.com"));
         User other = user("other@example.com");
         em.flush();
-        assertThatThrownBy(() -> em.createNativeQuery("""
-                INSERT INTO tb_application (user_id, job_id, status, created_at, updated_at, version)
-                VALUES (:user, :job, 'SAVED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
-                """).setParameter("user", other.getId()).setParameter("job", job.getId()).executeUpdate())
-                .isInstanceOf(PersistenceException.class);
+        assertThatThrownBy(() ->
+            em
+                .createNativeQuery(
+                    """
+                    INSERT INTO tb_application (user_id, job_id, status, created_at, updated_at, version)
+                    VALUES (:user, :job, 'SAVED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+                    """
+                )
+                .setParameter("user", other.getId())
+                .setParameter("job", job.getId())
+                .executeUpdate()
+        ).isInstanceOf(PersistenceException.class);
     }
 
     @Test
@@ -127,7 +139,11 @@ class DatabaseMappingIntegrationTest {
         JobSkill skill = new JobSkill(job, "Java", "java", SkillType.HARD);
         em.persist(skill);
         ApplicationStatusHistory history = new ApplicationStatusHistory(
-                application, null, ApplicationStatus.SAVED, null);
+            application,
+            null,
+            ApplicationStatus.SAVED,
+            null
+        );
         em.persist(history);
         ImportTask task = new ImportTask(owner, ImportInputType.TEXT, "Descricao");
         task.setJob(job);

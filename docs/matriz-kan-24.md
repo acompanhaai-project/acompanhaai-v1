@@ -16,33 +16,33 @@ Esta matriz não representa uma auditoria completa de segurança.
 
 ## Critérios de aceite do Jira
 
-| ID | Critério |
-|---|---|
+| ID  | Critério                                                                                                       |
+| --- | -------------------------------------------------------------------------------------------------------------- |
 | CA1 | Revalidar cadastro, login, logout, consulta, edição e exclusão da própria conta; e-mail duplicado retorna 409. |
-| CA2 | Com login válido, renovar sessão e CSRF; sem sessão retornar 401 e escrita sem CSRF retornar 403. |
-| CA3 | Troca de senha exige senha atual e invalida outras sessões; respostas não expõem senha/hash. |
+| CA2 | Com login válido, renovar sessão e CSRF; sem sessão retornar 401 e escrita sem CSRF retornar 403.              |
+| CA3 | Troca de senha exige senha atual e invalida outras sessões; respostas não expõem senha/hash.                   |
 
 ## Catálogo dos testes existentes
 
 Classe: [UserAuthenticationIntegrationTest.java](../src/test/java/com/maiconamaral/acompanhaai/UserAuthenticationIntegrationTest.java).
 T01 a T14 abaixo são identificadores locais desta matriz, não cartões Jira.
 
-| ID | Método | Verificação principal |
-|---|---|---|
-| T01 | `registrationHashesPasswordNormalizesEmailAndDoesNotExposeSecrets` | Cadastro 201, e-mail normalizado, campos de senha ausentes e hash válido no banco. |
-| T02 | `registrationRejectsDuplicateEmailIgnoringCase` | Duplicidade por caixa do e-mail retorna 409; permanece uma conta. |
-| T03 | `invalidFieldsAndMalformedJsonAreRejected` | Entrada inválida retorna 422, JSON malformado retorna 400 e não há gravação. |
-| T04 | `protectedRoutesRequireAuthenticationAndWritesRequireCsrf` | Consulta anônima retorna 401; cadastro e edição sem CSRF retornam 403. |
-| T05 | `loginReturnsGenericErrorForWrongPasswordAndUnknownEmail` | Login inválido retorna 401 e mensagem genérica para conta conhecida ou desconhecida. |
-| T06 | `realCsrfFlowRotatesSessionAndTokenOnLogin` | Fluxo real de CSRF, rotação do ID da sessão, rejeição do token antigo e logout com token novo. |
-| T07 | `userCanReadAndUpdateOnlyOwnAccount` | Consulta/edição sem senha/hash e tentativa de indicar o ID de B no JSON sem alterar B. |
-| T08 | `updateRejectsAnotherUsersEmail` | Edição para e-mail pertencente a outra conta retorna 409. |
-| T09 | `passwordChangeRequiresCurrentPasswordAndRevokesAllSessions` | Senha atual obrigatória, troca válida, revogação das sessões e login com a nova senha. |
-| T10 | `deleteRemovesOwnAccountAndRevokesItsSessionsWithoutAffectingAnotherAccount` | A removida e suas sessões revogadas; B preservada com sessão ativa e novo login válido. |
-| T11 | `loginWithoutCsrfIsRejectedAndDoesNotAuthenticate` | Credenciais válidas sem CSRF recebem 403; sessão anônima continua sem acesso. |
-| T12 | `logoutWithoutCsrfIsRejectedAndKeepsSessionAuthenticated` | Logout sem CSRF recebe 403 e a sessão continua autenticada. |
-| T13 | `passwordChangeWithoutCsrfIsRejectedAndPreservesPasswordAndSessions` | Troca sem CSRF recebe 403; hash, senha antiga e duas sessões preservados; senha proposta não autentica. |
-| T14 | `accountDeletionWithoutCsrfIsRejectedAndPreservesAccountAndSession` | Exclusão sem CSRF recebe 403; conta e sessão permanecem utilizáveis. |
+| ID  | Método                                                                       | Verificação principal                                                                                   |
+| --- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| T01 | `registrationHashesPasswordNormalizesEmailAndDoesNotExposeSecrets`           | Cadastro 201, e-mail normalizado, campos de senha ausentes e hash válido no banco.                      |
+| T02 | `registrationRejectsDuplicateEmailIgnoringCase`                              | Duplicidade por caixa do e-mail retorna 409; permanece uma conta.                                       |
+| T03 | `invalidFieldsAndMalformedJsonAreRejected`                                   | Entrada inválida retorna 422, JSON malformado retorna 400 e não há gravação.                            |
+| T04 | `protectedRoutesRequireAuthenticationAndWritesRequireCsrf`                   | Consulta anônima retorna 401; cadastro e edição sem CSRF retornam 403.                                  |
+| T05 | `loginReturnsGenericErrorForWrongPasswordAndUnknownEmail`                    | Login inválido retorna 401 e mensagem genérica para conta conhecida ou desconhecida.                    |
+| T06 | `realCsrfFlowRotatesSessionAndTokenOnLogin`                                  | Fluxo real de CSRF, rotação do ID da sessão, rejeição do token antigo e logout com token novo.          |
+| T07 | `userCanReadAndUpdateOnlyOwnAccount`                                         | Consulta/edição sem senha/hash e tentativa de indicar o ID de B no JSON sem alterar B.                  |
+| T08 | `updateRejectsAnotherUsersEmail`                                             | Edição para e-mail pertencente a outra conta retorna 409.                                               |
+| T09 | `passwordChangeRequiresCurrentPasswordAndRevokesAllSessions`                 | Senha atual obrigatória, troca válida, revogação das sessões e login com a nova senha.                  |
+| T10 | `deleteRemovesOwnAccountAndRevokesItsSessionsWithoutAffectingAnotherAccount` | A removida e suas sessões revogadas; B preservada com sessão ativa e novo login válido.                 |
+| T11 | `loginWithoutCsrfIsRejectedAndDoesNotAuthenticate`                           | Credenciais válidas sem CSRF recebem 403; sessão anônima continua sem acesso.                           |
+| T12 | `logoutWithoutCsrfIsRejectedAndKeepsSessionAuthenticated`                    | Logout sem CSRF recebe 403 e a sessão continua autenticada.                                             |
+| T13 | `passwordChangeWithoutCsrfIsRejectedAndPreservesPasswordAndSessions`         | Troca sem CSRF recebe 403; hash, senha antiga e duas sessões preservados; senha proposta não autentica. |
+| T14 | `accountDeletionWithoutCsrfIsRejectedAndPreservesAccountAndSession`          | Exclusão sem CSRF recebe 403; conta e sessão permanecem utilizáveis.                                    |
 
 O auxiliar `login` verifica 200 e ausência de `password` e `passwordHash`.
 O auxiliar `register` envia POST com JSON e CSRF. Cadastro, login, consulta e
@@ -50,22 +50,22 @@ edição usam `doesNotHaveJsonPath()`: os campos não podem existir nem com null
 
 ## Matriz de rastreabilidade
 
-| Critério/cenário | Testes | Evidência e resultado | Avaliação |
-|---|---|---|---|
-| CA1 — cadastro válido | T01 | 201, Location correto, e-mail e data retornados; hash conferido no banco. | Comprovado no cenário |
-| CA1 — login válido e inválido | T05, T06 e auxiliar `login` | Login válido retorna 200 e permite consulta; inválidos retornam 401 genérico. | Comprovado no cenário |
-| CA1 — logout | T06 | Token antigo retorna 403; token novo permite logout 204 e sessão fica inválida. | Comprovado no cenário |
-| CA1 — consulta da própria conta | T07 | Retorna 200 e e-mail de A usando a sessão de A. | Comprovado no cenário |
-| CA1 — edição e isolamento | T07, T08 | A edita o próprio e-mail, mesmo enviando ID de B; B preserva o e-mail; duplicidade retorna 409. | Comprovado nos cenários existentes |
-| CA1 — exclusão da própria conta | T10 | A é removida, suas sessões são revogadas e novo login de A falha; B permanece no banco, consulta o perfil com a sessão existente e faz novo login. | Comprovado no cenário após L3 |
-| CA1 — e-mail duplicado | T02, T08 | Cadastro com variação de caixa e edição conflitante retornam 409. | Comprovado nos cenários existentes |
-| CA2 — rotação da sessão e do CSRF | T06 | ID muda após login; token anterior deixa de funcionar e token novo permite escrita. | Comprovado no cenário |
-| CA2 — acesso sem sessão | T04 | GET /api/users/me sem sessão retorna 401. Outros endpoints protegidos não são enumerados nesta classe. | Comprovado no cenário representativo |
-| CA2 — escrita sem CSRF | T04, T11–T14 | Cadastro, edição, login, logout, troca de senha e exclusão retornam 403 sem CSRF. T11–T14 também verificam a ausência dos efeitos rejeitados. | Comprovado nos cenários após L2 |
-| CA3 — exigir senha atual | T09 | Senha atual errada retorna 401; correta permite troca 204. | Comprovado no cenário |
-| CA3 — revogar sessões após troca | T09 | Sessão atual inválida; segunda sessão recebe 401; senha antiga falha e nova funciona. | Comprovado no cenário |
-| CA3 — respostas sem senha/hash | T01, T07 e auxiliar `login` | Cadastro, login, consulta e edição verificam explicitamente a ausência de password e passwordHash. | Comprovado nos cenários após L1 |
-| Complementar — entradas inválidas | T03 | 400/422 e ausência de gravação. | Comprovado no cenário |
+| Critério/cenário                  | Testes                      | Evidência e resultado                                                                                                                              | Avaliação                            |
+| --------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| CA1 — cadastro válido             | T01                         | 201, Location correto, e-mail e data retornados; hash conferido no banco.                                                                          | Comprovado no cenário                |
+| CA1 — login válido e inválido     | T05, T06 e auxiliar `login` | Login válido retorna 200 e permite consulta; inválidos retornam 401 genérico.                                                                      | Comprovado no cenário                |
+| CA1 — logout                      | T06                         | Token antigo retorna 403; token novo permite logout 204 e sessão fica inválida.                                                                    | Comprovado no cenário                |
+| CA1 — consulta da própria conta   | T07                         | Retorna 200 e e-mail de A usando a sessão de A.                                                                                                    | Comprovado no cenário                |
+| CA1 — edição e isolamento         | T07, T08                    | A edita o próprio e-mail, mesmo enviando ID de B; B preserva o e-mail; duplicidade retorna 409.                                                    | Comprovado nos cenários existentes   |
+| CA1 — exclusão da própria conta   | T10                         | A é removida, suas sessões são revogadas e novo login de A falha; B permanece no banco, consulta o perfil com a sessão existente e faz novo login. | Comprovado no cenário após L3        |
+| CA1 — e-mail duplicado            | T02, T08                    | Cadastro com variação de caixa e edição conflitante retornam 409.                                                                                  | Comprovado nos cenários existentes   |
+| CA2 — rotação da sessão e do CSRF | T06                         | ID muda após login; token anterior deixa de funcionar e token novo permite escrita.                                                                | Comprovado no cenário                |
+| CA2 — acesso sem sessão           | T04                         | GET /api/users/me sem sessão retorna 401. Outros endpoints protegidos não são enumerados nesta classe.                                             | Comprovado no cenário representativo |
+| CA2 — escrita sem CSRF            | T04, T11–T14                | Cadastro, edição, login, logout, troca de senha e exclusão retornam 403 sem CSRF. T11–T14 também verificam a ausência dos efeitos rejeitados.      | Comprovado nos cenários após L2      |
+| CA3 — exigir senha atual          | T09                         | Senha atual errada retorna 401; correta permite troca 204.                                                                                         | Comprovado no cenário                |
+| CA3 — revogar sessões após troca  | T09                         | Sessão atual inválida; segunda sessão recebe 401; senha antiga falha e nova funciona.                                                              | Comprovado no cenário                |
+| CA3 — respostas sem senha/hash    | T01, T07 e auxiliar `login` | Cadastro, login, consulta e edição verificam explicitamente a ausência de password e passwordHash.                                                 | Comprovado nos cenários após L1      |
+| Complementar — entradas inválidas | T03                         | 400/422 e ausência de gravação.                                                                                                                    | Comprovado no cenário                |
 
 ## Acompanhamento das lacunas de cobertura
 
@@ -209,12 +209,12 @@ migrações V1 a V5 aplicadas.
 ./mvnw.cmd verify "-Dspring.datasource.url=jdbc:h2:mem:acompanhaai-kan24-final;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1" "-Dspring.datasource.username=sa" "-Dspring.datasource.password="
 ```
 
-| Classe | Executados | Falhas | Erros | Ignorados |
-|---|---|---|---|---|
-| DatabaseMappingIntegrationTest | 6 | 0 | 0 | 0 |
-| ProfileAndApplicationIntegrationTest | 10 | 0 | 0 | 0 |
-| UserAuthenticationIntegrationTest | 14 | 0 | 0 | 0 |
-| Total | 30 | 0 | 0 | 0 |
+| Classe                               | Executados | Falhas | Erros | Ignorados |
+| ------------------------------------ | ---------- | ------ | ----- | --------- |
+| DatabaseMappingIntegrationTest       | 6          | 0      | 0     | 0         |
+| ProfileAndApplicationIntegrationTest | 10         | 0      | 0     | 0         |
+| UserAuthenticationIntegrationTest    | 14         | 0      | 0     | 0         |
+| Total                                | 30         | 0      | 0     | 0         |
 
 ```text
 BUILD SUCCESS

@@ -5,11 +5,6 @@ import com.maiconamaral.acompanhaai.entities.PasswordResetToken;
 import com.maiconamaral.acompanhaai.repositories.PasswordResetTokenRepository;
 import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.exceptions.InvalidPasswordResetTokenException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,9 +15,14 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Optional;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PasswordResetService {
+
     private static final Duration TOKEN_LIFETIME = Duration.ofMinutes(30);
     private static final Duration REQUEST_COOLDOWN = Duration.ofMinutes(1);
 
@@ -33,8 +33,13 @@ public class PasswordResetService {
     private final ApplicationEventPublisher events;
     private final SecureRandom random = new SecureRandom();
 
-    public PasswordResetService(UserRepository users, PasswordResetTokenRepository tokens, Clock clock,
-                                PasswordEncoder passwordEncoder, ApplicationEventPublisher events) {
+    public PasswordResetService(
+        UserRepository users,
+        PasswordResetTokenRepository tokens,
+        Clock clock,
+        PasswordEncoder passwordEncoder,
+        ApplicationEventPublisher events
+    ) {
         this.users = users;
         this.tokens = tokens;
         this.clock = clock;
@@ -83,19 +88,15 @@ public class PasswordResetService {
         if (rawToken == null || !rawToken.matches("[A-Za-z0-9_-]{43}")) {
             throw new InvalidPasswordResetTokenException();
         }
-        if (newPassword == null || newPassword.isBlank()
-                || newPassword.length() < 8 || newPassword.length() > 128) {
+        if (newPassword == null || newPassword.isBlank() || newPassword.length() < 8 || newPassword.length() > 128) {
             throw new IllegalArgumentException("A nova senha deve conter de 8 a 128 caracteres e não pode ser vazia.");
         }
 
         String hash = hashToken(rawToken);
-        Long userId = tokens.findUserIdByTokenHash(hash)
-                .orElseThrow(InvalidPasswordResetTokenException::new);
+        Long userId = tokens.findUserIdByTokenHash(hash).orElseThrow(InvalidPasswordResetTokenException::new);
         // Mesmo bloqueio da emissão: depois de esperar, consultar novamente o token.
-        var user = users.findByIdForUpdate(userId)
-                .orElseThrow(InvalidPasswordResetTokenException::new);
-        var token = tokens.findByTokenHash(hash)
-                .orElseThrow(InvalidPasswordResetTokenException::new);
+        var user = users.findByIdForUpdate(userId).orElseThrow(InvalidPasswordResetTokenException::new);
+        var token = tokens.findByTokenHash(hash).orElseThrow(InvalidPasswordResetTokenException::new);
         Instant now = clock.instant();
         if (!token.isUsableAt(now)) {
             throw new InvalidPasswordResetTokenException();
@@ -109,8 +110,9 @@ public class PasswordResetService {
 
     private static String hashToken(String rawToken) {
         try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(rawToken.getBytes(StandardCharsets.UTF_8)));
+            return HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-256").digest(rawToken.getBytes(StandardCharsets.UTF_8))
+            );
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 indisponível.", exception);
         }

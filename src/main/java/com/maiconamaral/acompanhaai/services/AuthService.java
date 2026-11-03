@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
     private final AuthenticationManager authenticationManager;
 
     public AuthService(AuthenticationManager authenticationManager) {
@@ -15,6 +16,7 @@ public class AuthService {
 
     public Authentication login(LoginDTO dto) {
         return authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(dto.email(), dto.password()));
+            UsernamePasswordAuthenticationToken.unauthenticated(dto.email(), dto.password())
+        );
     }
 }

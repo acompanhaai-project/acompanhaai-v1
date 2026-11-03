@@ -1,5 +1,13 @@
 package com.maiconamaral.acompanhaai;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -8,6 +16,11 @@ import com.maiconamaral.acompanhaai.entities.User;
 import com.maiconamaral.acompanhaai.repositories.PasswordResetTokenRepository;
 import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.PasswordResetService;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,49 +42,63 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @SpringBootTest(properties = "app.password-reset.mail.enabled=true")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class PasswordResetMailIntegrationTest {
+
     private static final String EMAIL = "mail-flow@example.test";
     private static final String OLD = "SenhaAnterior123!";
     private static final String NEW = "NovaSenha123!";
     private static final Instant NOW = Instant.parse("2026-11-02T03:00:00Z");
-    private static final GreenMail SMTP = new GreenMail(new ServerSetup(0, "127.0.0.1", "smtp"))
-            .withConfiguration(GreenMailConfiguration.aConfig().withDisabledAuthentication());
-    static { SMTP.start(); }
+    private static final GreenMail SMTP = new GreenMail(new ServerSetup(0, "127.0.0.1", "smtp")).withConfiguration(
+        GreenMailConfiguration.aConfig().withDisabledAuthentication()
+    );
+
+    static {
+        SMTP.start();
+    }
 
     @DynamicPropertySource
     static void smtpProperties(DynamicPropertyRegistry registry) {
         registry.add("app.password-reset.mail.port", () -> SMTP.getSmtp().getPort());
     }
 
-    @Autowired private MockMvc mvc;
-    @Autowired private ObjectMapper mapper;
-    @Autowired private UserRepository users;
-    @Autowired private PasswordResetTokenRepository tokens;
-    @Autowired private PasswordResetService service;
-    @Autowired private PasswordEncoder encoder;
-    @Autowired private PlatformTransactionManager transactions;
-    @Autowired private JavaMailSender sender;
-    @Autowired @Qualifier("passwordResetMailExecutor") private ThreadPoolTaskExecutor executor;
-    @Autowired @Qualifier("passwordResetRequestExecutor") private ThreadPoolTaskExecutor requests;
-    @MockitoBean private Clock clock;
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Autowired
+    private UserRepository users;
+
+    @Autowired
+    private PasswordResetTokenRepository tokens;
+
+    @Autowired
+    private PasswordResetService service;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
+    @Autowired
+    private PlatformTransactionManager transactions;
+
+    @Autowired
+    private JavaMailSender sender;
+
+    @Autowired
+    @Qualifier("passwordResetMailExecutor")
+    private ThreadPoolTaskExecutor executor;
+
+    @Autowired
+    @Qualifier("passwordResetRequestExecutor")
+    private ThreadPoolTaskExecutor requests;
+
+    @MockitoBean
+    private Clock clock;
 
     @BeforeEach
     void prepare() throws Exception {
@@ -90,44 +117,80 @@ class PasswordResetMailIntegrationTest {
     }
 
     @AfterAll
-    static void stopSmtp() { SMTP.stop(); }
+    static void stopSmtp() {
+        SMTP.stop();
+    }
 
     @Test
     void fullHttpFlowReceivesEmailConsumesTokenRevokesSessionAndLogsInWithNewPassword() throws Exception {
-        var oldSession = (MockHttpSession) mvc.perform(post("/api/auth/login").with(csrf())
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of("email", EMAIL, "password", OLD))))
-                .andExpect(status().isOk()).andReturn().getRequest().getSession(false);
+        var oldSession = (MockHttpSession) mvc
+            .perform(
+                post("/api/auth/login")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json(Map.of("email", EMAIL, "password", OLD)))
+            )
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
         var csrfResult = mvc.perform(get("/api/auth/csrf")).andExpect(status().isOk()).andReturn();
         var anonymous = (MockHttpSession) csrfResult.getRequest().getSession(false);
         String csrfToken = JsonPath.read(csrfResult.getResponse().getContentAsString(), "$.token");
 
-        String response = mvc.perform(post("/api/auth/password-reset/request").session(anonymous)
-                .header("X-CSRF-TOKEN", csrfToken).header("Host", "untrusted.example")
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of("email", EMAIL))))
-                .andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString();
+        String response = mvc
+            .perform(
+                post("/api/auth/password-reset/request")
+                    .session(anonymous)
+                    .header("X-CSRF-TOKEN", csrfToken)
+                    .header("Host", "untrusted.example")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json(Map.of("email", EMAIL)))
+            )
+            .andExpect(status().isAccepted())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
         String token = receivedToken();
         var message = SMTP.getReceivedMessages()[0];
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo(EMAIL);
         assertThat(message.getFrom()[0].toString()).isEqualTo("noreply@acompanhaai.test");
         assertThat(message.getSubject()).contains("recuperação de senha");
         String body = (String) message.getContent();
-        assertThat(body).contains("http://localhost:4200/reset-password#token=", "2026-11-02T03:30:00Z")
-                .doesNotContain("untrusted.example", OLD, NEW);
+        assertThat(body)
+            .contains("http://localhost:4200/reset-password#token=", "2026-11-02T03:30:00Z")
+            .doesNotContain("untrusted.example", OLD, NEW);
         assertThat(response).doesNotContain(token, EMAIL);
         assertThat(tokens.findAll().getFirst().getTokenHash()).doesNotContain(token);
 
         String confirmation = json(Map.of("token", token, "newPassword", NEW));
-        mvc.perform(post("/api/auth/password-reset/confirm").session(anonymous)
-                .header("X-CSRF-TOKEN", csrfToken).contentType(MediaType.APPLICATION_JSON).content(confirmation))
-                .andExpect(status().isNoContent());
-        mvc.perform(post("/api/auth/password-reset/confirm").with(csrf())
-                .contentType(MediaType.APPLICATION_JSON).content(confirmation)).andExpect(status().isBadRequest());
+        mvc.perform(
+            post("/api/auth/password-reset/confirm")
+                .session(anonymous)
+                .header("X-CSRF-TOKEN", csrfToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(confirmation)
+        ).andExpect(status().isNoContent());
+        mvc.perform(
+            post("/api/auth/password-reset/confirm")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(confirmation)
+        ).andExpect(status().isBadRequest());
         mvc.perform(get("/api/users/me").session(anonymous)).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/users/me").session(oldSession)).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("email", EMAIL, "password", OLD)))).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("email", EMAIL, "password", NEW)))).andExpect(status().isOk());
+        mvc.perform(
+            post("/api/auth/login")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(Map.of("email", EMAIL, "password", OLD)))
+        ).andExpect(status().isUnauthorized());
+        mvc.perform(
+            post("/api/auth/login")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(Map.of("email", EMAIL, "password", NEW)))
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -144,11 +207,13 @@ class PasswordResetMailIntegrationTest {
     @Test
     void rollbackDoesNotSubmitMailAndDoesNotPersistToken() {
         long tasks = executor.getThreadPoolExecutor().getTaskCount();
-        assertThatThrownBy(() -> new TransactionTemplate(transactions).executeWithoutResult(status -> {
-            service.requestReset(EMAIL);
-            assertThat(SMTP.getReceivedMessages()).isEmpty();
-            throw new IllegalStateException("Rollback de teste");
-        })).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() ->
+            new TransactionTemplate(transactions).executeWithoutResult(status -> {
+                service.requestReset(EMAIL);
+                assertThat(SMTP.getReceivedMessages()).isEmpty();
+                throw new IllegalStateException("Rollback de teste");
+            })
+        ).isInstanceOf(IllegalStateException.class);
         idle();
         assertThat(executor.getThreadPoolExecutor().getTaskCount()).isEqualTo(tasks);
         assertThat(SMTP.getReceivedMessages()).isEmpty();
@@ -186,15 +251,26 @@ class PasswordResetMailIntegrationTest {
     }
 
     private String request(String email) throws Exception {
-        String response = mvc.perform(post("/api/auth/password-reset/request").with(csrf())
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of("email", email))))
-                .andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString();
+        String response = mvc
+            .perform(
+                post("/api/auth/password-reset/request")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json(Map.of("email", email)))
+            )
+            .andExpect(status().isAccepted())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
         idle();
         return response;
     }
 
     private String receivedToken() throws Exception {
-        assertThat(SMTP.waitForIncomingEmail(5000, 1)).isTrue();
+        // A resposta 202 precede duas filas: emissão/commit e entrega SMTP.
+        // Confira a entrega somente após a conclusão dos dois estágios.
+        idle();
+        assertThat(SMTP.getReceivedMessages()).as("mensagem entregue pelo SMTP local").hasSize(1);
         String body = (String) SMTP.getReceivedMessages()[0].getContent();
         var match = Pattern.compile("#token=([A-Za-z0-9_-]{43})").matcher(body);
         assertThat(match.find()).isTrue();
@@ -202,11 +278,22 @@ class PasswordResetMailIntegrationTest {
     }
 
     private void idle() {
-        await().atMost(Duration.ofSeconds(10)).until(() -> requests.getActiveCount() == 0
-                && requests.getThreadPoolExecutor().getQueue().isEmpty());
-        await().atMost(Duration.ofSeconds(10)).until(() -> executor.getActiveCount() == 0
-                && executor.getThreadPoolExecutor().getQueue().isEmpty());
+        idle(requests, "emissão e commit do token");
+        idle(executor, "entrega SMTP após commit");
     }
 
-    private String json(Map<String, String> values) { return mapper.writeValueAsString(values); }
+    private void idle(ThreadPoolTaskExecutor stage, String description) {
+        await(description)
+            .atMost(Duration.ofSeconds(10))
+            .untilAsserted(() -> {
+                var pool = stage.getThreadPoolExecutor();
+                assertThat(pool.getQueue()).isEmpty();
+                assertThat(pool.getActiveCount()).isZero();
+                assertThat(pool.getCompletedTaskCount()).isEqualTo(pool.getTaskCount());
+            });
+    }
+
+    private String json(Map<String, String> values) {
+        return mapper.writeValueAsString(values);
+    }
 }

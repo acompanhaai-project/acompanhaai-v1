@@ -167,9 +167,7 @@
         "Definir branches curtas com chave KAN, template de PR, revisão e proteção da branch principal.",
         "Configurar .gitignore e checagem de segredos; manter credenciais locais e relatórios de sessão fora do Git."
       ],
-      "depends": [
-        "T01"
-      ],
+      "depends": ["T01"],
       "baseline": false
     },
     {
@@ -199,9 +197,7 @@
         "Executar as migrações em banco vazio de desenvolvimento e separar banco de testes.",
         "Confirmar cookie local HTTP e produção HTTPS; nenhuma senha ou usuário administrador é copiado para exemplos versionados."
       ],
-      "depends": [
-        "T02"
-      ],
+      "depends": ["T02"],
       "baseline": true
     },
     {
@@ -216,9 +212,7 @@
         "Registrar baseline histórico: 26 testes de integração e coleção v1 com 90 requisições/246 asserções; executar novamente e anexar resultado atual.",
         "Conferir hashes da fixture v1 e planejar novas verificações exclusivamente em v2."
       ],
-      "depends": [
-        "T01"
-      ],
+      "depends": ["T01"],
       "baseline": true
     },
     {
@@ -233,10 +227,7 @@
         "Executar build/testes em PR e publicar relatórios de teste e artefato, sem credenciais no log.",
         "Demonstrar um PR com sucesso e um teste falhando que bloqueia merge."
       ],
-      "depends": [
-        "T02",
-        "T04"
-      ],
+      "depends": ["T02", "T04"],
       "baseline": false
     },
     {
@@ -252,9 +243,7 @@
         "Com login válido, renovar sessão e CSRF; sem sessão retornar 401 e escrita sem CSRF retornar 403.",
         "Troca de senha exige senha atual e invalida outras sessões; respostas não expõem senha/hash."
       ],
-      "depends": [
-        "T04"
-      ],
+      "depends": ["T04"],
       "baseline": true
     },
     {
@@ -270,10 +259,7 @@
         "Token aleatório é armazenado como hash, expira em até 30 minutos e só pode ser usado uma vez.",
         "Senha alterada revoga sessões; testes cobrem token inválido, expirado e repetido; envio de e-mail usa ambiente de testes."
       ],
-      "depends": [
-        "US01",
-        "T10"
-      ],
+      "depends": ["US01", "T10"],
       "baseline": false
     },
     {
@@ -288,9 +274,7 @@
         "Revalidar substituição, remoção idempotente e acesso apenas à foto da própria conta.",
         "Exclusão de conta remove foto; frontend futuro terá avatar padrão quando photoUrl for nulo."
       ],
-      "depends": [
-        "US01"
-      ],
+      "depends": ["US01"],
       "baseline": true
     },
     {
@@ -305,11 +289,7 @@
         "Usar banco de testes isolado; garantir que os testes não apagam dados pessoais do banco de desenvolvimento.",
         "Anexar relatórios, ambiente, versão e passos de reprodução para cada falha."
       ],
-      "depends": [
-        "US01",
-        "US02",
-        "T07"
-      ],
+      "depends": ["US01", "US02", "T07"],
       "baseline": false
     },
     {
@@ -324,9 +304,7 @@
         "Separar severidade de prioridade e definir SLA didático de triagem para crítico/alto.",
         "Definir: reportado → triagem → correção → revisão → reteste → fechado/reaberto; vincular bugs à história e à release. Não cadastrar defeitos fictícios como reais."
       ],
-      "depends": [
-        "T05"
-      ],
+      "depends": ["T05"],
       "baseline": false
     },
     {
@@ -341,9 +319,7 @@
         "Configurar segredos por ambiente e envio de e-mail de testes sem usar destinatários reais.",
         "Documentar rotação e confirmar que logs/artefatos não contêm senha, token de recuperação ou cookie."
       ],
-      "depends": [
-        "T04"
-      ],
+      "depends": ["T04"],
       "baseline": false
     },
     {
@@ -359,9 +335,7 @@
         "Salário ausente permanece nulo; faixa usa decimal exato, moeda e periodicidade explícitas, sem inferir valores.",
         "Validar faixa invertida, tamanhos, habilidades duplicadas e propriedade; migração preserva dados existentes."
       ],
-      "depends": [
-        "US01"
-      ],
+      "depends": ["US01"],
       "baseline": false
     },
     {
@@ -377,9 +351,7 @@
         "Atualização de status e evento no histórico são atômicos; editar observações não cria evento de status.",
         "Versão antiga retorna 409; acesso de outro usuário retorna 404; SAVED não aceita data de inscrição."
       ],
-      "depends": [
-        "US03"
-      ],
+      "depends": ["US03"],
       "baseline": true
     },
     {
@@ -394,10 +366,7 @@
         "Definir normalização conservadora de URL, preservando identificadores e conferindo colisão de hash.",
         "Documentar e testar o efeito da exclusão sobre vaga, histórico, habilidades e tarefas vinculadas."
       ],
-      "depends": [
-        "US03",
-        "US04"
-      ],
+      "depends": ["US03", "US04"],
       "baseline": false
     },
     {
@@ -412,11 +381,7 @@
         "Cobrir sucesso, payload inválido, autorização, versão antiga, duplicidade e rollback de transações.",
         "Executar regressão em PostgreSQL de testes com limpeza restrita às contas criadas."
       ],
-      "depends": [
-        "US03",
-        "US04",
-        "T11"
-      ],
+      "depends": ["US03", "US04", "T11"],
       "baseline": false
     },
     {
@@ -431,10 +396,7 @@
         "Verificar FKs, tipos monetários, JSONB e concorrência no PostgreSQL; H2 permanece teste rápido complementar.",
         "Definir política de migrações imutáveis e demonstrar atualização preservando registros."
       ],
-      "depends": [
-        "T06",
-        "US03"
-      ],
+      "depends": ["T06", "US03"],
       "baseline": false
     },
     {
@@ -449,10 +411,7 @@
         "Registrar exemplos de 401, 403, 409 e 422 e estratégia de renovação de CSRF após login.",
         "Revisar exemplos com frontend e QA e vincular o contrato aos critérios das histórias."
       ],
-      "depends": [
-        "US03",
-        "US04"
-      ],
+      "depends": ["US03", "US04"],
       "baseline": false
     },
     {
@@ -468,12 +427,7 @@
         "Renovar CSRF após login e tratar sessão expirada; estado autenticado deve refletir a API.",
         "Rotas privadas redirecionam para login e nenhum segredo é persistido no localStorage."
       ],
-      "depends": [
-        "US01",
-        "US02",
-        "T14",
-        "T16"
-      ],
+      "depends": ["US01", "US02", "T14", "T16"],
       "baseline": false
     },
     {
@@ -489,10 +443,7 @@
         "Enviar, substituir e remover foto com preview, limites e avatar padrão; apresentar erros do servidor.",
         "Excluir conta exige confirmação e encerra sessão; navegação por teclado é funcional."
       ],
-      "depends": [
-        "US05",
-        "T07"
-      ],
+      "depends": ["US05", "T07"],
       "baseline": false
     },
     {
@@ -507,10 +458,7 @@
         "Definir layout responsivo, tokens de cor/tipografia, componentes de formulário e estados vazio/loading/erro.",
         "Organizar módulos/domínios e lint; padronizar acessibilidade e textos em português."
       ],
-      "depends": [
-        "T02",
-        "T14"
-      ],
+      "depends": ["T02", "T14"],
       "baseline": false
     },
     {
@@ -525,10 +473,7 @@
         "Definir proxy local ou mesma origem e política explícita de CORS quando necessário; não usar wildcard com credenciais.",
         "Mapear ProblemDetail e erros de segurança para mensagens úteis e testar 401/403/409/422."
       ],
-      "depends": [
-        "T15",
-        "T14"
-      ],
+      "depends": ["T15", "T14"],
       "baseline": false
     },
     {
@@ -543,10 +488,7 @@
         "Executar cenários de teclado, foco, erros de campo e sessão expirada em viewport desktop e mobile.",
         "Anexar evidência sem senha/cookie e abrir Bugs reais vinculados às histórias."
       ],
-      "depends": [
-        "US05",
-        "US06"
-      ],
+      "depends": ["US05", "US06"],
       "baseline": false
     },
     {
@@ -561,10 +503,7 @@
         "Gerar artefato identificável e validar ausência de chaves de IA ou senha em bundle.",
         "Documentar execução local integrada e falha de build que bloqueia merge."
       ],
-      "depends": [
-        "T06",
-        "T15"
-      ],
+      "depends": ["T06", "T15"],
       "baseline": false
     },
     {
@@ -580,11 +519,7 @@
         "Permitir mudança por controle acessível; arrastar e soltar, se implementado, terá alternativa por teclado.",
         "Salvar alteração na API; em conflito de versão, preservar contexto e oferecer recarregamento; exibir erro sem fingir sucesso."
       ],
-      "depends": [
-        "US04",
-        "US05",
-        "T16"
-      ],
+      "depends": ["US04", "US05", "T16"],
       "baseline": false
     },
     {
@@ -600,11 +535,7 @@
         "Detalhes exibem histórico em ordem e ausência de salário sem apresentar zero.",
         "Excluir candidatura exige confirmação e atualiza listagem; mensagens explicam duplicidade e validações."
       ],
-      "depends": [
-        "US03",
-        "US04",
-        "US07"
-      ],
+      "depends": ["US03", "US04", "US07"],
       "baseline": false
     },
     {
@@ -619,10 +550,7 @@
         "Preservar filtros ao abrir/voltar dos detalhes e distinguir lista vazia de nenhum resultado.",
         "Testar combinações, reset de filtro e ausência de registros de outras contas."
       ],
-      "depends": [
-        "US07",
-        "T14"
-      ],
+      "depends": ["US07", "T14"],
       "baseline": false
     },
     {
@@ -637,11 +565,7 @@
         "Validar duas contas, conflito 409 e erro de rede com dados exclusivos e limpeza.",
         "Publicar relatório no CI; falhas relevantes geram Bug com evidência reproduzível."
       ],
-      "depends": [
-        "US07",
-        "US08",
-        "T19"
-      ],
+      "depends": ["US07", "US08", "T19"],
       "baseline": false
     },
     {
@@ -656,10 +580,7 @@
         "Executar viewport mobile sem depender apenas de cores ou de arrastar e soltar.",
         "Registrar achados reais e retestar correções antes da aceitação."
       ],
-      "depends": [
-        "US07",
-        "US08"
-      ],
+      "depends": ["US07", "US08"],
       "baseline": false
     },
     {
@@ -674,10 +595,7 @@
         "Garantir mesma origem ou CORS restrito, cookies coerentes e massa fictícia identificada.",
         "Documentar acesso, atualização, limpeza e custo previsto; segredos ficam fora do frontend."
       ],
-      "depends": [
-        "T18",
-        "T10"
-      ],
+      "depends": ["T18", "T10"],
       "baseline": false
     },
     {
@@ -693,11 +611,7 @@
         "Coletar conteúdo com timeout e tamanho máximo e priorizar JobPosting estruturado quando disponível.",
         "Página bloqueada/login/JavaScript não suportado gera NEEDS_INPUT com orientação para colar descrição, sem contornar restrições."
       ],
-      "depends": [
-        "US03",
-        "US04",
-        "T23"
-      ],
+      "depends": ["US03", "US04", "T23"],
       "baseline": false
     },
     {
@@ -713,10 +627,7 @@
         "Manter estados e contrato compatíveis com importação por URL e separar coleta de extração.",
         "Validar entrada vazia, tamanho, propriedade e cancelamento/expiração conforme contrato."
       ],
-      "depends": [
-        "T26",
-        "T23"
-      ],
+      "depends": ["T26", "T23"],
       "baseline": false
     },
     {
@@ -731,9 +642,7 @@
         "Recuperar execução interrompida após expiração e impedir gravação de worker antigo.",
         "Limitar concorrência/tentativas e descartar resultado se a tarefa ou conta tiver sido excluída."
       ],
-      "depends": [
-        "T26"
-      ],
+      "depends": ["T26"],
       "baseline": false
     },
     {
@@ -748,10 +657,7 @@
         "Revalidar redirecionamentos e resolução DNS; testar portas, IPv6, respostas enormes e lentas.",
         "Exercitar os casos com servidores controlados/simulações, sem acessar recursos internos reais."
       ],
-      "depends": [
-        "US09",
-        "T23"
-      ],
+      "depends": ["US09", "T23"],
       "baseline": false
     },
     {
@@ -766,9 +672,7 @@
         "Registrar métricas por estado/erro e duração sem armazenar tokens ou conteúdo pessoal em logs.",
         "Definir comportamento de sobrecarga com resposta clara e controle de uso."
       ],
-      "depends": [
-        "T23"
-      ],
+      "depends": ["T23"],
       "baseline": false
     },
     {
@@ -783,10 +687,7 @@
         "Definir limites de retenção para texto coletado, resultados e falhas; vaga confirmada deve sobreviver à limpeza.",
         "Publicar OpenAPI e exemplos que permitam ao frontend acompanhar e oferecer fallback."
       ],
-      "depends": [
-        "US03",
-        "US04"
-      ],
+      "depends": ["US03", "US04"],
       "baseline": false
     },
     {
@@ -802,12 +703,7 @@
         "Preservar evidência/origem por campo, validar JSON e manter informações ausentes como nulo/lista vazia.",
         "Priorizar dados estruturados válidos e não executar instruções encontradas no conteúdo da vaga."
       ],
-      "depends": [
-        "US09",
-        "US10",
-        "T23",
-        "T27"
-      ],
+      "depends": ["US09", "US10", "T23", "T27"],
       "baseline": false
     },
     {
@@ -823,10 +719,7 @@
         "Confirmação valida os campos e cria/atualiza vaga e habilidades junto com a conclusão da tarefa em uma transação.",
         "Segunda confirmação não duplica vagas; reimportação não sobrescreve alterações manuais sem revisão e controle de versão."
       ],
-      "depends": [
-        "US11",
-        "US03"
-      ],
+      "depends": ["US11", "US03"],
       "baseline": false
     },
     {
@@ -841,9 +734,7 @@
         "Configurar modelo/chave no backend; não enviar currículo, notas pessoais ou credenciais com a descrição.",
         "Validar o contrato JSON e permitir trocar provedor por configuração sem alterar regras de candidaturas."
       ],
-      "depends": [
-        "T26"
-      ],
+      "depends": ["T26"],
       "baseline": false
     },
     {
@@ -858,10 +749,7 @@
         "Definir meta inicial: zero salários inventados e ao menos 90% de acerto de título/empresa explícitos, registrando resultados por campo.",
         "Separar testes determinísticos de contrato das avaliações reais do modelo; preservar versão do conjunto."
       ],
-      "depends": [
-        "US11",
-        "T27"
-      ],
+      "depends": ["US11", "T27"],
       "baseline": false
     },
     {
@@ -876,9 +764,7 @@
         "Definir cotas por usuário, limites de tokens e orçamento/configuração de desligamento da IA.",
         "Falha externa não perde a candidatura nem bloqueia cadastro manual; registrar métricas sem conteúdo sensível."
       ],
-      "depends": [
-        "T27"
-      ],
+      "depends": ["T27"],
       "baseline": false
     },
     {
@@ -893,11 +779,7 @@
         "Provar que confirmação duplicada e worker atrasado não geram registros duplicados.",
         "Anexar evidência de integridade e teste de isolamento entre contas."
       ],
-      "depends": [
-        "US12",
-        "T28",
-        "T29"
-      ],
+      "depends": ["US12", "T28", "T29"],
       "baseline": false
     },
     {
@@ -913,11 +795,7 @@
         "Polling tem intervalo/limite e é interrompido ao sair ou finalizar; recarregar recupera o estado pela API.",
         "Distinguir bloqueio do site, conteúdo ausente e cota indisponível com alternativa de descrição colada."
       ],
-      "depends": [
-        "T26",
-        "US11",
-        "US05"
-      ],
+      "depends": ["T26", "US11", "US05"],
       "baseline": false
     },
     {
@@ -933,11 +811,7 @@
         "Permitir preencher salário/habilidades e escolher salvar como interesse ou registrar inscrição.",
         "Evitar duplo envio e tratar 409 sem perda das correções; confirmar somente após ação do usuário."
       ],
-      "depends": [
-        "US12",
-        "US13",
-        "US08"
-      ],
+      "depends": ["US12", "US13", "US08"],
       "baseline": false
     },
     {
@@ -952,11 +826,7 @@
         "Cobrir recarga, sessão expirada, falha recuperável e repetição de clique sem duplicatas.",
         "Manter teste real de integração com IA separado, com limite de consumo e sem dados pessoais."
       ],
-      "depends": [
-        "US13",
-        "US14",
-        "T30"
-      ],
+      "depends": ["US13", "US14", "T30"],
       "baseline": false
     },
     {
@@ -971,10 +841,7 @@
         "Verificar que ausência de salário não é confundida com zero e que texto da página não é renderizado como HTML executável.",
         "Conduzir demonstração com roteiro de sucesso e fallback e registrar ajustes de UX."
       ],
-      "depends": [
-        "US13",
-        "US14"
-      ],
+      "depends": ["US13", "US14"],
       "baseline": false
     },
     {
@@ -989,11 +856,7 @@
         "Orientar primeiro uso, diferenças entre etapas e importação por texto sem expor termos internos de infraestrutura.",
         "Cobrir loading, vazio, falha, nenhum resultado e confirmação de ações destrutivas."
       ],
-      "depends": [
-        "US07",
-        "US13",
-        "US14"
-      ],
+      "depends": ["US07", "US13", "US14"],
       "baseline": false
     },
     {
@@ -1008,10 +871,7 @@
         "Testar exclusão de conta durante tarefa ativa e remoção dos dados associados.",
         "Registrar política de retenção e operação; não guardar descrição em logs por padrão."
       ],
-      "depends": [
-        "T26",
-        "US12"
-      ],
+      "depends": ["T26", "US12"],
       "baseline": false
     },
     {
@@ -1027,13 +887,7 @@
         "Registrar aceite por fluxo e vincular Bugs encontrados; sem defeitos críticos/altos em aberto para liberar produção.",
         "Revisar evidências com o usuário responsável e identificar a versão candidata e suas limitações conhecidas."
       ],
-      "depends": [
-        "T20",
-        "T31",
-        "T32",
-        "T34",
-        "T35"
-      ],
+      "depends": ["T20", "T31", "T32", "T34", "T35"],
       "baseline": false
     },
     {
@@ -1048,11 +902,7 @@
         "Criar imagens/artefatos reproduzíveis, health checks e staging com PostgreSQL e segredos separados.",
         "Pipeline publica versão identificada com migração controlada e smoke automático; banco local não é reutilizado."
       ],
-      "depends": [
-        "T22",
-        "T13",
-        "T18"
-      ],
+      "depends": ["T22", "T13", "T18"],
       "baseline": false
     },
     {
@@ -1067,10 +917,7 @@
         "Verificar dependências e segredos em repositório/bundle/logs, com severidade e plano de tratamento.",
         "Confirmar credenciais mínimas de banco, cookies seguros em HTTPS e ausência de stacktrace nas respostas."
       ],
-      "depends": [
-        "US15",
-        "T35"
-      ],
+      "depends": ["US15", "T35"],
       "baseline": false
     },
     {
@@ -1085,10 +932,7 @@
         "Meta inicial para CRUD em staging: p95 até 750 ms e erros inesperados abaixo de 1%; ajustar metas com evidência no refinement.",
         "Medir importação separadamente da latência do provedor e identificar gargalos de consultas/polling/worker."
       ],
-      "depends": [
-        "T35",
-        "US15"
-      ],
+      "depends": ["T35", "US15"],
       "baseline": false
     },
     {
@@ -1103,9 +947,7 @@
         "Propor RPO de 24h e RTO de 4h para o MVP e registrar tempo/resultado real do ensaio.",
         "Ensaiar rollback da aplicação sem reverter migração destrutiva; definir abordagem expand/contract e responsáveis."
       ],
-      "depends": [
-        "T35"
-      ],
+      "depends": ["T35"],
       "baseline": false
     },
     {
@@ -1120,12 +962,7 @@
         "Fazer triagem e reteste dos Bugs reais; verificar que a fixture v1 permanece intacta.",
         "Registrar Go/No-Go com UAT, segurança, carga, backup/restore e limites conhecidos antes de aprovar produção."
       ],
-      "depends": [
-        "US15",
-        "T36",
-        "T37",
-        "T38"
-      ],
+      "depends": ["US15", "T36", "T37", "T38"],
       "baseline": false
     },
     {
@@ -1141,12 +978,7 @@
         "Executar smoke de cadastro/login/candidatura/importação com conta sintética controlada e limpeza.",
         "Registrar aprovação da release, versão, horário, resultado e responsável; não publicar com gate de homologação reprovado."
       ],
-      "depends": [
-        "T39",
-        "T40",
-        "T41",
-        "T42"
-      ],
+      "depends": ["T39", "T40", "T41", "T42"],
       "baseline": false
     },
     {
@@ -1161,11 +993,7 @@
         "Criar banco e usuários próprios de produção com rede restrita, backup e retenção configurados.",
         "Cadastrar segredos no provedor, revisar cookies/SameSite/CSRF e decidir persistência de sessão ou logout controlado em reinício."
       ],
-      "depends": [
-        "T35",
-        "T36",
-        "T38"
-      ],
+      "depends": ["T35", "T36", "T38"],
       "baseline": false
     },
     {
@@ -1180,10 +1008,7 @@
         "Definir gatilhos objetivos de rollback, versão anterior disponível e procedimento para migração incompatível.",
         "Exercitar checklist em staging e registrar o plano de comunicação e responsáveis."
       ],
-      "depends": [
-        "T39",
-        "T40"
-      ],
+      "depends": ["T39", "T40"],
       "baseline": false
     },
     {
@@ -1198,10 +1023,7 @@
         "Criar alertas acionáveis e testá-los; logs estruturados usam correlação sem senhas/tokens/conteúdo pessoal.",
         "Documentar runbooks para indisponibilidade, falha de migração, cota IA e recuperação; definir acompanhamento inicial."
       ],
-      "depends": [
-        "T35",
-        "T40"
-      ],
+      "depends": ["T35", "T40"],
       "baseline": false
     },
     {
@@ -1216,10 +1038,7 @@
         "Verificar HTTPS, autorização, persistência, importação/fallback e alertas sem expor dados de usuários.",
         "Registrar resultados após release e acompanhar métricas por pelo menos sete dias, abrindo incidentes/Bugs reais quando necessário."
       ],
-      "depends": [
-        "US16",
-        "T42"
-      ],
+      "depends": ["US16", "T42"],
       "baseline": false
     },
     {
@@ -1234,9 +1053,7 @@
         "Conduzir review/retrospectiva com evidências, aprendizados e ações de melhoria com responsável.",
         "Organizar backlog pós-MVP e revisar prioridades após uso real, preservando os contratos/fixtures versionados."
       ],
-      "depends": [
-        "T43"
-      ],
+      "depends": ["T43"],
       "baseline": false
     }
   ],

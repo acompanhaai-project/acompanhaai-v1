@@ -5,16 +5,17 @@ import com.maiconamaral.acompanhaai.security.UserPrincipal;
 import com.maiconamaral.acompanhaai.services.UserService;
 import jakarta.servlet.http.*;
 import jakarta.validation.Valid;
+import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
-import java.net.URI;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserResource {
+
     private final UserService service;
     private final SecurityContextLogoutHandler logoutHandler;
 
@@ -39,17 +40,25 @@ public class UserResource {
     }
 
     @PutMapping("/me/password")
-    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal UserPrincipal principal,
-            @Valid @RequestBody PasswordUpdateDTO dto, HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) {
+    public ResponseEntity<Void> updatePassword(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @Valid @RequestBody PasswordUpdateDTO dto,
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Authentication authentication
+    ) {
         service.updatePassword(principal.getId(), dto);
         logoutHandler.logout(request, response, authentication);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<Void> delete(@AuthenticationPrincipal UserPrincipal principal, HttpServletRequest request,
-                                       HttpServletResponse response, Authentication authentication) {
+    public ResponseEntity<Void> delete(
+        @AuthenticationPrincipal UserPrincipal principal,
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Authentication authentication
+    ) {
         service.delete(principal.getId());
         logoutHandler.logout(request, response, authentication);
         return ResponseEntity.noContent().build();
