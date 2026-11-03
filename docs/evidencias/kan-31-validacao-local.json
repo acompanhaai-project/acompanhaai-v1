@@ -1,0 +1,47 @@
+{
+  "task": "KAN-31",
+  "validatedOn": "2026-11-03",
+  "branch": "feat/KAN-31-etapas-filtros-historico",
+  "java": "Amazon Corretto 25.0.4.1",
+  "springBoot": "4.0.9",
+  "h2": {
+    "database": "H2 2.4.240",
+    "total": 155,
+    "passed": 148,
+    "skipped": 7,
+    "failures": 0,
+    "errors": 0,
+    "newTrackingScenarios": 25,
+    "command": "mvnw.cmd verify com spring.config.location apontando para cópias versionadas sem import local",
+    "result": "BUILD SUCCESS"
+  },
+  "postgres": {
+    "database": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "total": 154,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "startedAtUtc": "2026-11-03T21:29:31.3457135+00:00",
+    "finishedAtUtc": "2026-11-03T21:31:51.2579373+00:00",
+    "command": "./scripts/test-database-roles.ps1",
+    "configuration": "versioned-copy-without-local-import",
+    "migrationTests": 2,
+    "regressionTests": 152,
+    "newTrackingScenarios": 25,
+    "note": "Total inclui 1 teste exclusivamente H2 de migração salarial; os outros 153 testes usam PostgreSQL. O teste histórico de migração com admin é substituído pela primeira fase com roles separadas.",
+    "mavenExitCode": 0,
+    "clusterStopped": true
+  },
+  "fixedIssue": {
+    "description": "LOWER(bytea) em listagens sem termo de busca na primeira execução PostgreSQL",
+    "initialRegressionErrors": 12,
+    "correction": "Padrão textual não nulo: % quando q é omitido ou vazio, escapando caracteres de termos fornecidos.",
+    "retested": "Suítes completas H2 e PostgreSQL aprovadas após a correção."
+  },
+  "fixtureV1": {
+    "sha256FilesChecked": 9,
+    "modified": false,
+    "collectionExecuted": false
+  },
+  "pending": ["Revisão do PR", "CI remoto", "Aceite no Jira"]
+}

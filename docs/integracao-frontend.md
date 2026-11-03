@@ -84,7 +84,11 @@ são limpos e listas omitidas ou vazias removem as habilidades daquele tipo.
 `GET /api/applications?status=SCREENING&page=0&size=20` retorna `content`,
 `page`, `size`, `totalElements` e `totalPages`. Página começa em zero;
 tamanho de 1 a 100. Ordenação: atualização e ID decrescentes.
-Busca por texto ainda não é parte do contrato atual.
+O parâmetro opcional `q` busca um trecho literal do título ou empresa, sem
+diferenciar caixa, com até 100 caracteres. Pode ser combinado com `status`:
+`GET /api/applications?status=SCREENING&q=java&page=0&size=20`.
+Texto vazio ou somente espaços desativa a busca textual; `%`, `_` e `!` são
+literais. Ver [contrato KAN-31](acompanhamento-kan-31.md).
 
 No PUT, enviar os campos editáveis completos e `version` da última leitura.
 Opcionais omitidos ficam nulos. Trocar status registra histórico; alterar

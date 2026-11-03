@@ -59,6 +59,8 @@ Após o login e a renovação do CSRF, envie este JSON para `POST /api/applicati
 
 Listagem: `GET /api/applications?status=SCREENING&page=0&size=20`. A página começa em zero, com tamanho entre 1 e 100. A resposta contém `content`, `page`, `size`, `totalElements` e `totalPages`, ordenada pela última atualização e ID decrescentes.
 
+Busca opcional: `GET /api/applications?status=SCREENING&q=java&page=0&size=20`. O termo tem até 100 caracteres e busca título ou empresa, combinado com a etapa e sempre restrito à conta autenticada. Consulte o [contrato KAN-31](docs/acompanhamento-kan-31.md) para regras e testes do histórico.
+
 Para editar, envie todos os campos editáveis por `PUT /api/applications/{id}`, incluindo o objeto `job`, o novo `status`, `appliedOn`, `notes` e a `version` recebida na consulta. Campos opcionais omitidos ficam nulos. Uma edição com versão antiga retorna 409: consulte o registro atualizado e revise sua alteração antes de reenviar. A atualização do status e o registro no histórico são atômicos.
 
 Upload da foto, com PowerShell 7 e a sessão/headers do exemplo de autenticação:

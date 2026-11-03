@@ -322,11 +322,22 @@ paths:
     get:
       operationId: listApplications
       summary: Listar candidaturas próprias
-      description: Ordenadas por updatedAt e id decrescentes.
+      description: >-
+        Candidaturas da conta autenticada, ordenadas por updatedAt e id decrescentes.
+        Filtros de status e texto são combinados; título OU empresa correspondem ao texto.
       parameters:
         - in: query
           name: status
           schema: { $ref: "#/components/schemas/ApplicationStatus" }
+        - in: query
+          name: q
+          description: >-
+            Trecho literal do título ou empresa, sem diferenciar maiúsculas/minúsculas.
+            Até 100 caracteres na entrada. Espaços nas extremidades são removidos;
+            vazio ou somente espaços equivale a não filtrar por texto.
+            %, _ e ! são caracteres literais, sem suporte a curingas ou regex.
+            Acentos não são removidos; comparação segue LOWER e a collation do banco.
+          schema: { type: string, maxLength: 100 }
         - in: query
           name: page
           schema: { type: integer, minimum: 0, default: 0 }
