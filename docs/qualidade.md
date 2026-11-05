@@ -1,5 +1,9 @@
 # Estratégia de qualidade e evidências
 
+Executar os comandos de backend deste guia dentro de `backend/`. Caminhos
+Postman, scripts e relatórios são relativos a essa pasta; registros históricos
+abaixo mantêm o ambiente e os resultados das execuções originais.
+
 Relacionamento: KAN-22 e tarefas de QA das demais entregas.
 Esta estratégia não representa um relatório de testes executados.
 
@@ -64,7 +68,7 @@ a senha em argumento de linha de comando.
 
 ## Fixture Postman v1
 
-Seguir o [roteiro original](../postman/fixtures/v1/README.md). Ele executa
+Seguir o [roteiro original](../backend/postman/fixtures/v1/README.md). Ele executa
 requisições contra a API real local; não é um servidor que substitui a API.
 
 - Não editar `postman/fixtures/v1/`, seu executor ou seus hashes.
@@ -89,11 +93,11 @@ esse estado e não publicar `postman/reports/`.
 
 ## Matriz mínima de aceite
 
-A [regressão Postman v2 — KAN-33](regressao-api-v2-kan-33.md) complementa a v1
+A [regressão Postman v2 — KAN-33](../backend/docs/regressao-api-v2-kan-33.md) complementa a v1
 com detalhes da vaga, busca, edição, isolamento e falha SQL controlada no
 histórico. Executar pelo roteiro `scripts/test-postman-v2.ps1`, que cria e encerra
 PostgreSQL/API exclusivos, confirma limpeza por IDs e preservação de sentinela.
-O roteiro não repete a suíte Java. O [CI da KAN-34](ci-postgresql-kan-34.md)
+O roteiro não repete a suíte Java. O [CI da KAN-34](../backend/docs/ci-postgresql-kan-34.md)
 executa a coleção no job próprio e mantém as suítes Java nos jobs existentes.
 
 | Domínio           | Cenários                                                                                   |

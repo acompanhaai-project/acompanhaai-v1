@@ -1,0 +1,54 @@
+.stages-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.stage-group + .stage-group {
+  margin-top: var(--space-7);
+}
+
+.stage-group h2 {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-4);
+}
+
+dl {
+  margin: 0;
+}
+
+dl div {
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+dt {
+  color: var(--color-primary);
+  font-weight: 800;
+  margin-bottom: var(--space-1);
+}
+
+dd {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.guidance h2 {
+  font-size: 1.25rem;
+}
+
+.guidance p {
+  color: var(--color-muted);
+}
+
+.guidance p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  .stages-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}

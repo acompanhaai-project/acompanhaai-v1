@@ -126,7 +126,7 @@ a senha de um volume já inicializado.
 6. Criar uma candidatura, reiniciar a aplicação e verificar persistência.
    Fazer novo login: a sessão atual fica em memória.
 7. Executar testes somente no H2 em memória ou em PostgreSQL de testes
-   separado, seguindo o [guia de qualidade](qualidade.md).
+   separado, seguindo o [guia de qualidade](../../docs/qualidade.md).
 8. Conferir cookie local sem Secure. HTTPS e cookie Secure devem ser
    verificados no ambiente de homologação antes de produção.
 

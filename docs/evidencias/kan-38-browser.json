@@ -1,0 +1,55 @@
+{
+  "browser": "156.0.4314.58",
+  "inspections": [
+    {
+      "route": "inicio",
+      "width": 1440,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "etapas",
+      "width": 1440,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "referencias",
+      "width": 1440,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "inexistente",
+      "width": 1440,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "inicio",
+      "width": 390,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "etapas",
+      "width": 390,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "referencias",
+      "width": 390,
+      "overflow": false,
+      "axeViolations": 0
+    },
+    {
+      "route": "inexistente",
+      "width": 390,
+      "overflow": false,
+      "axeViolations": 0
+    }
+  ],
+  "errors": [],
+  "productionReferenceBlocked": true
+}

@@ -8,7 +8,7 @@ Data de referência documental: 30/10/2026.
 O backend é utilizado por cliente HTTP, como Postman. A interface Angular
 e a importação automática ainda estão planejadas.
 
-1. Iniciar o backend seguindo [ambiente local](ambiente-local.md).
+1. Iniciar o backend seguindo [ambiente local](../backend/docs/ambiente-local.md).
 2. Obter CSRF e cadastrar uma conta fictícia.
 3. Fazer login, preservar a sessão e renovar o CSRF.
 4. Consultar/editar perfil e, se desejado, enviar uma foto.
@@ -17,7 +17,7 @@ e a importação automática ainda estão planejadas.
 7. Consultar histórico, excluir registros próprios e encerrar a sessão.
 
 Os endpoints e exemplos estão no [guia de integração](integracao-frontend.md)
-e no [contrato OpenAPI](openapi.yaml). Senhas de exemplo são fictícias;
+e no [contrato OpenAPI](../backend/docs/openapi.yaml). Senhas de exemplo são fictícias;
 nenhuma conta vem pré-cadastrada automaticamente.
 
 ## Capacidades existentes

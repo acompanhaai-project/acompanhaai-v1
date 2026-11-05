@@ -2,5 +2,5 @@
 *.java text eol=lf
 *.yml text eol=lf
 *.md text eol=lf
-mvnw text eol=lf
+backend/mvnw text eol=lf
 *.cmd text eol=crlf

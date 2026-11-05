@@ -1,5 +1,9 @@
 # Integração e entrega contínuas
 
+Após a separação dos módulos, os comandos e caminhos relativos de backend
+deste guia partem de `backend/`. O workflow fica na raiz em `.github/workflows/`;
+ações de cache/upload usam caminhos `backend/...` relativos ao checkout.
+
 Relacionamento: KAN-23, KAN-29 e KAN-34. Revisado em 05/11/2026.
 **Estado: CI do backend implementado; deploy pendente.** O workflow
 [Backend CI](../.github/workflows/backend-ci.yml) executa build e testes
@@ -59,7 +63,7 @@ exclusivamente de teste e porta publicada no loopback do runner. A primeira
 etapa valida adoção/instalação limpa como administrador de QA; a segunda usa
 acompanhaai_app no datasource e acompanhaai_migrator no Flyway. Essa validação
 de privilégios não testa senhas reais nem autenticação SCRAM do ambiente local.
-Consultar [credenciais](credenciais.md) para configuração, rotação e limitações.
+Consultar [credenciais](../backend/docs/credenciais.md) para configuração, rotação e limitações.
 
 Os jobs H2/PostgreSQL tradicionais não habilitam kan29.isolated. Os seis novos
 testes condicionais só executam no job de isolamento, sem serem considerados
@@ -76,8 +80,8 @@ rollback e a sentinela da KAN-33. Confere limpeza por IDs e encerra sua API em
 Esse job depende da aprovação de `migration-policy`. Publica somente resumos
 JSON sanitizados com `if: always()`, sem ambiente exportado, relatório bruto do
 Newman ou logs completos da API. Não usa POSTMAN_API_KEY nem publica recursos
-em um workspace compartilhado. Ver [regressão KAN-33](regressao-api-v2-kan-33.md)
-e [matriz KAN-34](ci-postgresql-kan-34.md).
+em um workspace compartilhado. Ver [regressão KAN-33](../backend/docs/regressao-api-v2-kan-33.md)
+e [matriz KAN-34](../backend/docs/ci-postgresql-kan-34.md).
 
 Não copiar segredos locais ou dados de desenvolvimento para o runner.
 Antes de compartilhar relatórios de falhas, revisar seu conteúdo: eles podem

@@ -1,5 +1,10 @@
 # Guia de contribuição
 
+Backend e frontend são módulos independentes em `backend/` e `frontend/`.
+Executar Maven/QA dentro de `backend/` e npm dentro de `frontend/`. Abrir
+`backend/pom.xml` no IDE como projeto Maven; Git, PRs e workflows continuam
+gerenciados na raiz do repositório.
+
 ## Fluxo de trabalho
 
 1. Selecionar a tarefa no Jira e movê-la para Em Progresso.

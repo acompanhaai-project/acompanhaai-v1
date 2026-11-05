@@ -32,7 +32,7 @@ de habilidades nulas na resposta. O cadastro com status nulo e o histórico
 inicial nulo foram conferidos; PUT com status nulo foi recusado pelo schema.
 
 Para repetir a validação estrutural do documento, instalar o parser temporário
-e executar na raiz do repositório:
+e executar na pasta `backend/`:
 
 ```powershell
 npm.cmd install --prefix target/contract-tools --no-save --ignore-scripts --no-audit --no-fund @apidevtools/swagger-parser@13.0.0
@@ -63,4 +63,4 @@ Entrega local em arquivos versionáveis; nenhuma publicação externa realizada.
 Revisão conjunta com frontend/QA, teste no navegador Angular, PR e CI desta
 alteração ainda precisam ser registrados antes do encerramento de KAN-35.
 O roteiro e a relação entre critérios, contrato e testes estão no
-[guia de integração](../integracao-frontend.md#rastreabilidade-e-aceite).
+[guia de integração](../../../docs/integracao-frontend.md#rastreabilidade-e-aceite).

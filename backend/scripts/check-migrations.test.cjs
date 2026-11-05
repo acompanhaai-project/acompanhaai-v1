@@ -76,3 +76,48 @@ test('Base invalida ou inexistente falha em vez de aprovar sem comparar', () => 
   assert.throws(() => verifyMigrations(f.root, '--qualquer-coisa'), /SHA Git completo/);
   assert.throws(() => verifyMigrations(f.root, 'f'.repeat(40)), /Base Git indisponivel/);
 });
+
+function relocate(f) {
+  const destination = path.join(f.root, 'backend/src/main/resources/db/migration');
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.renameSync(f.migrations, destination);
+  return destination;
+}
+
+test('Mudanca para backend preservando conteudo e permitida antes e depois do commit', () => {
+  const f = fixture();
+  relocate(f);
+  assert.equal(verifyMigrations(f.root, f.base).result, 'PASS');
+  f.git('add', '.');
+  f.git('-c', 'commit.gpgsign=false', 'commit', '-m', 'reorganizar backend');
+  assert.equal(verifyMigrations(f.root, f.base).result, 'PASS');
+  assert.equal(verifyMigrations(path.join(f.root, 'backend'), f.base).result, 'PASS');
+});
+
+test('Mudanca de pasta com edicao nao esconde alteracao da migracao', () => {
+  const f = fixture();
+  const directory = relocate(f);
+  fs.writeFileSync(path.join(directory, 'V1__initial.sql'), 'SELECT 99;\n');
+  assert.equal(verifyMigrations(f.root, f.base).violations[0].status, 'M');
+});
+
+test('Migracoes continuam imutaveis depois de estabelecer backend como base', () => {
+  const f = fixture();
+  const directory = relocate(f);
+  f.git('add', '.');
+  f.git('-c', 'commit.gpgsign=false', 'commit', '-m', 'reorganizar backend');
+  const base = f.git('rev-parse', 'HEAD');
+  fs.writeFileSync(path.join(directory, 'V1__initial.sql'), 'SELECT 99;\n');
+  assert.equal(verifyMigrations(f.root, base).violations[0].status, 'M');
+});
+
+test('Duplicar a mesma migracao nas duas estruturas e rejeitado', () => {
+  const f = fixture();
+  const directory = path.join(f.root, 'backend/src/main/resources/db/migration');
+  fs.mkdirSync(directory, { recursive: true });
+  fs.copyFileSync(
+    path.join(f.migrations, 'V1__initial.sql'),
+    path.join(directory, 'V1__initial.sql')
+  );
+  assert.equal(verifyMigrations(f.root, f.base).result, 'FAIL');
+});
