@@ -89,6 +89,12 @@ esse estado e não publicar `postman/reports/`.
 
 ## Matriz mínima de aceite
 
+A [regressão Postman v2 — KAN-33](regressao-api-v2-kan-33.md) complementa a v1
+com detalhes da vaga, busca, edição, isolamento e falha SQL controlada no
+histórico. Executar pelo roteiro `scripts/test-postman-v2.ps1`, que cria e encerra
+PostgreSQL/API exclusivos, confirma limpeza por IDs e preservação de sentinela.
+O roteiro não repete a suíte Java; CI da coleção pertence à KAN-34.
+
 | Domínio           | Cenários                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------ |
 | Contas            | Cadastro, e-mail duplicado, entrada inválida e ausência de senha/hash na resposta          |

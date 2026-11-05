@@ -34,6 +34,9 @@ ou empresa, filtros, paginação e a matriz de testes de etapas e histórico.
 A [consistência — KAN-32](consistencia-candidaturas-kan-32.md) define normalização
 de URLs, conflitos, concorrência por conta e exclusão dos dados vinculados.
 
+A [regressão API v2 — KAN-33](regressao-api-v2-kan-33.md) consolida os novos
+contratos no Postman e valida rollback e limpeza no PostgreSQL descartável.
+
 O [fluxo de Bugs — KAN-28](bugs.md) e o [modelo copiável](templates/bug.md)
 definem severidade, prioridade, prazos didáticos de triagem, revisão e reteste.
 Processo documentado; janela de trabalho, mapeamento no Jira e aceite pendentes.

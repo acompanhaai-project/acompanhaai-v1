@@ -1,0 +1,73 @@
+{
+  "task": "KAN-33",
+  "runId": "d497db0d026f4a9db1c0daf39b406f14",
+  "postgres": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+  "startedAtUtc": "2026-11-05T03:45:24.3221758+00:00",
+  "finishedAtUtc": "2026-11-05T03:46:12.2135166+00:00",
+  "fixture": {
+    "fixture": "2.0.0",
+    "runId": "d497db0d026f4a9db1c0daf39b406f14",
+    "target": "http://127.0.0.1:55282",
+    "startedAt": "2026-11-05T03:45:59.939Z",
+    "finishedAt": "2026-11-05T03:46:11.196Z",
+    "databaseFaultEnabled": true,
+    "expectedCollectionRequests": 97,
+    "expectedIdentityRequests": 6,
+    "requests": 103,
+    "assertions": 251,
+    "failedAssertions": 0,
+    "failures": 0,
+    "guardFailures": 0,
+    "v1HashesChecked": 9,
+    "v1IntegrityPreserved": true,
+    "accounts": {
+      "a": {
+        "id": 2,
+        "email": "qa.kan33.a+d497db0d026f4a9db1c0daf39b406f14@example.test",
+        "result": "deleted-by-collection"
+      },
+      "b": {
+        "id": 3,
+        "email": "qa.kan33.b+d497db0d026f4a9db1c0daf39b406f14@example.test",
+        "result": "deleted-by-collection"
+      }
+    },
+    "cleanupComplete": true,
+    "failureStages": [],
+    "result": "PASS"
+  },
+  "fixtureRowsRemoved": true,
+  "unrelatedSentinelPreserved": true,
+  "result": "PASS",
+  "environment": {
+    "java": "Amazon Corretto 25.0.4.1",
+    "springBoot": "4.0.9",
+    "node": "22.16.0",
+    "npm": "10.9.2",
+    "newman": "6.2.3",
+    "prettier": "3.9.10",
+    "backendBaseCommit": "66b9f4e7d6bc7b4ee70f7996012d4166276b7f4d",
+    "npmCiVerified": true,
+    "backendJavaSuiteRepeated": false
+  },
+  "guardTests": {
+    "tests": 9,
+    "passed": 9,
+    "failures": 0
+  },
+  "snapshotSha256": {
+    "postman/fixtures/v2/acompanhaai-v2.postman_collection.json": "115b04104a6e44714f758f539ae49bc1bdae0b212528e0e30ff0f0f7c58c071c",
+    "postman/fixtures/v2/dados.json": "b74dd9ab5cdd0f9f9699eaeb00c5905be90d83742e85d2f2c104c8905115b5fa",
+    "postman/fixtures/v2/build.cjs": "d8dcb72f9629d1273426ea6b9454ff326718a0a861be7d1d9108bdde79a5d91d",
+    "postman/fixtures/v2/run.cjs": "48be5da503349620f327ba518922ad0147951e4ef0a34c0bdf42645977f837a6",
+    "postman/fixtures/v2/guards.test.cjs": "07b410ce84918eeb5566e2bc67cbe6d09f24076f44dd8f880434c8bbc16a509b",
+    "postman/fixtures/v2/history-fault.sql": "2b1d4e26b1892e1c97d6d24ade50de7426efdd7862864cbca1b5e46974929b0d",
+    "postman/fixtures/v2/package-lock.json": "8c307c23eaac22b3bdc0d0f254d554ad87acadef43af171e3e3a80c1f8e90c85",
+    "scripts/test-postman-v2.ps1": "29c0905b708963e7e184627140814156f75ecc2292cf3758d5d5da76c26c476f"
+  },
+  "pending": [
+    "Revisão do PR",
+    "CI remoto e integração da v2 na KAN-34",
+    "Aceite no Jira"
+  ]
+}

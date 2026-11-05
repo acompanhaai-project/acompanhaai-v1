@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "date": "2026-01-15",
+  "users": {
+    "a": "Ana QA V2",
+    "b": "Bruno QA V2"
+  },
+  "statuses": [
+    "APPLIED",
+    "SAVED",
+    "SCREENING",
+    "INTERVIEW",
+    "OFFER",
+    "HIRED",
+    "REJECTED",
+    "WITHDRAWN"
+  ],
+  "job": {
+    "title": "Backend Java V2",
+    "companyName": "Acme Ficticia V2",
+    "description": "Java, SQL e comunicacao. Remuneracao declarada de R$ 5.000,25 por mes.",
+    "sourceUrl": "https://jobs.example.test/kan33/{{v2_runId}}/APPLIED?jobId=A%2FB#Job-1",
+    "location": "Porto Alegre, RS",
+    "workMode": "HYBRID",
+    "salary": 5000.25,
+    "salaryCurrency": "BRL",
+    "salaryPeriod": "MONTH",
+    "hardSkills": [" Java ", "Spring   Boot"],
+    "softSkills": ["Comunicacao"]
+  },
+  "faultMarker": "KAN33_SIMULATED_HISTORY_FAILURE"
+}
