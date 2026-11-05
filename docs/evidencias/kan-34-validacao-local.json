@@ -1,0 +1,97 @@
+{
+  "task": "KAN-34",
+  "validatedOn": "2026-11-05",
+  "branch": "ci/KAN-34-regressao-postgresql",
+  "environment": "Windows 11, Java Corretto 25.0.4.1, Spring Boot 4.0.9, Node.js 22.16.0, PostgreSQL 18.6",
+  "migrationPolicy": {
+    "tests": 6,
+    "passed": 6,
+    "failures": 0,
+    "realRepositoryResult": {
+      "baseSha": "16eb9fa3b3f2eab90e9142b2e705153cc0031c1f",
+      "result": "PASS",
+      "violations": []
+    }
+  },
+  "javaPostgres": {
+    "tests": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "./scripts/test-database-roles.ps1",
+    "note": "Duas provas de migracao com roles + 193 testes de regressao. Inclui unitarios sem banco e migracao salarial independente em H2."
+  },
+  "portableRunner": {
+    "task": "KAN-34",
+    "runId": "f8eada52af744c5d992015615d9f8fe6",
+    "result": "PASS",
+    "apiStopped": true,
+    "fixtureRowsRemoved": true,
+    "unrelatedSentinelPreserved": true,
+    "postgres": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "apiTarget": "http://127.0.0.1:53518",
+    "schemaVersion": "7",
+    "fixture": {
+      "fixture": "2.0.0",
+      "runId": "f8eada52af744c5d992015615d9f8fe6",
+      "target": "http://127.0.0.1:53518",
+      "startedAt": "2026-11-05T13:33:13.177Z",
+      "finishedAt": "2026-11-05T13:33:26.579Z",
+      "databaseFaultEnabled": true,
+      "expectedCollectionRequests": 97,
+      "expectedIdentityRequests": 6,
+      "requests": 103,
+      "assertions": 251,
+      "failedAssertions": 0,
+      "failures": 0,
+      "guardFailures": 0,
+      "v1HashesChecked": 9,
+      "v1IntegrityPreserved": true,
+      "accounts": {
+        "a": {
+          "id": 2,
+          "email": "qa.kan33.a+f8eada52af744c5d992015615d9f8fe6@example.test",
+          "result": "deleted-by-collection"
+        },
+        "b": {
+          "id": 3,
+          "email": "qa.kan33.b+f8eada52af744c5d992015615d9f8fe6@example.test",
+          "result": "deleted-by-collection"
+        }
+      },
+      "cleanupComplete": true,
+      "failureStages": [],
+      "result": "PASS"
+    },
+    "startedAtUtc": "2026-11-05T13:32:24.7Z",
+    "finishedAtUtc": "2026-11-05T13:33:26.785Z"
+  },
+  "windowsCompatibility": {
+    "runId": "12310620f909442da576b1684fd0480c",
+    "result": "PASS",
+    "requests": 103,
+    "assertions": 251,
+    "failures": 0,
+    "fixtureRowsRemoved": true,
+    "unrelatedSentinelPreserved": true,
+    "command": "./scripts/test-postman-v2.ps1"
+  },
+  "fixtureGuards": {
+    "tests": 9,
+    "passed": 9
+  },
+  "workflowValidation": {
+    "yamlParsed": true,
+    "permissions": "contents: read",
+    "newChecks": ["backend-migration-policy", "backend-postman-v2"],
+    "newmanRawReportUploaded": false,
+    "githubRunObserved": false,
+    "linuxRunnerExecutedLocally": false
+  },
+  "pending": [
+    "PR e execucao dos cinco checks no GitHub Actions",
+    "Revisao dos artefatos remotos",
+    "Conferir checks obrigatorios na main depois da primeira execucao verde",
+    "Aceite no Jira"
+  ]
+}

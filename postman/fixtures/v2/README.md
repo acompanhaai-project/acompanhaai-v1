@@ -14,6 +14,7 @@ V1, seu executor, hashes, dados e dependências continuam congelados.
 - `guards.test.cjs`: nove testes unitários de alvo permitido, IDs antigos e bloqueio de exclusão indevida.
 - `package.json` e `package-lock.json`: dependências próprias da v2.
 - `history-fault.sql`: trigger exclusivo do banco descartável, utilizado para testar rollback.
+- `sentinel.sql` e `verify-cleanup.sql`: templates compartilhados pelos executores Windows e CI.
 - `../../../scripts/test-postman-v2.ps1`: provisiona PostgreSQL/API exclusivos, executa e encerra.
 
 Alterações de cenários devem ser feitas em `build.cjs` e `dados.json`. Gerar
@@ -154,4 +155,15 @@ node postman/fixtures/v2/run.cjs --base-url http://127.0.0.1:18083
 ```
 
 O executor recusa alvos remotos, HTTPS, porta implícita, caminho ou credenciais
-na URL. A integração no CI é a KAN-34; esta entrega não altera os workflows.
+na URL. A KAN-34 adiciona o job `backend-postman-v2`; ver a
+[matriz de CI](../../../docs/ci-postgresql-kan-34.md).
+
+Para testar no Windows o mesmo executor Node.js usado no job Ubuntu:
+
+```powershell
+./scripts/test-postman-v2.ps1 -UseCiRunner
+```
+
+O wrapper cria e encerra seu próprio cluster; `scripts/test-postman-v2-ci.cjs`
+inicia a API, executa os testes e escreve resumo em `target/kan34-postgres-<runId>`.
+No GitHub Actions, o PostgreSQL é o serviço descartável do job.

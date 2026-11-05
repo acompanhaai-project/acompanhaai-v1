@@ -1,12 +1,13 @@
 # Integração e entrega contínuas
 
-Relacionamento: KAN-23 e evoluções de DevOps. Revisado em 03/11/2026.
+Relacionamento: KAN-23, KAN-29 e KAN-34. Revisado em 05/11/2026.
 **Estado: CI do backend implementado; deploy pendente.** O workflow
 [Backend CI](../.github/workflows/backend-ci.yml) executa build e testes
 em H2 e PostgreSQL, publica relatórios e disponibiliza o JAR após sucesso
 do job H2. Não publica a aplicação em homologação ou produção.
-Na KAN-29 foi acrescentado o job de isolamento de privilégios; sua execução
-remota depende do PR e deve ser conferida por commit antes do aceite.
+Na KAN-34 foram acrescentados os checks de migrações imutáveis e regressão
+Postman v2. A configuração e o executor foram validados localmente; a execução
+remota dos novos jobs deve ser conferida no PR antes do aceite.
 
 ## Pipeline do backend
 
@@ -19,12 +20,12 @@ Fonte da configuração: `.github/workflows/backend-ci.yml`.
 | Runtime   | Amazon Corretto JDK 25 em `ubuntu-latest`                               |
 | Build     | Maven Wrapper versionado                                                |
 | Permissão | `contents: read`; checkout sem persistir credenciais                    |
-| Bancos    | H2 em memória e dois serviços PostgreSQL 18 efêmeros, em jobs separados |
-| Limite    | 15 minutos por job                                                      |
+| Bancos    | H2 em memória e três serviços PostgreSQL 18 efêmeros, em jobs separados |
+| Limite    | 15 minutos por job; política de migrações limitada a 5 minutos          |
 | Retenção  | Relatórios e JAR mantidos por 7 dias                                    |
 | Resultado | Build/testes, relatórios e JAR identificados pelo commit                |
 
-Os três jobs fazem checkout, configuram Java com cache Maven, habilitam
+Os três jobs Java fazem checkout, configuram Java com cache Maven, habilitam
 a execução de `mvnw` no Linux e executam:
 
 ```bash
@@ -39,6 +40,8 @@ A fase verify compila, executa os testes e empacota a aplicação.
 | `build-test`              | `backend-build-test`              | Suíte em H2; relatórios `testes-${{ github.sha }}` e JAR `backend-${{ github.sha }}`                             |
 | `postgres-test`           | `backend-postgres-test`           | Suíte em PostgreSQL 18, incluindo migrações e testes específicos; relatórios `testes-postgres-${{ github.sha }}` |
 | `database-role-isolation` | `backend-database-role-isolation` | Provisionamento, migrações e runtime restrito; relatórios `testes-permissoes-${{ github.sha }}`                  |
+| `migration-policy`        | `backend-migration-policy`        | Rejeita alteração/exclusão/renomeação de migrações existentes; `politica-migracoes-${{ github.sha }}`            |
+| `postman-v2`              | `backend-postman-v2`              | API real, PostgreSQL próprio e coleção v2; resumos `testes-postman-v2-${{ github.sha }}`                         |
 
 O H2 usa banco em memória com modo de compatibilidade PostgreSQL. Isso não
 substitui a validação no PostgreSQL real. O outro job inicia um serviço
@@ -49,7 +52,7 @@ Os relatórios Surefire XML e texto são enviados com `if: always()`, inclusive
 quando testes falham, desde que tenham sido gerados. O JAR
 `target/acompanhaai-0.0.1-SNAPSHOT.jar` é publicado somente após sucesso do job H2.
 Como os jobs são independentes, a existência desse JAR não comprova aprovação
-dos jobs PostgreSQL: conferir os três checks antes de aprovar uma release.
+dos demais jobs: conferir os cinco checks antes de aprovar uma release.
 
 O job de isolamento usa serviço PostgreSQL próprio, com autenticação trust
 exclusivamente de teste e porta publicada no loopback do runner. A primeira
@@ -62,8 +65,19 @@ Os jobs H2/PostgreSQL tradicionais não habilitam kan29.isolated. Os seis novos
 testes condicionais só executam no job de isolamento, sem serem considerados
 aprovados quando ignorados nos outros jobs.
 
-O workflow não executa a coleção Postman; ela possui procedimento próprio em
-[qualidade](qualidade.md). Os testes de integração Java fazem parte do verify.
+O novo job Postman usa Java 25, Node.js 22, `npm ci` no pacote exclusivo da v2
+e seu próprio PostgreSQL 18. Empacota o JAR com `-DskipTests`, pois os três jobs
+Java continuam responsáveis pela suíte Java. O executor portável
+`scripts/test-postman-v2-ci.cjs` confirma um banco vazio de QA, provisiona roles,
+inicia sua API, aplica V1–V7 pelo Flyway e executa a coleção com o trigger de
+rollback e a sentinela da KAN-33. Confere limpeza por IDs e encerra sua API em
+`finally`. O serviço PostgreSQL é encerrado pelo GitHub ao terminar o job.
+
+Esse job depende da aprovação de `migration-policy`. Publica somente resumos
+JSON sanitizados com `if: always()`, sem ambiente exportado, relatório bruto do
+Newman ou logs completos da API. Não usa POSTMAN_API_KEY nem publica recursos
+em um workspace compartilhado. Ver [regressão KAN-33](regressao-api-v2-kan-33.md)
+e [matriz KAN-34](ci-postgresql-kan-34.md).
 
 Não copiar segredos locais ou dados de desenvolvimento para o runner.
 Antes de compartilhar relatórios de falhas, revisar seu conteúdo: eles podem
@@ -74,7 +88,7 @@ ausência de dados sensíveis em qualquer mensagem de erro futura.
 
 ## Consultar execuções e artefatos
 
-1. No GitHub, abrir o PR e consultar os três checks em Checks ou abrir
+1. No GitHub, abrir o PR e consultar os cinco checks em Checks ou abrir
    Actions → Backend CI e selecionar a execução do commit desejado.
 2. Abrir o job para consultar etapas, erros e resultado do Maven.
 3. Na página da execução, consultar Artifacts para baixar relatórios e JAR.
@@ -92,6 +106,9 @@ check foi adicionado à regra para que falhas no PostgreSQL bloqueiem o merge.
 A regra atual do GitHub não foi consultada nesta atualização documental.
 Após aprovar a primeira execução do novo job, conferir também a exigência de
 backend-database-role-isolation na proteção da main, conforme a política do projeto.
+Após os novos checks da KAN-34 aparecerem e ficarem verdes, conferir também
+`backend-migration-policy` e `backend-postman-v2`. A configuração da regra não
+foi alterada automaticamente por esta implementação.
 
 Continuar exigindo PR, resolução de conversas e bloqueio de force push e
 exclusão. No trabalho individual, zero aprovações externas permite manter
@@ -110,6 +127,9 @@ O teste falhando é um exercício de validação do gate, não um defeito real
 do produto a cadastrar como Bug. Não deixá-lo na main.
 
 ## Evolução por etapa
+
+- KAN-34: política imutável, regressão v2 no CI e validação local implementadas;
+  comprovação da execução remota e aceite ainda pendentes.
 
 - PostgreSQL efêmero, migrações e comportamento específico já estão incluídos
   no CI. Essa implementação não encerra automaticamente os critérios da KAN-34.

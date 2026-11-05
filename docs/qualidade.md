@@ -93,7 +93,8 @@ A [regressão Postman v2 — KAN-33](regressao-api-v2-kan-33.md) complementa a v
 com detalhes da vaga, busca, edição, isolamento e falha SQL controlada no
 histórico. Executar pelo roteiro `scripts/test-postman-v2.ps1`, que cria e encerra
 PostgreSQL/API exclusivos, confirma limpeza por IDs e preservação de sentinela.
-O roteiro não repete a suíte Java; CI da coleção pertence à KAN-34.
+O roteiro não repete a suíte Java. O [CI da KAN-34](ci-postgresql-kan-34.md)
+executa a coleção no job próprio e mantém as suítes Java nos jobs existentes.
 
 | Domínio           | Cenários                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------ |
