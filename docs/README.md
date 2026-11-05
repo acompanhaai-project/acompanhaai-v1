@@ -18,12 +18,18 @@ evidências de execução: registrar resultados somente após executar cada rote
 | [Validação PostgreSQL KAN-25](validacao-postgres-kan25.md) | Migração limpa, V5→V6, concorrência e CI                    | 84 testes aprovados em PostgreSQL 18.6; CI remoto pendente                                   |
 | [CI/CD](ci-cd.md)                                          | Checks H2/PostgreSQL, isolamento de roles e artefatos       | CI implementado; novo check de permissões aguardando execução remota; deploy pendente        |
 | [Contrato OpenAPI](openapi.yaml)                           | Endpoints e estruturas disponíveis                          | Contrato versionado da API atual                                                             |
-| [Integração frontend](integracao-frontend.md)              | Sessão, CSRF, erros e candidaturas KAN-35                   | Guia da API atual; extensões futuras pendentes                                               |
+| [Integração frontend](integracao-frontend.md)              | Sessão, CSRF, erros e candidaturas KAN-35                   | Contrato revisado; aceite conjunto frontend/QA pendente                                      |
 | [Operação](operacao.md)                                    | Release, backup, restore, rollback e incidentes             | Procedimento planejado; infraestrutura não provisionada                                      |
 | [Release e retrospectiva](releases.md)                     | Uso atual, notas de versão e encerramento KAN-77            | Base documental; release 1.0 ainda não publicada                                             |
 | [Plano de entrega](delivery/README.md)                     | Sprints, DoR, DoD e rotina                                  | Planejamento; datas dependem do planning                                                     |
 
 ## Como usar
+
+O [guia de integração — KAN-35](integracao-frontend.md) acompanha o
+[OpenAPI 0.1.0](openapi.yaml), com exemplos de erros, modelos de entrada/saída
+e roteiro de revisão para frontend/QA. A
+[evidência local](evidencias/kan-35-contrato.md) registra a validação estática;
+não comprova teste Angular nem publicação em produção.
 
 O [contrato da vaga manual — KAN-30](vaga-manual-kan-30.md) registra salário único
 em BRL, localização, modalidade e habilidades, incluindo substituição e validações.
