@@ -8,7 +8,6 @@ Esta pasta representa o contrato observado em 28/10/2026. E um cenario de dados 
 - `dados.json`: nomes, senhas ficticias e oito candidaturas usadas na colecao. Serve como documentacao; a colecao ja incorpora estes dados e pode ser importada sozinha.
 - `run.cjs`: executor com Newman, restrito a HTTP em localhost/127.0.0.1, e verificacao de integridade.
 - `sha256.json`: hashes dos arquivos congelados.
-- `AGENTS.md`: instrucao para preservar esta versao em futuras alteracoes.
 
 Nenhum endpoint de foto e chamado. Nenhum arquivo de imagem e criado ou enviado. O teste verifica apenas que uma conta nova tem `photoUrl: null`.
 
@@ -99,7 +98,7 @@ Se o processo for interrompido, podera haver dados ficticios restantes. O execut
 - Exclusao das contas criadas e rejeicao de novo login dessas contas.
 - Respostas sem as senhas ficticias em texto.
 
-O teste via API nao substitui testes de concorrencia real, carga, recuperacao de senha, IA ou verificacao direta de cascatas no banco. Fotos foram excluidas deste cenario por solicitacao. A verificacao de integridade detecta alteracoes acidentais; nao e uma assinatura digital nem bloqueio fisico de arquivos.
+O teste via API nao substitui testes de concorrencia real, carga, recuperacao de senha, IA ou verificacao direta de cascatas no banco. O cenario nao inclui fotos. A verificacao de integridade detecta alteracoes acidentais; nao e uma assinatura digital nem bloqueio fisico de arquivos.
 
 ## Regra de preservacao
 

@@ -1,0 +1,111 @@
+{
+  "runId": "910f88d61bc84bb189aefc62735f8f3b",
+  "result": "PASS",
+  "steps": [
+    {
+      "label": "private-anonymous",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "label": "csrf-anonymous",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "signup-without-csrf",
+      "expected": 403,
+      "actual": 403
+    },
+    {
+      "label": "signup",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "label": "signup-does-not-login",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "label": "invalid-login",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "label": "login",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "csrf-after-login",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "old-csrf-rejected",
+      "expected": 403,
+      "actual": 403
+    },
+    {
+      "label": "authenticated-me",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "invalid-fields",
+      "expected": 422,
+      "actual": 422
+    },
+    {
+      "label": "application-created",
+      "expected": 201,
+      "actual": 201
+    },
+    {
+      "label": "duplicate-url",
+      "expected": 409,
+      "actual": 409
+    },
+    {
+      "label": "application-deleted",
+      "expected": 204,
+      "actual": 204
+    },
+    {
+      "label": "logout",
+      "expected": 204,
+      "actual": 204
+    },
+    {
+      "label": "csrf-after-logout",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "logout-private-anonymous",
+      "expected": 401,
+      "actual": 401
+    },
+    {
+      "label": "cleanup-login",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "cleanup-csrf",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "label": "account-deleted",
+      "expected": 204,
+      "actual": 204
+    }
+  ],
+  "apiStopped": true,
+  "proxyStopped": true,
+  "browser": "156.0.4314.58",
+  "httpOnlyCookie": true,
+  "sessionIdRotated": true
+}

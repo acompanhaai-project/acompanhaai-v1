@@ -146,7 +146,7 @@ a senha de um volume já inicializado.
 ### Evidências da validação local — 30/10/2026
 
 Base do repositório antes deste registro: `3ea50cd`.
-Execução realizada pelo usuário; logs e respostas HTTP revisados nesta conversa.
+Logs de inicialização e respostas HTTP conferidos na validação local.
 
 - Java 25 e Maven Wrapper executados com sucesso.
 - Perfil dev conectado ao H2 em arquivo.

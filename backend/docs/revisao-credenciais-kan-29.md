@@ -37,22 +37,22 @@ nessa tentativa. Não confirma que o usuário existe, que é o usuário da API,
 que sua senha está correta nem quais permissões possui. Não foi tentada
 adivinhação de senhas ou leitura das credenciais privadas.
 
-| Verificação no banco real                                         | Estado                                                                                    |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Username local da API                                             | postgres, informado pelo usuário; outras sobreposições de runtime não foram inspecionadas |
-| Superusuário, criação de roles/bancos, replicação e bypass de RLS | Todos habilitados para postgres, conforme resultado do pgAdmin                            |
-| Memberships da consulta 3                                         | Nenhum vínculo retornado para as roles filtradas                                          |
-| Proprietários do banco, tabelas e sequências                      | postgres; schema public sob pg_database_owner                                             |
-| Privilégios efetivos                                              | postgres tem todos os privilégios consultados nas tabelas e sequências listadas           |
-| Escrita no histórico Flyway e privilégios de criação/truncate     | Permitidos para postgres; inadequados para a identidade de operação da API                |
-| Concessões padrão adicionais da consulta 8                        | Nenhuma entrada retornada em pg_default_acl; os padrões nativos continuam existindo       |
+| Verificação no banco real                                         | Estado                                                                                                     |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Username local da API                                             | postgres, conforme registro da configuração local; outras sobreposições de runtime não foram inspecionadas |
+| Superusuário, criação de roles/bancos, replicação e bypass de RLS | Todos habilitados para postgres, conforme resultado do pgAdmin                                             |
+| Memberships da consulta 3                                         | Nenhum vínculo retornado para as roles filtradas                                                           |
+| Proprietários do banco, tabelas e sequências                      | postgres; schema public sob pg_database_owner                                                              |
+| Privilégios efetivos                                              | postgres tem todos os privilégios consultados nas tabelas e sequências listadas                            |
+| Escrita no histórico Flyway e privilégios de criação/truncate     | Permitidos para postgres; inadequados para a identidade de operação da API                                 |
+| Concessões padrão adicionais da consulta 8                        | Nenhuma entrada retornada em pg_default_acl; os padrões nativos continuam existindo                        |
 
-### Evidências fornecidas pelo usuário no pgAdmin
+### Evidências das consultas no pgAdmin
 
 Em 03/11/2026, as capturas das consultas 1–8 identificaram o banco acompanhaai,
 PostgreSQL 18.6, porta 5433, servidor ::1 e conexão como postgres. A listagem
-das roles fora de pg_* retornou somente postgres. O usuário também informou
-spring.datasource.username=postgres na configuração local, sem compartilhar senha.
+das roles fora de pg_* retornou somente postgres. A configuração local registrada utilizava spring.datasource.username=postgres,
+sem exposição de senha.
 
 Foram listadas oito tabelas em public, incluindo flyway_schema_history, e seis
 sequências, todas pertencentes a postgres. As consultas 3 e 8 vazias não são
@@ -79,8 +79,8 @@ FROM public.flyway_schema_history
 ORDER BY installed_rank;
 ```
 
-O usuário confirmou inicialmente histórico V1–V5 com sucesso e, após iniciar
-a API no banco correto, forneceu captura com V6 aplicada com sucesso em
+O histórico inicial registrava V1–V5 com sucesso. Após iniciar a API no banco
+correto, uma nova captura confirmou a V6 aplicada com sucesso em
 03/11/2026. A divergência de migração foi resolvida por esse procedimento,
 sem recriação do banco nem edição de migrações antigas.
 
@@ -88,7 +88,7 @@ O [guia de credenciais](credenciais.md) documenta a implementação posterior:
 scripts de provisionamento/adoção, callback, perfis separados e rotação.
 O executor isolado aprovou 103 testes usando as identidades separadas.
 A aplicação dos novos privilégios no banco local ainda depende do procedimento
-manual com a conexão administrativa do usuário.
+manual com a conexão administrativa.
 
 ## Como concluir a auditoria pelo pgAdmin
 

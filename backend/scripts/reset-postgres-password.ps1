@@ -22,9 +22,9 @@ if (-not (Test-Path -LiteralPath $psqlPath) -or -not (Test-Path -LiteralPath $hb
 $original = [IO.File]::ReadAllBytes($hbaPath)
 $originalText = [Text.Encoding]::UTF8.GetString($original)
 if ($originalText.Contains('ACOMPANHAAI_PASSWORD_RECOVERY')) {
-    throw 'Existe uma recuperacao incompleta. Restaure o backup pg_hba.conf.codex-recovery-*.bak antes de continuar.'
+    throw 'Existe uma recuperacao incompleta. Restaure o backup do pg_hba.conf antes de continuar.'
 }
-$backupPath = $hbaPath + '.codex-recovery-' + [Guid]::NewGuid().ToString('N') + '.bak'
+$backupPath = $hbaPath + '.password-recovery-' + [Guid]::NewGuid().ToString('N') + '.bak'
 [IO.File]::WriteAllBytes($backupPath, $original)
 Write-Host "Backup da autenticacao: $backupPath"
 

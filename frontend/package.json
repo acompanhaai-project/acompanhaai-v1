@@ -9,8 +9,8 @@
     "test": "ng test",
     "test:ci": "ng test --watch=false",
     "lint": "eslint src",
-    "format": "prettier --write src angular.json package.json eslint.config.mjs vitest.config.mjs",
-    "format:check": "prettier --check src angular.json package.json eslint.config.mjs vitest.config.mjs"
+    "format": "prettier --write src angular.json proxy.conf.json package.json eslint.config.mjs vitest.config.mjs",
+    "format:check": "prettier --check src angular.json proxy.conf.json package.json eslint.config.mjs vitest.config.mjs"
   },
   "private": true,
   "packageManager": "npm@10.9.2",
@@ -40,6 +40,6 @@
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.0.0",
-    "vitest": "4.0.8"
+    "vitest": "4.1.12"
   }
 }

@@ -49,7 +49,6 @@ public class PasswordResetService {
 
     @Transactional
     public void requestReset(String email) {
-        // O listener só recebe o evento após confirmação desta transação.
         issueToken(email).ifPresent(events::publishEvent);
     }
 
@@ -76,7 +75,6 @@ public class PasswordResetService {
         String rawToken = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         Instant expiresAt = now.plus(TOKEN_LIFETIME);
 
-        // A reemissão substitui tokens não utilizados, preservando os já consumidos.
         tokens.deleteUnusedByUserId(user.getId());
         tokens.saveAndFlush(new PasswordResetToken(user, hashToken(rawToken), now, expiresAt));
 
@@ -103,7 +101,6 @@ public class PasswordResetService {
         }
 
         token.markUsed(now);
-        // Incrementar authVersion revoga as sessões anteriores na próxima requisição.
         user.changePassword(passwordEncoder.encode(newPassword));
         tokens.deleteUnusedByUserId(userId);
     }

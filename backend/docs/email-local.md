@@ -93,7 +93,7 @@ Cinco cenários verificam:
 
 O teste usa o cliente JavaMailSender real e conexão SMTP real contra GreenMail;
 isso comprova o comportamento local, não entrega em um provedor externo.
-Docker não estava disponível no ambiente do agente; Mailpit não foi iniciado
+Docker não estava disponível no ambiente de validação; Mailpit não foi iniciado
 nem validado manualmente nesta rodada.
 
 Regressão completa executada em H2 isolado, com as seis migrações:

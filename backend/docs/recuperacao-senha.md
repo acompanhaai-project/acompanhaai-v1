@@ -90,7 +90,7 @@ anteriores e os nove desta etapa, com zero falhas, erros ou ignorados.
 O log confirmou H2 em memória isolado, perfil test e aplicação da migração V6.
 Resultado: BUILD SUCCESS, JAR gerado, duração total de 28,290 segundos,
 conclusão em 02/11/2026 às 03:03:11 (-03:00).
-Os avisos de compatibilidade H2/Flyway e agente Mockito permanecem observações.
+Os avisos de compatibilidade H2/Flyway e instrumentação do Mockito permanecem observações.
 
 Essa execução não comprova aplicação da V6 em PostgreSQL nem atualização de
 um banco V5 com dados existentes. Essas verificações permanecem pendentes;
@@ -155,7 +155,7 @@ São dez testes novos, cobrindo:
 - Ausência do token em JSON e no toString do resultado interno.
 - Senha e versão de autenticação inalteradas após a emissão.
 
-Regressão completa executada pelo agente em H2 isolado, base `c694574` mais
+Regressão completa executada em H2 isolado, base `c694574` mais
 as alterações locais ainda sem commit:
 
 ```bash

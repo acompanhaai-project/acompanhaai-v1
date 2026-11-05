@@ -60,7 +60,7 @@ O quadro atual tem A fazer → Em Progresso → In Review → Concluído. Revis�
 
 ## Datas e estimativas
 
-Cadência proposta de 14 dias, não compromisso de prazo. As 10 sprints são futuras, sem datas artificiais e sem story points atribuídos sem refinement. O usuário confirmará calendário e capacidade no primeiro planning. A liberação só acontece quando os gates forem atendidos.
+Cadência proposta de 14 dias, não compromisso de prazo. As 10 sprints são futuras, sem datas artificiais e sem story points atribuídos sem refinement. Calendário e capacidade serão confirmados no primeiro planning. A liberação só acontece quando os gates forem atendidos.
 
 ## Escopo da execução deste planejamento
 

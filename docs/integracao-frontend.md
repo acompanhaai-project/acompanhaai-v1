@@ -77,7 +77,11 @@ retorna 400. Limite excedido na confirmação retorna 429 com `Retry-After`
 em segundos. Solicitação limitada continua retornando 202 sem processamento.
 Não registrar token, senha ou cookie em logs, analytics ou URLs da API.
 
-### Responsabilidades do futuro cliente Angular
+### Cliente Angular — KAN-39
+
+O [cliente HTTP](../frontend/docs/cliente-http-kan-39.md) implementa estas
+responsabilidades em `frontend/src/app/core/`, com proxy de desenvolvimento
+para a API. As telas de acesso e os guards ainda serão implementados na KAN-36.
 
 - Usar URLs relativas `/api/...` e proxy local para o backend. O proxy deve
   encaminhar também cookies; confirmar isso nas ferramentas do navegador.
@@ -211,6 +215,8 @@ controller usam ProblemDetail. O frontend precisa aceitar ambos.
 As evidências de execução da v2 estão em
 [KAN-33](../backend/docs/regressao-api-v2-kan-33.md) e [KAN-34](../backend/docs/ci-postgresql-kan-34.md).
 Essas execuções validam HTTP/backend, não o futuro cliente Angular.
+Os testes e limites da integração técnica da KAN-39 estão registrados em
+[sua evidência](evidencias/kan-39-cliente-http.md).
 
 Roteiro para revisão com frontend/QA: cadastro → login → novo CSRF → GET me;
 listar página vazia e com filtro; criar com/sem salário; editar com version;

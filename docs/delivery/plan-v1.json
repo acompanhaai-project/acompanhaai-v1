@@ -163,7 +163,7 @@
       "role": "devops",
       "title": "Organizar Git, branches, pull requests e vínculo com Jira",
       "accept": [
-        "Versionar o código e criar repositório remoto no provedor escolhido pelo usuário.",
+        "Versionar o código e criar repositório remoto no provedor escolhido para o projeto.",
         "Definir branches curtas com chave KAN, template de PR, revisão e proteção da branch principal.",
         "Configurar .gitignore e checagem de segredos; manter credenciais locais e relatórios de sessão fora do Git."
       ],
@@ -885,7 +885,7 @@
       "accept": [
         "Executar roteiro UAT: conta, perfil, cadastro manual, etapas, importação, revisão, filtros e exclusão.",
         "Registrar aceite por fluxo e vincular Bugs encontrados; sem defeitos críticos/altos em aberto para liberar produção.",
-        "Revisar evidências com o usuário responsável e identificar a versão candidata e suas limitações conhecidas."
+        "Revisar evidências com o responsável pelo aceite e identificar a versão candidata e suas limitações conhecidas."
       ],
       "depends": ["T20", "T31", "T32", "T34", "T35"],
       "baseline": false
@@ -1538,7 +1538,7 @@
       "accept": [
         "Executar roteiro UAT: conta, perfil, cadastro manual, etapas, importação, revisão, filtros e exclusão.",
         "Registrar aceite por fluxo e vincular Bugs encontrados; sem defeitos críticos/altos em aberto para liberar produção.",
-        "Revisar evidências com o usuário responsável e identificar a versão candidata e suas limitações conhecidas."
+        "Revisar evidências com o responsável pelo aceite e identificar a versão candidata e suas limitações conhecidas."
       ],
       "baseline": false
     },

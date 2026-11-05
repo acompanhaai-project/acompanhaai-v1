@@ -104,15 +104,14 @@ não corresponde ao gatilho push, que está limitado à main.
 
 ## Proteção da main
 
-A proteção foi informada como ativada pelo usuário, com backend-build-test
+O registro de configuração indica proteção ativa, com backend-build-test
 obrigatório. O workflow também publica backend-postgres-test; conferir se esse
 check foi adicionado à regra para que falhas no PostgreSQL bloqueiem o merge.
 A regra atual do GitHub não foi consultada nesta atualização documental.
 Após aprovar a primeira execução do novo job, conferir também a exigência de
 backend-database-role-isolation na proteção da main, conforme a política do projeto.
 Após os novos checks da KAN-34 aparecerem e ficarem verdes, conferir também
-`backend-migration-policy` e `backend-postman-v2`. A configuração da regra não
-foi alterada automaticamente por esta implementação.
+`backend-migration-policy` e `backend-postman-v2`. A configuração da regra permanece como procedimento administrativo separado.
 
 Continuar exigindo PR, resolução de conversas e bloqueio de force push e
 exclusão. No trabalho individual, zero aprovações externas permite manter

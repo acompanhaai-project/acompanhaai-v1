@@ -123,7 +123,7 @@ Finished at: 2026-11-03T00:50:37-03:00
 São 95 execuções aprovadas e um teste ignorado intencionalmente:
 PostgresMigrationIntegrationTest, que exige PostgreSQL. Os doze cenários novos
 de foto passaram nos dois bancos. H2 2.4.240 e Tomcat 11.0.27 foram confirmados
-no log. Os avisos já existentes de compatibilidade H2/Flyway e agente Mockito
+no log. Os avisos já existentes de compatibilidade H2/Flyway e instrumentação do Mockito
 não impediram o build.
 
 A instância PostgreSQL temporária foi encerrada após salvar os relatórios.
