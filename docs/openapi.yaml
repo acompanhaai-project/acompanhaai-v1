@@ -1,12 +1,14 @@
 openapi: 3.0.3
 info:
-  title: Acompanhaai - Contas e autenticação
-  version: 0.0.1
+  title: Acompanhaai - Contas e candidaturas
+  version: 0.1.0
   description: |
     API com autenticação por sessão. Obtenha GET /api/auth/csrf antes de qualquer escrita,
     preserve o cookie JSESSIONID e envie o token no header X-CSRF-TOKEN.
     Após login, obtenha um novo token. Cadastro não autentica automaticamente.
-    Cada conta só acessa seus próprios dados. Não há listagem nem consulta por ID.
+    Cada conta só acessa seus próprios dados. Não há listagem de usuários nem consulta de usuário por ID.
+    Candidaturas têm consulta por ID e listagem paginada, sempre restritas à própria conta.
+    Contrato revisado na KAN-35. Versão documental; não indica publicação em produção.
 servers:
   - url: http://localhost:8080
     description: Desenvolvimento local com perfil dev
@@ -162,7 +164,7 @@ paths:
                   required: [password]
                   properties:
                     password: { type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true }
-            example: { name: Maicon Amaral, email: maicon@example.com, password: "SenhaExemplo123!" }
+            example: { name: Pessoa Exemplo, email: pessoa@example.test, password: "SenhaFicticia123!" }
       responses:
         "201":
           description: Conta cadastrada. Efetue login para acessá-la.
@@ -276,7 +278,8 @@ paths:
         "400": { description: Parte obrigatória file ausente ou multipart inválido. }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-        "413": { description: Arquivo acima de 2 MiB ou multipart acima de 3 MiB, rejeitado pelo servidor HTTP. }
+        "413":
+          description: Arquivo acima de 2 MiB ou multipart acima de 3 MiB, rejeitado pelo servidor HTTP.
         "422":
           description: Imagem vazia, corrompida, formato diferente de JPEG/PNG ou acima de 4 milhões de pixels; também rejeição dos limites de bytes pelo Service.
           content:
@@ -351,14 +354,16 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [content, page, size, totalElements, totalPages]
                 properties:
                   content:
                     type: array
                     items: { $ref: "#/components/schemas/Application" }
-                  page: { type: integer }
-                  size: { type: integer }
-                  totalElements: { type: integer, format: int64 }
-                  totalPages: { type: integer }
+                  page: { type: integer, minimum: 0 }
+                  size: { type: integer, minimum: 1, maximum: 100 }
+                  totalElements: { type: integer, format: int64, minimum: 0 }
+                  totalPages: { type: integer, minimum: 0 }
+              example: { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "422": { $ref: "#/components/responses/ValidationError" }
@@ -391,6 +396,7 @@ paths:
                 - type: object
                   required: [status, version]
                   properties:
+                    status: { $ref: "#/components/schemas/ApplicationStatus" }
                     version: { type: integer, format: int64, minimum: 0 }
       responses:
         "200": { $ref: "#/components/responses/ApplicationResponse" }
@@ -435,11 +441,12 @@ paths:
                 type: array
                 items:
                   type: object
+                  required: [id, fromStatus, toStatus, changedAt]
                   properties:
                     id: { type: integer, format: int64 }
                     fromStatus:
-                      allOf:
-                        - { $ref: "#/components/schemas/ApplicationStatus" }
+                      type: string
+                      enum: [SAVED, APPLIED, SCREENING, INTERVIEW, OFFER, HIRED, REJECTED, WITHDRAWN, null]
                       nullable: true
                       description: Nulo no evento inicial.
                     toStatus: { $ref: "#/components/schemas/ApplicationStatus" }
@@ -475,7 +482,7 @@ components:
             format: email,
             minLength: 1,
             maxLength: 254,
-            description: Obrigatório e não vazio; espaços externos removidos antes de validar.
+            description: Obrigatório e não vazio; espaços externos removidos antes de validar.,
           }
     PasswordResetConfirmation:
       type: object
@@ -487,7 +494,7 @@ components:
             minLength: 1,
             maxLength: 128,
             writeOnly: true,
-            description: Não vazio; formato emitido de 43 caracteres Base64 URL-safe. Formato inválido com até 128 caracteres retorna 400.
+            description: Não vazio; formato emitido de 43 caracteres Base64 URL-safe. Formato inválido com até 128 caracteres retorna 400.,
           }
         newPassword:
           {
@@ -496,7 +503,7 @@ components:
             minLength: 8,
             maxLength: 128,
             writeOnly: true,
-            description: Não pode conter somente espaços; preservada sem normalização.
+            description: Não pode conter somente espaços; preservada sem normalização.,
           }
     ApplicationStatus:
       type: string
@@ -521,7 +528,7 @@ components:
         workMode:
           type: string
           nullable: true
-          enum: [REMOTE, HYBRID, ONSITE]
+          enum: [REMOTE, HYBRID, ONSITE, null]
         salary:
           type: number
           nullable: true
@@ -533,12 +540,12 @@ components:
         salaryCurrency:
           type: string
           nullable: true
-          enum: [BRL]
+          enum: [BRL, null]
           description: Obrigatória com salário; deve ser nula ou omitida sem salário.
         salaryPeriod:
           type: string
           nullable: true
-          enum: [HOUR, DAY, WEEK, MONTH, YEAR]
+          enum: [HOUR, DAY, WEEK, MONTH, YEAR, null]
           description: Obrigatória com salário; deve ser nula ou omitida sem salário. Não é presumida.
         hardSkills:
           $ref: "#/components/schemas/SkillNames"
@@ -558,38 +565,85 @@ components:
     ApplicationInput:
       type: object
       required: [job]
+      example:
+        job:
+          title: Desenvolvedor Java
+          companyName: Empresa Exemplo
+          sourceUrl: https://example.test/jobs/123
+          description: Java e Spring Boot.
+          location: São Paulo
+          workMode: HYBRID
+          salary: 6000.00
+          salaryCurrency: BRL
+          salaryPeriod: MONTH
+          hardSkills: [Java, Spring Boot]
+          softSkills: [Comunicação]
+        status: SAVED
+        appliedOn: null
+        notes: Revisar os requisitos antes de enviar a inscrição.
       properties:
         job: { $ref: "#/components/schemas/JobInput" }
         status:
-          allOf:
-            - { $ref: "#/components/schemas/ApplicationStatus" }
+          type: string
+          nullable: true
+          enum: [SAVED, APPLIED, SCREENING, INTERVIEW, OFFER, HIRED, REJECTED, WITHDRAWN, null]
           default: APPLIED
+          description: No cadastro, omissão ou null assume APPLIED. No PUT, obrigatório e não nulo.
         appliedOn:
           {
             type: string,
             format: date,
             nullable: true,
-            description: Data passada ou atual. Obrigatoriamente nula em SAVED; não é presumida nos demais estados.
+            description: Data passada ou atual. Obrigatoriamente nula em SAVED; não é presumida nos demais estados.,
           }
         notes: { type: string, maxLength: 5000, nullable: true }
-    Application:
+    Job:
+      description: Dados públicos da vaga pessoal; não inclui hash de URL ou proprietário.
       allOf:
-        - { $ref: "#/components/schemas/ApplicationInput" }
+        - { $ref: "#/components/schemas/JobInput" }
         - type: object
+          required:
+            [
+              id,
+              title,
+              companyName,
+              sourceUrl,
+              description,
+              location,
+              workMode,
+              salary,
+              salaryCurrency,
+              salaryPeriod,
+              hardSkills,
+              softSkills,
+            ]
           properties:
-            id: { type: integer, format: int64 }
-            job:
-              allOf:
-                - { $ref: "#/components/schemas/JobInput" }
-                - type: object
-                  properties:
-                    id: { type: integer, format: int64 }
-            version: { type: integer, format: int64 }
-            createdAt: { type: string, format: date-time }
-            updatedAt: { type: string, format: date-time }
+            id: { type: integer, format: int64, readOnly: true }
+            hardSkills:
+              type: array
+              maxItems: 50
+              uniqueItems: true
+              items: { type: string, minLength: 1, maxLength: 150 }
+            softSkills:
+              type: array
+              maxItems: 50
+              uniqueItems: true
+              items: { type: string, minLength: 1, maxLength: 150 }
+    Application:
+      type: object
+      required: [id, job, status, appliedOn, notes, createdAt, updatedAt, version]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        job: { $ref: "#/components/schemas/Job" }
+        status: { $ref: "#/components/schemas/ApplicationStatus" }
+        appliedOn: { type: string, format: date, nullable: true }
+        notes: { type: string, maxLength: 5000, nullable: true }
+        version: { type: integer, format: int64, minimum: 0 }
+        createdAt: { type: string, format: date-time, readOnly: true }
+        updatedAt: { type: string, format: date-time, readOnly: true }
     User:
       type: object
-      required: [id, name, email, createdAt]
+      required: [id, name, email, createdAt, photoUrl]
       properties:
         id: { type: integer, format: int64, readOnly: true }
         name: { type: string }
@@ -601,7 +655,7 @@ components:
             nullable: true,
             readOnly: true,
             description: Rota privada da foto; nula quando não cadastrada.,
-            example: /api/users/me/photo
+            example: /api/users/me/photo,
           }
     UserUpdate:
       type: object
@@ -612,14 +666,14 @@ components:
             type: string,
             minLength: 2,
             maxLength: 100,
-            description: Espaços nas extremidades são removidos antes da validação.
+            description: Espaços nas extremidades são removidos antes da validação.,
           }
         email:
           {
             type: string,
             format: email,
             maxLength: 254,
-            description: Espaços nas extremidades são removidos; persistido em minúsculas.
+            description: Espaços nas extremidades são removidos; persistido em minúsculas.,
           }
     Problem:
       type: object
@@ -643,6 +697,7 @@ components:
               message: { type: string }
     SecurityError:
       type: object
+      required: [status, error]
       properties:
         status: { type: integer }
         error: { type: string }
@@ -652,6 +707,27 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Application" }
+          example:
+            id: 1
+            job:
+              id: 1
+              title: Desenvolvedor Java
+              companyName: Empresa Exemplo
+              sourceUrl: https://example.test/jobs/123
+              description: null
+              location: null
+              workMode: null
+              salary: null
+              salaryCurrency: null
+              salaryPeriod: null
+              hardSkills: []
+              softSkills: []
+            status: SAVED
+            appliedOn: null
+            notes: null
+            createdAt: "2026-11-05T12:00:00Z"
+            updatedAt: "2026-11-05T12:00:00Z"
+            version: 0
     ApplicationConflict:
       description: >-
         Versão antiga, link equivalente já cadastrado ou colisão de hash. Uma colisão não une vagas.
@@ -659,6 +735,24 @@ components:
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }
+          examples:
+            staleVersion:
+              value:
+                {
+                  type: "about:blank",
+                  title: Conflict,
+                  status: 409,
+                  detail: "O registro foi alterado. Recarregue antes de salvar.",
+                }
+            duplicateUrl:
+              value:
+                {
+                  type: "about:blank",
+                  title: Conflict,
+                  status: 409,
+                  detail: "Esta vaga já foi cadastrada com esse link.",
+                  code: JOB_URL_ALREADY_EXISTS,
+                }
     NotFound:
       description: Registro ausente ou pertencente a outro usuário.
       content:
@@ -679,20 +773,39 @@ components:
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }
+          example: { type: "about:blank", title: Unauthorized, status: 401, detail: "Credenciais inválidas." }
         application/json:
           schema: { $ref: "#/components/schemas/SecurityError" }
+          example: { status: 401, error: "Autenticação necessária." }
     Forbidden:
-      description: Token CSRF ausente/inválido ou acesso negado. Obtenha novo token e repita com o mesmo cookie.
+      description: Token CSRF ausente/inválido ou acesso negado. Confira sessão e renove o CSRF; não repita escritas automaticamente.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/SecurityError" }
+          example: { status: 403, error: "Acesso negado ou token CSRF inválido." }
     Conflict:
       description: E-mail já cadastrado; altere o e-mail antes de repetir.
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }
     ValidationError:
-      description: Campos inválidos. Corrija os campos indicados em errors.
+      description: Campos ou regras inválidos. errors pode estar ausente; nesse caso, apresente detail.
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }
+          examples:
+            field:
+              value:
+                type: "about:blank"
+                title: Unprocessable Entity
+                status: 422
+                detail: Dados inválidos.
+                errors: [{ field: job.title, message: não deve estar em branco }]
+            query:
+              value:
+                {
+                  type: "about:blank",
+                  title: Unprocessable Entity,
+                  status: 422,
+                  detail: "Parâmetros de consulta inválidos.",
+                }
