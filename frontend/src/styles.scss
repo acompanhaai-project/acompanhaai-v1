@@ -1,188 +1,75 @@
-@use './styles/tokens';
-@import '@fontsource/manrope/latin-400.css';
-@import '@fontsource/manrope/latin-600.css';
-@import '@fontsource/manrope/latin-700.css';
-@import '@fontsource/manrope/latin-800.css';
+:root {
+  --bg: #f4f7ff;
+  --bg-2: #e3ebff;
+  --card: rgba(255, 255, 255, 0.78);
+  --text: #0d1b3d;
+  --muted: #4a5a82;
+  --line: rgba(37, 87, 167, 0.22);
+  --field: #fff;
+  --accent: #2557a7;
+  --neon: #2f7bff;
+  --neon-2: #00c2ff;
+  --btn-disabled: #9bb5e5;
+  --err: #d93025;
+  --hover: rgba(47, 123, 255, 0.08);
+}
+
+@mixin tema-escuro {
+  color-scheme: dark;
+  --bg: #050a1c;
+  --bg-2: #0a1430;
+  --card: rgba(12, 22, 50, 0.62);
+  --text: #eaf1ff;
+  --muted: #9db0d8;
+  --line: rgba(80, 140, 255, 0.28);
+  --field: rgba(5, 12, 32, 0.7);
+  --accent: #4d8dff;
+  --btn-disabled: #2a3f73;
+  --hover: rgba(80, 140, 255, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include tema-escuro;
+  }
+}
+:root[data-theme='dark'] {
+  @include tema-escuro;
+}
 
 * {
   box-sizing: border-box;
 }
 
-html {
-  font-family: var(--font-body);
-  background: var(--color-background);
-  color: var(--color-ink);
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
 body {
   margin: 0;
-}
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text);
+  background: radial-gradient(1200px 700px at 20% -10%, var(--bg-2), var(--bg)) fixed;
 
-::selection {
-  color: var(--color-ink);
-  background: #c8d9ff;
-}
-
-:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 4px;
-}
-
-a {
-  color: var(--color-primary);
-  text-underline-offset: 0.2em;
-}
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
-
-h1,
-h2,
-h3 {
-  line-height: 1.2;
-  text-wrap: balance;
-}
-
-h1 {
-  font-size: clamp(2rem, 4.8vw, 3.75rem);
-  letter-spacing: -0.035em;
-  font-weight: 800;
-}
-
-h2 {
-  font-size: clamp(1.4rem, 2.5vw, 1.875rem);
-  letter-spacing: -0.025em;
-}
-
-h3 {
-  font-size: 1.125rem;
-}
-
-p {
-  max-width: 70ch;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-button,
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: 48px;
-  padding: var(--space-3) var(--space-5);
-  border: 1px solid transparent;
-  border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: white;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-button:hover,
-.button:hover {
-  background: var(--color-primary-hover);
-}
-
-button.secondary,
-.button.secondary {
-  border-color: var(--color-field-border);
-  background: var(--color-surface);
-  color: var(--color-ink);
-}
-
-button.secondary:hover,
-.button.secondary:hover {
-  background: var(--color-primary-soft);
-}
-
-button:disabled {
-  border-color: var(--color-border);
-  background: #e2e8f1;
-  color: #52647c;
-  cursor: not-allowed;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  min-height: 48px;
-  padding: var(--space-3);
-  border: 1px solid var(--color-field-border);
-  border-radius: var(--radius-control);
-  background: var(--color-surface);
-  color: var(--color-ink);
-  caret-color: var(--color-primary);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--color-muted);
-}
-
-[aria-invalid='true'] {
-  border-color: var(--color-danger);
-}
-
-.skip-link {
-  position: fixed;
-  top: var(--space-4);
-  left: var(--space-4);
-  z-index: 10;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
-  background: var(--color-ink);
-  color: white;
-  transform: translateY(-200%);
-}
-
-.skip-link:focus {
-  transform: translateY(0);
-}
-
-.page-heading {
-  margin-bottom: var(--space-6);
-}
-
-.page-heading h1 {
-  max-width: 19ch;
-  margin-bottom: var(--space-4);
-}
-
-.page-heading p {
-  color: var(--color-muted);
-  font-size: 1.0625rem;
-}
-
-.panel {
-  padding: clamp(24px, 4vw, 48px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-panel);
-  background: var(--color-surface);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation: none !important;
-    transition: none !important;
+  // grade que acende ao redor do cursor (--mx/--my vêm do NeonCursorComponent)
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(
+      260px 260px at var(--mx, 50%) var(--my, 40%),
+      #000,
+      transparent
+    );
+    mask-image: radial-gradient(260px 260px at var(--mx, 50%) var(--my, 40%), #000, transparent);
   }
+}
+
+:root {
+  --ok: #22c55e;
+  --warn: #f5a524;
 }

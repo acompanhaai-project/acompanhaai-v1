@@ -1,88 +1,64 @@
-# Frontend do Acompanhaai
+# Frontend do Acompanha Aí
 
-Base Angular/TypeScript da KAN-38. O backend Spring Boot fica em `../backend/`.
-O esboço entrega navegação e componentes visuais. A KAN-39 adiciona o
-[cliente HTTP de sessão/CSRF](docs/cliente-http-kan-39.md), preparado para as
-próximas telas. Login, perfil e candidaturas ainda não têm interface integrada.
+Protótipos de entrada, cadastro e recuperação baseados nos arquivos de interface fornecidos.
+O backend Spring Boot permanece em `../backend/`.
 
 ## Executar
 
-Pré-requisitos: Node.js 22.13+ na linha 22, ou Node.js 24, e npm 10.9.2+.
-Validado localmente com Node.js 22.16.0 e npm 10.9.2. Angular 21 foi escolhido
-por ser compatível com esse ambiente, conforme a
-[tabela oficial](https://angular.dev/reference/versions).
-O mínimo de Node.js 22.13 também atende ao ESLint 10 usado no projeto.
-O lockfile registra as versões efetivamente instaladas. Não requer CLI global.
-
-Na raiz do repositório:
+Na pasta `frontend/`, com Node.js 22.13+ e npm 10.9.2+:
 
 ```bash
-cd frontend
 npm ci
 npm start
 ```
 
-Abrir [http://localhost:4200](http://localhost:4200).
-A interface desta tarefa funciona sem iniciar o backend e sem dados de teste.
+Abrir http://localhost:4200/entrar. A raiz e os endereços desconhecidos
+redirecionam para `/entrar`. A tela de cadastro está em `/cadastro`, acessível
+pelo link **Criar conta** na tela de entrada.
+O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
+`/redefinir-senha?token=demo-design` para demonstração.
 
-## Estrutura e navegação
+## Estrutura
 
-- `src/app/features/`: páginas independentes carregadas por rota.
-- `src/app/shared/models/`: vocabulário compartilhado das oito etapas da API.
-- `src/app/shared/ui/`: estados vazio, carregando, erro e campo de formulário.
-- `src/styles/_tokens.scss`: cores, tipografia, espaçamentos e bordas.
-- `src/app/app.*`: cabeçalho, navegação, conteúdo e rodapé.
+- `src/app/auth-page/`: cartão de acesso, e-mail e inclinação do cartão.
+- `src/app/signup-page/`: cadastro, requisitos de senha e estados do formulário.
+- `src/app/recuperar-senha-page/`: solicitação do link, confirmação e reenvio.
+- `src/app/redefinir-senha-page/`: validação simulada do link e nova senha.
+- `src/app/shared/`: estilos do cartão, diretiva neon e serviço simulado de cadastro.
+- `src/app/core/auth/`: cliente real de sessão e estado autenticado em memória.
+- `src/app/core/http/`: interceptor, CSRF, fila de requisições e tratamento de erros.
+- `src/app/header/`: cabeçalho e alternância entre temas.
+- `src/app/neon-cursor/`: brilho com blur e ponto que acompanham o mouse.
+- `src/styles.scss`: cores, temas, tipografia e grade iluminada pelo cursor.
+- `src/app/app.config.ts`: rotas e providers do cliente HTTP, sessão/CSRF e erros globais.
 
-Rotas públicas: `/inicio` e `/etapas`; `/` redireciona para `/inicio`.
-Endereços desconhecidos apresentam página de recuperação.
-`/referencias` demonstra componentes **somente no build de desenvolvimento**.
-Ela não é um formulário de cadastro nem faz requisições à API.
+As telas seguem os componentes dos ZIPs. A infraestrutura HTTP da KAN-39 e seus
+testes estão preservados e configurados no bootstrap. As telas continuam usando
+o serviço simulado; a integração real pertence à KAN-36, com implementação na
+subtarefa KAN-86, na sprint S04 - Angular: acesso.
+Consultar o [cliente de sessão/CSRF](docs/cliente-http-kan-39.md).
 
-O Angular usa componentes standalone, TypeScript estrito, formulários reativos
-tipados e rotas lazy. Páginas futuras de conta/candidaturas ficam em seus
-domínios; o cliente HTTP e interceptor ficam em `src/app/core/`.
-Não há guard de autenticação nesta tarefa, pois não há rotas privadas entregues.
+Os botões Google/Apple e a mensagem de código enviado são simulações locais,
+conforme o protótipo. Nenhuma autenticação, envio de e-mail ou chamada à API é
+executada. Os links de navegação e políticas são placeholders (`href="#"`).
 
-## Componentes e acessibilidade
-
-- Usar controles HTML nativos e classes globais `.button`/`.secondary`.
-- `FormField` recebe `controlId`, `label`, `hint` e `error`. O input projetado
-  deve usar o mesmo ID e relacionar as mensagens em `aria-describedby`.
-  O formulário consumidor define `aria-invalid` e validações.
-- `ErrorState` anuncia a mensagem e só mostra ação se `retryLabel` for informado;
-  o consumidor trata o evento `retry`. Nenhuma repetição automática é realizada.
-- `LoadingState` usa anúncio de status e skeleton sem animação obrigatória.
-- Navegação com link para pular conteúdo, foco no conteúdo após trocar rota,
-  link ativo com `aria-current`, idioma pt-BR e títulos por página.
-- Manrope é servida localmente pelo pacote Fontsource; nenhuma CDN é necessária.
-
-Consultar o [sistema visual](docs/sistema-visual.md) para manter os componentes consistentes.
+O cadastro também é simulado, com atraso de 1,6 segundo. O e-mail
+`existente@exemplo.com` demonstra cadastro duplicado; `rede@exemplo.com`
+demonstra falha de conexão. Outros e-mails válidos demonstram sucesso, sem
+persistência ou envio de mensagem. Consultar [tela de cadastro](docs/tela-cadastro.md).
+As telas de recuperação também usam simulações. Consultar os
+[cenários de recuperação](docs/recuperacao-senha.md) para demonstrar erros e sucesso.
 
 ## Verificar
 
-Dentro de `frontend/`:
-
 ```bash
-npm run lint
 npm run format:check
+npm run lint
 npm run test:ci
 npm run build
 ```
 
-Lint verifica TypeScript e templates, incluindo regras de acessibilidade.
-Vitest/jsdom verifica navegação, estados e validação da prévia; não substitui
-testes de navegador. A configuração usa um worker em thread para evitar a
-inicialização intermitente de processos separados no Windows local.
-Build de produção em `dist/acompanhaai-web/browser`.
-A integração desses comandos ao GitHub Actions pertence à KAN-41.
-
-O host de produção deve devolver `index.html` para rotas de interface
-desconhecidas pelo servidor e preservar o tratamento de `/api` e assets.
-Não há deploy configurado nesta tarefa.
-
-## Próximas entregas
-
-KAN-39: cliente de sessão/CSRF/erros e proxy local implementados; consultar seu guia.
-KAN-36: cadastro, login, logout e recuperação de senha.
-KAN-37: perfil e foto. Consulte o
-[contrato HTTP](../docs/integracao-frontend.md) antes de integrar.
+O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
+para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
+HTTP e sua configuração na aplicação. As telas e simulações são conferidas no
+navegador; isso ainda não comprova integração com a API.

@@ -64,9 +64,10 @@ relativas `/api/...`. O interceptor aplica o contrato compartilhado.
 Não duplicar a lógica de cookie, CSRF ou repetição em cada componente.
 Para FormData, deixar o navegador definir Content-Type e boundary.
 
-As telas/guards de acesso pertencem à KAN-36; perfil/foto à KAN-37. Não há
-redirecionamento global para uma rota de login inexistente. O UX/UI definitivo
-será definido antes dessas telas.
+As telas/guards de acesso pertencem à KAN-36; perfil/foto à KAN-37. As interfaces
+de login, cadastro, recuperação e redefinição estão disponíveis com serviços
+simulados. A infraestrutura real permanece configurada, mas as telas ainda não
+a utilizam e não há redirecionamento global de autenticação nesta entrega.
 
 ## Erros para os formulários
 

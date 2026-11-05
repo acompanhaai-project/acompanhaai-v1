@@ -1,31 +1,30 @@
 import { Routes } from '@angular/router';
-import { isDevMode } from '@angular/core';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'inicio' },
+  { path: '', pathMatch: 'full', redirectTo: 'entrar' },
   {
-    path: 'inicio',
-    title: 'Início | Acompanhaai',
-    loadComponent: () => import('./features/home/home').then((module) => module.Home),
+    path: 'entrar',
+    loadComponent: () => import('./auth-page/auth-page.component').then((m) => m.AuthPageComponent),
   },
   {
-    path: 'etapas',
-    title: 'Etapas da candidatura | Acompanhaai',
-    loadComponent: () => import('./features/stages/stages').then((module) => module.Stages),
+    path: 'cadastro',
+    loadComponent: () =>
+      import('./signup-page/signup-page.component').then((m) => m.SignupPageComponent),
   },
-  ...(isDevMode()
-    ? [
-        {
-          path: 'referencias',
-          title: 'Referências de interface | Acompanhaai',
-          loadComponent: () =>
-            import('./features/ui-reference/ui-reference').then((module) => module.UiReference),
-        },
-      ]
-    : []),
   {
-    path: '**',
-    title: 'Página não encontrada | Acompanhaai',
-    loadComponent: () => import('./features/not-found/not-found').then((module) => module.NotFound),
+    path: 'recuperar-senha',
+    loadComponent: () =>
+      import('./recuperar-senha-page/recuperar-senha-page.component').then(
+        (m) => m.RecuperarSenhaPageComponent,
+      ),
   },
+  {
+    // link do e-mail: /redefinir-senha?token=...
+    path: 'redefinir-senha',
+    loadComponent: () =>
+      import('./redefinir-senha-page/redefinir-senha-page.component').then(
+        (m) => m.RedefinirSenhaPageComponent,
+      ),
+  },
+  { path: '**', redirectTo: 'entrar' },
 ];
