@@ -1,7 +1,8 @@
 #requires -Version 7.0
 [CmdletBinding()]
 param(
-    [string]$PostgresBin = 'C:\Program Files\PostgreSQL\18\bin'
+    [string]$PostgresBin = 'C:\Program Files\PostgreSQL\18\bin',
+    [switch]$UseCiRunner
 )
 
 $ErrorActionPreference = 'Stop'
@@ -94,6 +95,13 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw 'Não foi possível verificar a instância exclusiva.'
     }
+    if ($UseCiRunner) {
+        & node scripts/test-postman-v2-ci.cjs --postgres-port $qaDbPort --postgres-bin $PostgresBin --run-id $qaRunId
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Executor portável do CI não foi aprovado.'
+        }
+        return
+    }
     foreach ($qaSql in @('create-database-roles.sql', 'adopt-database-objects.sql')) {
         & (Join-Path $PostgresBin 'psql.exe') @qaPsqlArgs -f (Join-Path $qaRoot "scripts/sql/$qaSql")
         if ($LASTEXITCODE -ne 0) {
@@ -149,26 +157,9 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw 'Falha ao instalar o trigger exclusivo da fixture.'
     }
-    $qaSentinelEmail = "qa.kan33.sentinel+$qaRunId@example.test"
     $qaSentinelFile = Join-Path $qaRunRoot 'sentinel.sql'
-    $qaSentinelSql = @"
-INSERT INTO tb_user(name, email, password_hash, auth_version, created_at)
-VALUES ('Sentinela QA KAN33', '$qaSentinelEmail', 'hash-ficticio-sem-login', 0, CURRENT_TIMESTAMP);
-INSERT INTO tb_job(user_id, title)
-SELECT id, 'Vaga sentinela preservada' FROM tb_user WHERE email = '$qaSentinelEmail';
-INSERT INTO tb_application(user_id, job_id, status, notes, created_at, updated_at, version)
-SELECT user_id, id, 'SAVED', 'Sentinela preservada', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
-FROM tb_job WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail');
-INSERT INTO tb_application_status_history(application_id, to_status, changed_at)
-SELECT id, 'SAVED', CURRENT_TIMESTAMP FROM tb_application
-WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail');
-INSERT INTO tb_job_skill(job_id, name, normalized_name, type)
-SELECT id, 'Java sentinela', 'java sentinela', 'HARD' FROM tb_job
-WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail');
-INSERT INTO tb_import_task(user_id, job_id, input_type, input_text, status, attempt_count, created_at, updated_at)
-SELECT user_id, id, 'TEXT', 'Sentinela de importacao', 'PENDING', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-FROM tb_job WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail');
-"@
+    $qaSentinelSql = [IO.File]::ReadAllText((Join-Path $qaRoot 'postman/fixtures/v2/sentinel.sql'))
+    $qaSentinelSql = $qaSentinelSql.Replace('__RUN_ID__', $qaRunId)
     [IO.File]::WriteAllText($qaSentinelFile, $qaSentinelSql)
     & (Join-Path $PostgresBin 'psql.exe') @qaPsqlArgs -f $qaSentinelFile
     if ($LASTEXITCODE -ne 0) {
@@ -187,24 +178,8 @@ FROM tb_job WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEm
     if ($qaA -lt 1 -or $qaB -lt 1 -or $qaA -eq $qaB) {
         throw 'IDs das contas criadas não puderam ser confirmados; não ampliar a limpeza.'
     }
-    $qaChecks = @"
-SELECT count(*) FROM tb_user WHERE id IN ($qaA, $qaB);
-SELECT count(*) FROM tb_job WHERE user_id IN ($qaA, $qaB);
-SELECT count(*) FROM tb_application WHERE user_id IN ($qaA, $qaB);
-SELECT count(*) FROM tb_import_task WHERE user_id IN ($qaA, $qaB);
-SELECT count(*) FROM tb_user_photo WHERE user_id IN ($qaA, $qaB);
-SELECT count(*) FROM tb_password_reset_token WHERE user_id IN ($qaA, $qaB);
-SELECT count(*) FROM tb_user WHERE email = '$qaSentinelEmail' AND name = 'Sentinela QA KAN33';
-SELECT count(*) FROM tb_job WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail')
-AND title = 'Vaga sentinela preservada';
-SELECT count(*) FROM tb_application WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail')
-AND status = 'SAVED' AND notes = 'Sentinela preservada';
-SELECT count(*) FROM tb_application_status_history h JOIN tb_application a ON a.id = h.application_id
-JOIN tb_user u ON u.id = a.user_id WHERE u.email = '$qaSentinelEmail';
-SELECT count(*) FROM tb_job_skill s JOIN tb_job j ON j.id = s.job_id
-JOIN tb_user u ON u.id = j.user_id WHERE u.email = '$qaSentinelEmail';
-SELECT count(*) FROM tb_import_task WHERE user_id = (SELECT id FROM tb_user WHERE email = '$qaSentinelEmail');
-"@
+    $qaChecks = [IO.File]::ReadAllText((Join-Path $qaRoot 'postman/fixtures/v2/verify-cleanup.sql'))
+    $qaChecks = $qaChecks.Replace('__RUN_ID__', $qaRunId).Replace('__A_ID__', [string]$qaA).Replace('__B_ID__', [string]$qaB)
     $qaCheckFile = Join-Path $qaRunRoot 'verify-cleanup.sql'
     [IO.File]::WriteAllText($qaCheckFile, $qaChecks)
     $qaRows = @(& (Join-Path $PostgresBin 'psql.exe') @qaPsqlArgs -Atq -f $qaCheckFile)

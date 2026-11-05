@@ -37,6 +37,10 @@ de URLs, conflitos, concorrência por conta e exclusão dos dados vinculados.
 A [regressão API v2 — KAN-33](regressao-api-v2-kan-33.md) consolida os novos
 contratos no Postman e valida rollback e limpeza no PostgreSQL descartável.
 
+A [matriz de CI PostgreSQL — KAN-34](ci-postgresql-kan-34.md) descreve os cinco
+checks, o executor portável da v2 e as evidências. A [política de migrações](migracoes.md)
+define a comparação contra o SHA base e o tratamento de migrações já aplicadas.
+
 O [fluxo de Bugs — KAN-28](bugs.md) e o [modelo copiável](templates/bug.md)
 definem severidade, prioridade, prazos didáticos de triagem, revisão e reteste.
 Processo documentado; janela de trabalho, mapeamento no Jira e aceite pendentes.

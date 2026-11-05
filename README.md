@@ -301,6 +301,10 @@ busca, versões, duplicidade e rollback real no PostgreSQL descartável. Possui
 coleção, dados e dependências independentes. Após instalar as dependências na
 pasta v2, execute `./scripts/test-postman-v2.ps1` no PowerShell 7.
 
+A [KAN-34](docs/ci-postgresql-kan-34.md) acrescenta os checks
+`backend-migration-policy` e `backend-postman-v2` ao pipeline. Para validar
+localmente o executor do CI, use `./scripts/test-postman-v2.ps1 -UseCiRunner`.
+
 ```powershell
 .\mvnw.cmd verify `
   "-Dspring.datasource.url=jdbc:h2:mem:acompanhaai-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1" `
