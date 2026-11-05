@@ -1,0 +1,17 @@
+{
+  "name": "acompanhaai-api-fixtures-v2",
+  "private": true,
+  "version": "2.0.0",
+  "scripts": {
+    "build": "node build.cjs",
+    "check": "node build.cjs --check",
+    "test:guards": "node --test guards.test.cjs",
+    "test": "node run.cjs"
+  },
+  "dependencies": {
+    "newman": "6.2.3"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

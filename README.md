@@ -294,8 +294,12 @@ Ao integrar o frontend, prefira a mesma origem da API. Não há CORS habilitado 
 O cenario completo de dados ficticios **sem imagem**, congelado como v1, esta em
 [postman/fixtures/v1/README.md](postman/fixtures/v1/README.md). Ele inclui a colecao
 do Postman, dois usuarios ficticios, oito etapas de candidatura, controle
-automatico de sessao/CSRF e limpeza dos dados criados. Mudancas futuras devem
-criar uma v2 e preservar a v1.
+automatico de sessao/CSRF e limpeza dos dados criados. A v1 permanece preservada.
+
+A [regressão v2 — KAN-33](postman/fixtures/v2/README.md) cobre os novos campos,
+busca, versões, duplicidade e rollback real no PostgreSQL descartável. Possui
+coleção, dados e dependências independentes. Após instalar as dependências na
+pasta v2, execute `./scripts/test-postman-v2.ps1` no PowerShell 7.
 
 ```powershell
 .\mvnw.cmd verify `
