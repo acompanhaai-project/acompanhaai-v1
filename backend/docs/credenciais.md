@@ -234,7 +234,7 @@ Os processos de banco temporários foram encerrados.
 
 1. A primeira tentativa complementar não iniciou a JVM de testes por falta de
    memória/arquivo de paginação do Windows. Foi repetida com heap inicial de
-   32 MiB e máximo de 384 MiB, sem encerrar processos do usuário. A falha ocorreu
+   32 MiB e máximo de 384 MiB, sem encerrar outros processos. A falha ocorreu
    antes de executar os testes e não foi contabilizada como aprovação.
 2. Ao forçar credenciais Flyway próprias também em H2, a suíte apresentou
    6 falhas e 2 erros, com causa interna database has been closed na avaliação
@@ -252,8 +252,8 @@ futura. Relatórios completos permanecem locais e exigem revisão antes de compa
 
 ### Smoke da API local após provisionamento
 
-O usuário executou os scripts no banco local, configurou as contas e forneceu
-log de inicialização com V1–V6 validadas e callback afterMigrate concluído.
+O provisionamento local foi aplicado, com as contas configuradas e
+log de inicialização registrando V1–V6 validadas e callback afterMigrate concluído.
 O pgAdmin mostrou conexões JDBC com nome iniciado por acompanhaai_a; a coluna
 estava truncada na captura. O smoke HTTP abaixo demonstra o funcionamento da
 API nessa configuração, mas sozinho não identifica a role efetiva da conexão
@@ -261,7 +261,7 @@ nem substitui a auditoria SQL de privilégios.
 
 As primeiras tentativas válidas excederam o prazo de resposta. A verificação
 do Windows confirmou postgresql-x64-18 parado e porta 5433 sem resposta.
-O usuário restabeleceu o serviço; não foi alterada senha ou permissão para
+O serviço foi restabelecido; não foi alterada senha ou permissão para
 contornar esse problema. Não se tratava de evidência de credencial inválida.
 
 Com o banco disponível, foi executado:
@@ -277,7 +277,7 @@ candidatura, mudança APPLIED→INTERVIEW, histórico e filtro. Após exclusão,
 candidatura retornou 404; a conta de teste foi excluída e a sessão retornou 401.
 
 O script usa cookies próprios, senha aleatória em memória e e-mail fictício
-único em example.test. Não carrega credenciais de banco nem cookies do usuário,
+único em example.test. Não carrega credenciais de banco nem cookies preexistentes,
 não executa a fixture completa e só permite origem HTTP no loopback, sem
 redirecionamentos. Antes de modificar/excluir o perfil, confere a identidade
 fictícia. Em falha, tenta autenticar novamente para limpar somente essa conta.

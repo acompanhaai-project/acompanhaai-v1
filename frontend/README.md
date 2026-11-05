@@ -1,8 +1,9 @@
 # Frontend do Acompanhaai
 
 Base Angular/TypeScript da KAN-38. O backend Spring Boot fica em `../backend/`.
-Este incremento entrega navegação e componentes visuais. Login, perfil e
-candidaturas ainda não estão conectados à API.
+O esboço entrega navegação e componentes visuais. A KAN-39 adiciona o
+[cliente HTTP de sessão/CSRF](docs/cliente-http-kan-39.md), preparado para as
+próximas telas. Login, perfil e candidaturas ainda não têm interface integrada.
 
 ## Executar
 
@@ -39,7 +40,7 @@ Ela não é um formulário de cadastro nem faz requisições à API.
 
 O Angular usa componentes standalone, TypeScript estrito, formulários reativos
 tipados e rotas lazy. Páginas futuras de conta/candidaturas ficam em seus
-domínios; o cliente HTTP e interceptors serão implementados na KAN-39.
+domínios; o cliente HTTP e interceptor ficam em `src/app/core/`.
 Não há guard de autenticação nesta tarefa, pois não há rotas privadas entregues.
 
 ## Componentes e acessibilidade
@@ -55,7 +56,7 @@ Não há guard de autenticação nesta tarefa, pois não há rotas privadas entr
   link ativo com `aria-current`, idioma pt-BR e títulos por página.
 - Manrope é servida localmente pelo pacote Fontsource; nenhuma CDN é necessária.
 
-Consultar [DESIGN.md](DESIGN.md) para manter o sistema visual.
+Consultar o [sistema visual](docs/sistema-visual.md) para manter os componentes consistentes.
 
 ## Verificar
 
@@ -81,7 +82,7 @@ Não há deploy configurado nesta tarefa.
 
 ## Próximas entregas
 
-KAN-39: cliente de sessão/CSRF/erros e estratégia de proxy local.
+KAN-39: cliente de sessão/CSRF/erros e proxy local implementados; consultar seu guia.
 KAN-36: cadastro, login, logout e recuperação de senha.
 KAN-37: perfil e foto. Consulte o
 [contrato HTTP](../docs/integracao-frontend.md) antes de integrar.

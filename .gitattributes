@@ -4,3 +4,7 @@
 *.md text eol=lf
 backend/mvnw text eol=lf
 *.cmd text eol=crlf
+backend/src/main/resources/db/migration/** text eol=lf
+backend/postman/fixtures/v1/** text eol=lf
+backend/postman/package.json text eol=lf
+backend/postman/package-lock.json text eol=lf

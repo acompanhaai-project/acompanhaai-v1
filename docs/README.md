@@ -33,8 +33,9 @@ evidências de execução: registrar resultados somente após executar cada rote
 ## Como usar
 
 A [base Angular — KAN-38](../frontend/README.md) documenta execução local,
-estrutura, componentes e verificações do frontend. A integração HTTP será
-entregue na KAN-39.
+estrutura, componentes e verificações do frontend. A
+[integração HTTP da KAN-39](../frontend/docs/cliente-http-kan-39.md) prepara
+sessão, CSRF, erros e proxy para as próximas telas.
 
 O [guia de integração — KAN-35](integracao-frontend.md) acompanha o
 [OpenAPI 0.1.0](../backend/docs/openapi.yaml), com exemplos de erros, modelos de entrada/saída

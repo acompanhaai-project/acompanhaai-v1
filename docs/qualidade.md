@@ -73,7 +73,7 @@ requisições contra a API real local; não é um servidor que substitui a API.
 
 - Não editar `postman/fixtures/v1/`, seu executor ou seus hashes.
 - Preservar também `postman/package.json`, `package-lock.json` e as regras
-  de preservação estabelecidas nos arquivos AGENTS.md.
+  de preservação documentadas no [guia dos testes da API](../backend/postman/README.md).
 - Não adicionar testes de imagem à v1.
 - Relatórios e ambiente exportado podem conter sessões: ficam locais.
 - Executar a fixture em uma instância local dedicada a testes.

@@ -42,7 +42,7 @@ npm start
 ```
 
 Abrir [http://localhost:4200](http://localhost:4200). O esboço atual ainda não
-faz chamadas à API. O UX/UI definitivo será definido pelo usuário antes das
+faz chamadas à API. O UX/UI definitivo será definido antes das
 telas completas.
 
 ## Verificar

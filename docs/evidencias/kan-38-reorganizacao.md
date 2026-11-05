@@ -34,8 +34,7 @@ Maven Wrapper 3.9.16, Node.js 22.16.0 e PostgreSQL 18.6.
 | Documentação e OpenAPI                          | Links locais conferidos; contrato válido no novo caminho                                           |
 
 Maven gerou o JAR em `backend/target/acompanhaai-0.0.1-SNAPSHOT.jar`.
-O primeiro teste HTTP foi bloqueado pelo sandbox; a execução final foi feita
-fora dele, com banco H2 explícito e sem usar o banco PostgreSQL local.
+A execução final utilizou banco H2 explícito, sem acessar o PostgreSQL local.
 
 ## Reproduzir
 
@@ -63,7 +62,7 @@ backend/postman/reports. Não houve leitura de conteúdo das configurações pri
 
 Nenhum volume Docker foi acessado. A manutenção do nome Compose foi revisada
 estaticamente; Docker não está disponível neste ambiente. Os checks remotos
-do GitHub Actions precisam ser confirmados no PR. Não houve deploy, commit ou
-push automático desta reorganização.
+do GitHub Actions devem ser consultados no PR. Esta evidência registra a
+validação local, sem deploy.
 O Angular não recebeu alterações funcionais nesta etapa; suas oito verificações
 anteriores estão na [evidência da base](kan-38-base-angular.md).

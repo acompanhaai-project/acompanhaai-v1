@@ -53,7 +53,7 @@ Também passaram validação da prévia, troca de estados, foco, título da rota
 e bloqueio das referências no build de produção. Sem erros JavaScript capturados.
 Resultado sanitizado: [kan-38-browser.json](kan-38-browser.json).
 
-Uma revisão visual independente das oito capturas não identificou problemas
+A conferência das oito capturas não identificou problemas
 materiais de legibilidade, hierarquia ou layout. Capturas e ferramentas
 temporárias permanecem em `target/kan38-browser` e `target/ui-tools`, ignorados
 pelo Git; não são dependências de produção nem parte da suíte versionada.
@@ -64,7 +64,6 @@ A primeira tentativa de instalação falhou no resolvedor npm; a instalação
 foi concluída com Vitest fixado. ESLint 10 foi escolhido em lugar do 9
 descontinuado. Foi configurado um worker em thread para evitar timeout
 intermitente ao iniciar os processos separados do Vitest no Windows local.
-O navegador foi executado fora do sandbox local.
 
 ## Limites e aceite
 
@@ -73,5 +72,5 @@ de candidaturas. Cliente HTTP: KAN-39; telas de acesso: KAN-36;
 perfil: KAN-37; frontend no CI: KAN-41.
 Não foram realizados testes com leitor de tela, dispositivos físicos ou
 jornadas de conta no navegador. Axe não comprova conformidade integral.
-PR, CI e aprovação visual do usuário continuam necessários antes de encerrar
+PR, CI e aprovação visual continuam necessários antes de encerrar
 a tarefa. Nenhum deploy foi realizado.

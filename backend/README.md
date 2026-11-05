@@ -199,7 +199,7 @@ Vaga e candidatura têm `@Version` para controle de edições concorrentes.
 Os relacionamentos usam carregamento lazy e não propagam remoção para o usuário.
 
 - V1: usuários, preservada.
-- V2: fotos de usuários, criada na outra conversa.
+- V2: fotos de usuários.
 - V3: vagas, candidaturas e histórico.
 - V4: salário, detalhes da vaga, habilidades e constraints adicionais.
 - V5: tarefas de importação com resultado JSONB.

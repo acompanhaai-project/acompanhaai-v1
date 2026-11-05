@@ -37,7 +37,7 @@ No IDE, importar `backend/pom.xml` como projeto Maven e configurar o diretório
 de trabalho da API para `backend/`. A identidade dos pacotes Java não mudou.
 
 O Angular continua usando `cd frontend` e `npm start`. O visual é provisório;
-o usuário definirá UX/UI antes das telas completas.
+o padrão de UX/UI será definido antes das telas completas.
 
 ## Dados locais e Docker Compose
 

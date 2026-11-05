@@ -1,6 +1,6 @@
 # Modelagem do banco — Acompanhaai
 
-Modelo baseado na conversa “Desenhar backend para vagas”. A implementação foi integrada em 28/10/2026 com as alterações da outra conversa: V1 para usuários, V2 para fotos, V3 para vagas/candidaturas/histórico, V4 para detalhes da vaga e habilidades e V5 para importações. O CRUD de candidaturas e a gravação transacional do histórico já existem; confirmação de importação e worker continuam pendentes. O Flyway aplica as tabelas ao iniciar a aplicação.
+Modelo relacional da API. A implementação foi integrada em 28/10/2026: V1 para usuários, V2 para fotos, V3 para vagas/candidaturas/histórico, V4 para detalhes da vaga e habilidades e V5 para importações. O CRUD de candidaturas e a gravação transacional do histórico já existem; confirmação de importação e worker continuam pendentes. O Flyway aplica as tabelas ao iniciar a aplicação.
 
 ## Escopo e decisões
 
@@ -206,7 +206,7 @@ Avaliar novos índices a partir das consultas reais. Não criar índice em todo 
 
 1. Preservar a V1 de usuários e a autenticação existente.
 2. Entidades e migrações de estrutura concluídas: V3 para vagas/candidaturas/histórico, V4 para detalhes e habilidades, V5 para tarefas de importação.
-3. Cadastro manual e transações de acompanhamento/histórico integrados com o CRUD da outra conversa.
+3. Cadastro manual e transações de acompanhamento/histórico integrados com a API de contas.
 4. Adicionar tarefa de importação e seu worker quando o fluxo manual estiver funcional.
 5. Validar constraints, isolamento entre usuários e concorrência em PostgreSQL. Testes em H2 não comprovam o comportamento de JSONB e do worker no PostgreSQL.
 
