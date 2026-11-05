@@ -16,6 +16,7 @@ function git(root, args) {
 }
 
 function verifyMigrations(root, requestedBase) {
+  const repository = git(root, ['rev-parse', '--show-toplevel']);
   let base = requestedBase;
   if (!base || /^0+$/.test(base)) {
     base = git(root, ['rev-parse', 'HEAD^']);
@@ -24,20 +25,34 @@ function verifyMigrations(root, requestedBase) {
     throw new Error('A base deve ser um SHA Git completo.');
   }
   git(root, ['cat-file', '-e', base + '^{commit}']);
-  const diff = git(root, [
-    'diff',
-    '--no-renames',
-    '--name-status',
-    '--diff-filter=MDT',
-    '-z',
-    base,
-    '--',
-    'src/main/resources/db/migration'
-  ]);
-  const fields = diff.split('\0').filter(Boolean);
+  const directories = [
+    'src/main/resources/db/migration/',
+    'backend/src/main/resources/db/migration/'
+  ];
+  const tree = git(repository, ['ls-tree', '-r', '-z', base, '--', ...directories]);
   const violations = [];
-  for (let index = 0; index < fields.length; index += 2) {
-    violations.push({ status: fields[index], file: fields[index + 1] });
+  for (const entry of tree.split('\0').filter(Boolean)) {
+    const [metadata, original] = entry.split('\t');
+    const directory = directories.find((candidate) => original.startsWith(candidate));
+    const relative = original.slice(directory.length);
+    const candidates = directories
+      .map((candidate) => candidate + relative)
+      .filter((candidate) => fs.existsSync(path.join(repository, candidate)));
+
+    if (candidates.length !== 1) {
+      violations.push({ status: candidates.length ? 'T' : 'D', file: original });
+      continue;
+    }
+    const current = candidates[0];
+    if (!fs.lstatSync(path.join(repository, current)).isFile()) {
+      violations.push({ status: 'T', file: current });
+      continue;
+    }
+    const expectedHash = metadata.split(' ')[2];
+    const actualHash = git(repository, ['hash-object', '--', current]);
+    if (actualHash !== expectedHash) {
+      violations.push({ status: 'M', file: current });
+    }
   }
   return { baseSha: base, result: violations.length ? 'FAIL' : 'PASS', violations };
 }

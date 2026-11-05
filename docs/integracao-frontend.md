@@ -2,9 +2,9 @@
 
 Relacionamento: KAN-35. Descreve a API existente; o frontend Angular ainda
 será entregue. Os detalhes de salário e habilidades seguem o
-[contrato KAN-30](vaga-manual-kan-30.md).
+[contrato KAN-30](../backend/docs/vaga-manual-kan-30.md).
 
-Fonte do contrato: [openapi.yaml](openapi.yaml). Conferir DTOs, Resources e
+Fonte do contrato: [openapi.yaml](../backend/docs/openapi.yaml). Conferir DTOs, Resources e
 testes ao alterar o contrato. A coleção Postman v1 é um registro congelado,
 não deve ser regenerada para acompanhar o OpenAPI. A v2 também tem scripts de
 sessão e limpeza próprios: revisar sua compatibilidade a cada mudança, sem
@@ -123,7 +123,7 @@ Exemplo de payload atual, sem dados pessoais:
 `job.title` é obrigatório. Status omitido no cadastro assume APPLIED;
 SAVED exige data nula. Datas futuras são inválidas. O link é armazenado,
 não acessado. Salário único, habilidades, localização e modalidade estão
-disponíveis nos DTOs conforme o [contrato KAN-30](vaga-manual-kan-30.md).
+disponíveis nos DTOs conforme o [contrato KAN-30](../backend/docs/vaga-manual-kan-30.md).
 Ao editar, reenviar os detalhes que devem ser preservados: opcionais omitidos
 são limpos e listas omitidas ou vazias removem as habilidades daquele tipo.
 Salário ausente deve ir como null (ou ser omitido), junto de moeda e período
@@ -147,7 +147,7 @@ O parâmetro opcional `q` busca um trecho literal do título ou empresa, sem
 diferenciar caixa, com até 100 caracteres. Pode ser combinado com `status`:
 `GET /api/applications?status=SCREENING&q=java&page=0&size=20`.
 Texto vazio ou somente espaços desativa a busca textual; `%`, `_` e `!` são
-literais. Ver [contrato KAN-31](acompanhamento-kan-31.md).
+literais. Ver [contrato KAN-31](../backend/docs/acompanhamento-kan-31.md).
 
 No PUT, enviar os campos editáveis completos e `version` da última leitura.
 Opcionais omitidos ficam nulos. Trocar status registra histórico; alterar
@@ -209,7 +209,7 @@ controller usam ProblemDetail. O frontend precisa aceitar ambos.
 | KAN-35 — exemplos e integração    | OpenAPI e este guia                                       | Validação estática nesta tarefa; aceite frontend/QA pendente       |
 
 As evidências de execução da v2 estão em
-[KAN-33](regressao-api-v2-kan-33.md) e [KAN-34](ci-postgresql-kan-34.md).
+[KAN-33](../backend/docs/regressao-api-v2-kan-33.md) e [KAN-34](../backend/docs/ci-postgresql-kan-34.md).
 Essas execuções validam HTTP/backend, não o futuro cliente Angular.
 
 Roteiro para revisão com frontend/QA: cadastro → login → novo CSRF → GET me;

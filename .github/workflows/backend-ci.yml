@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: backend
+
 jobs:
   migration-policy:
     name: backend-migration-policy
@@ -42,7 +46,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: politica-migracoes-${{ github.sha }}
-          path: target/migration-policy/summary.json
+          path: backend/target/migration-policy/summary.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -79,14 +83,15 @@ jobs:
           distribution: corretto
           java-version: "25"
           cache: maven
+          cache-dependency-path: backend/pom.xml
       - name: Configurar Node.js 22 e cache da v2
         uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: postman/fixtures/v2/package-lock.json
+          cache-dependency-path: backend/postman/fixtures/v2/package-lock.json
       - name: Restaurar dependências exclusivas da v2
-        working-directory: postman/fixtures/v2
+        working-directory: backend/postman/fixtures/v2
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Disponibilizar cliente PostgreSQL
         run: |
@@ -107,8 +112,8 @@ jobs:
         with:
           name: testes-postman-v2-${{ github.sha }}
           path: |
-            postman/reports/v2/*/summary.json
-            target/kan34-postgres-*/summary.json
+            backend/postman/reports/v2/*/summary.json
+            backend/target/kan34-postgres-*/summary.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -132,6 +137,7 @@ jobs:
           distribution: corretto
           java-version: "25"
           cache: maven
+          cache-dependency-path: backend/pom.xml
 
       - name: Permitir execução do Maven Wrapper
         run: chmod +x mvnw
@@ -149,8 +155,8 @@ jobs:
         with:
           name: testes-${{ github.sha }}
           path: |
-            target/surefire-reports/*.xml
-            target/surefire-reports/*.txt
+            backend/target/surefire-reports/*.xml
+            backend/target/surefire-reports/*.txt
           if-no-files-found: warn
           retention-days: 7
 
@@ -159,7 +165,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: backend-${{ github.sha }}
-          path: target/acompanhaai-0.0.1-SNAPSHOT.jar
+          path: backend/target/acompanhaai-0.0.1-SNAPSHOT.jar
           if-no-files-found: error
           retention-days: 7
 
@@ -196,6 +202,7 @@ jobs:
           distribution: corretto
           java-version: "25"
           cache: maven
+          cache-dependency-path: backend/pom.xml
       - name: Permitir execução do Maven Wrapper
         run: chmod +x mvnw
       - name: Validar provisionamento e migrações com identidades separadas
@@ -223,8 +230,8 @@ jobs:
         with:
           name: testes-permissoes-${{ github.sha }}
           path: |
-            target/surefire-reports/*.xml
-            target/surefire-reports/*.txt
+            backend/target/surefire-reports/*.xml
+            backend/target/surefire-reports/*.txt
           if-no-files-found: warn
           retention-days: 7
 
@@ -259,6 +266,7 @@ jobs:
           distribution: corretto
           java-version: "25"
           cache: maven
+          cache-dependency-path: backend/pom.xml
       - name: Permitir execução do Maven Wrapper
         run: chmod +x mvnw
       - name: Validar migrações e regressão no PostgreSQL
@@ -273,7 +281,7 @@ jobs:
         with:
           name: testes-postgres-${{ github.sha }}
           path: |
-            target/surefire-reports/*.xml
-            target/surefire-reports/*.txt
+            backend/target/surefire-reports/*.xml
+            backend/target/surefire-reports/*.txt
           if-no-files-found: warn
           retention-days: 7

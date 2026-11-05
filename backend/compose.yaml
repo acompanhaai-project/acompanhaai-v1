@@ -1,3 +1,5 @@
+name: acompanhaai
+
 services:
   postgres:
     image: postgres:18

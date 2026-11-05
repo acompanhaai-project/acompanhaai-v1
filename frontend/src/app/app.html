@@ -1,0 +1,40 @@
+<a class="skip-link" href="#main-content" (click)="skipToContent($event)">Pular para o conteúdo</a>
+
+<div class="app-shell">
+  <header class="app-header">
+    <a class="brand" routerLink="/inicio" aria-label="Acompanhaai, início">
+      <svg viewBox="0 0 32 32" width="32" height="32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="10" fill="currentColor" />
+        <path
+          d="m8 17 5 5 11-12"
+          stroke="white"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span>acompanhaai<span class="brand-dot">.</span></span>
+    </a>
+
+    <nav aria-label="Navegação principal">
+      <a routerLink="/inicio" routerLinkActive="active" ariaCurrentWhenActive="page">Início</a>
+      <a routerLink="/etapas" routerLinkActive="active" ariaCurrentWhenActive="page"
+        >Etapas da candidatura</a
+      >
+      @if (development) {
+        <a routerLink="/referencias" routerLinkActive="active" ariaCurrentWhenActive="page"
+          >Referências de interface</a
+        >
+      }
+    </nav>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+    <router-outlet />
+  </main>
+
+  <footer class="app-footer">
+    <span>Acompanhaai</span>
+    <p>Uma etapa de cada vez, com o próximo passo em vista.</p>
+  </footer>
+</div>

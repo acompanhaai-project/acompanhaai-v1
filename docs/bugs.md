@@ -176,7 +176,7 @@ Não executar suítes destrutivas sobre dados pessoais ou produção.
 | Fluxo, reabertura e vínculos com história/release                   | Fluxo, quadro de quatro colunas, vínculos e critérios de fechamento |
 | Não criar defeitos fictícios                                        | Orientação explícita e exemplos identificados como hipotéticos      |
 
-A [R01 da KAN-27](matriz-kan-27.md) é um exemplo real documentado de falha
+A [R01 da KAN-27](../backend/docs/matriz-kan-27.md) é um exemplo real documentado de falha
 em teste, correção e reteste. Ela não prova uma vulnerabilidade da API e não
 deve ser cadastrada retroativamente como Bug ainda aberto sem verificar seu
 estado e possíveis duplicatas. Nenhum Bug fictício foi criado nesta entrega.

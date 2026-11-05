@@ -27,8 +27,12 @@ a pasta `db/migration`, inclusive alterações de nome e tipo de arquivo.
   manualmente, informar explicitamente seu SHA base.
 
 O checkout desse job usa `fetch-depth: 0`. Base ausente, inválida ou sem objeto
-Git disponível falha; não produz aprovação sem comparação. O diff usa
-`--no-renames`: uma renomeação é vista como exclusão da migração original.
+Git disponível falha; não produz aprovação sem comparação. O verificador
+compara o hash Git de cada arquivo da base com o conteúdo atual, pelo mesmo
+nome relativo. Reconhece tanto `src/main/resources/db/migration/` histórico
+quanto `backend/src/main/resources/db/migration/`: somente a mudança de raiz
+sem alteração de conteúdo é aceita. Edição, exclusão, renomeação de arquivo,
+mudança de tipo ou duplicação nas duas raízes são rejeitadas.
 Adições são permitidas. O Flyway e os testes continuam responsáveis por
 versionamento válido, sintaxe, constraints e comportamento das novas migrações.
 
@@ -43,9 +47,10 @@ $base = (git rev-parse main).Trim()
 node scripts/check-migrations.cjs $base
 ```
 
-Os seis testes usam repositórios Git descartáveis em `target`, com identidade
+Os dez testes usam repositórios Git descartáveis em `target`, com identidade
 fictícia, hooks desativados e sem remoto. Simulam adição permitida, edição
-antes e depois de commit, exclusão, renomeação, callback e base inválida/ausente.
+antes e depois de commit, exclusão, renomeação, callback, base inválida/ausente
+e a reorganização do backend, inclusive edição disfarçada e duplicação.
 O repositório de trabalho não recebe commits desses testes.
 
 ## Atualização preservando dados
