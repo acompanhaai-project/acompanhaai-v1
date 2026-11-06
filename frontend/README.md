@@ -19,15 +19,16 @@ Abrir http://localhost:4200/entrar. A raiz e os endereços desconhecidos
 redirecionam para `/entrar`. A tela de cadastro está em `/cadastro`, acessível
 pelo link **Criar conta** na tela de entrada.
 O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
-`/redefinir-senha?token=demo-design` para demonstração.
+`/redefinir-senha#token=...`, usando um link recebido por e-mail. O endereço
+`/reset-password#token=...` também é aceito por compatibilidade com o Mailpit local.
 
 ## Estrutura
 
 - `src/app/auth-page/`: login em duas etapas, confirmação do acesso e logout.
 - `src/app/signup-page/`: cadastro, requisitos de senha e estados do formulário.
 - `src/app/recuperar-senha-page/`: solicitação do link, confirmação e reenvio.
-- `src/app/redefinir-senha-page/`: validação simulada do link e nova senha.
-- `src/app/shared/`: estilos do cartão, regras de senha e simulações de recuperação.
+- `src/app/redefinir-senha-page/`: leitura segura do token e nova senha.
+- `src/app/shared/`: estilos do cartão e regras de senha.
 - `src/app/core/auth/`: cliente real de sessão e estado autenticado em memória.
 - `src/app/core/http/`: interceptor, CSRF, fila de requisições e tratamento de erros.
 - `src/app/header/`: cabeçalho e alternância entre temas.
@@ -38,7 +39,7 @@ O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 As telas seguem os componentes dos ZIPs. A infraestrutura HTTP da KAN-39 e seus
 testes estão preservados e configurados no bootstrap. O cadastro usa
 `SessionApi.register()` para criar a conta na API. Login e logout usam os fluxos
-reais de sessão/CSRF; recuperação e redefinição ainda usam simulações.
+reais de sessão/CSRF; recuperação e redefinição usam `PasswordResetApi`.
 A implementação pertence à KAN-86 / KAN-36, na sprint
 S04 - Angular: acesso.
 Consultar o [cliente de sessão/CSRF](docs/cliente-http-kan-39.md).
@@ -60,8 +61,10 @@ O cadastro cria uma conta real no banco configurado pelo backend e requer a
 API em execução. Não autentica nem envia e-mail de confirmação. Não há e-mails
 especiais que simulem erros nessa tela; duplicidade depende dos registros reais.
 Consultar [tela de cadastro](docs/tela-cadastro.md).
-As telas de recuperação também usam simulações. Consultar os
-[cenários de recuperação](docs/recuperacao-senha.md) para demonstrar erros e sucesso.
+A recuperação solicita o processamento do e-mail e a redefinição altera a senha
+na API. O envio local requer o perfil `mail-local` e um capturador SMTP como
+Mailpit. A resposta `202` é genérica e não comprova entrega. Consultar o
+[fluxo de recuperação](docs/recuperacao-senha.md).
 
 ## Verificar
 
@@ -74,10 +77,10 @@ npm run build
 
 O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
 para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
-HTTP, sua configuração, cadastro, login e logout. Os fluxos reais de cadastro,
-entrada e saída também são conferidos no navegador com uma API e H2 isolado.
-Isso não valida recuperação, rotas privadas ou restauração da interface após
-recarregar a página, que continuam pendentes.
+HTTP, sua configuração e os fluxos de acesso. Cadastro, login, logout e recuperação
+também são conferidos no navegador com API real e H2 isolado. A recuperação usa
+SMTP real capturado pelo Mailpit local. Rotas privadas e restauração da interface
+após recarregar a página continuam pendentes.
 
 O lint verifica TypeScript e templates. Os testes usam Vitest/jsdom com um
 worker em thread. O build de produção fica em `dist/acompanhaai-web/browser`.

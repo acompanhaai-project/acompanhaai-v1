@@ -1,20 +1,8 @@
 <main class="page">
   <div class="brand">Acompanha Aí</div>
 
-  <section
-    appNeonCard
-    class="card"
-    aria-labelledby="titulo"
-    [attr.aria-busy]="estado() === 'validando' || carregando()"
-  >
+  <section appNeonCard class="card" aria-labelledby="titulo" [attr.aria-busy]="carregando()">
     @switch (estado()) {
-      @case ('validando') {
-        <div class="carga" role="status">
-          <span class="spinner neon" aria-hidden="true"></span>
-          <span id="titulo">Verificando seu link…</span>
-        </div>
-      }
-
       @case ('invalido') {
         <div class="painel" role="alert">
           <svg
@@ -97,6 +85,7 @@
                 [type]="verSenha() ? 'text' : 'password'"
                 autocomplete="new-password"
                 formControlName="senha"
+                maxlength="128"
                 [attr.aria-invalid]="invalido(form.controls.senha)"
                 aria-describedby="requisitos erro-senha"
               />
@@ -159,6 +148,7 @@
                 [type]="verConfirma() ? 'text' : 'password'"
                 autocomplete="new-password"
                 formControlName="confirma"
+                maxlength="128"
                 [attr.aria-invalid]="confirmaInvalida"
                 aria-describedby="erro-confirma"
               />
@@ -212,9 +202,11 @@
             }
           </div>
 
-          <button class="btn go" type="submit" [disabled]="carregando()">
+          <button class="btn go" type="submit" [disabled]="carregando() || espera() > 0">
             @if (carregando()) {
               <span class="spinner" aria-hidden="true"></span> Salvando…
+            } @else if (espera() > 0) {
+              Tente novamente em {{ relogio() }}
             } @else {
               Redefinir senha
             }

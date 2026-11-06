@@ -1,7 +1,12 @@
 <main class="page">
   <div class="brand">Acompanha Aí</div>
 
-  <section appNeonCard class="card" aria-labelledby="titulo" [attr.aria-busy]="carregando()">
+  <section
+    appNeonCard
+    class="card"
+    aria-labelledby="titulo"
+    [attr.aria-busy]="carregando() || reenviando()"
+  >
     @if (estado() === 'enviado') {
       <!-- ============ CONFIRMAÇÃO ============ -->
       <div class="painel" role="status">
@@ -27,7 +32,7 @@
         <h1 id="titulo">Verifique seu e-mail</h1>
         <p class="sub">
           Se existir uma conta para <strong>{{ email.value }}</strong
-          >, enviamos um link para criar uma nova senha. O link vale por 30 minutos.
+          >, a solicitação será processada. O link enviado vale por 30 minutos.
         </p>
         <p class="dica">Não chegou? Confira a caixa de spam.</p>
 
@@ -47,7 +52,12 @@
             }
           </button>
           <p class="dica" aria-live="polite">{{ aviso() }}</p>
-          <button class="link-btn" type="button" (click)="usarOutroEmail()">
+          <button
+            class="link-btn"
+            type="button"
+            (click)="usarOutroEmail()"
+            [disabled]="reenviando()"
+          >
             Usar outro e-mail
           </button>
         </div>
@@ -79,8 +89,9 @@
             autocomplete="email"
             placeholder="voce@exemplo.com"
             [formControl]="email"
+            maxlength="254"
             [attr.aria-invalid]="mostrarErro"
-            aria-describedby="erro-email"
+            [attr.aria-describedby]="mostrarErro ? 'erro-email' : null"
           />
           @if (mostrarErro) {
             <p id="erro-email" class="err" role="alert">
@@ -98,9 +109,11 @@
           }
         </div>
 
-        <button class="btn go" type="submit" [disabled]="carregando()">
+        <button class="btn go" type="submit" [disabled]="carregando() || espera() > 0">
           @if (carregando()) {
             <span class="spinner" aria-hidden="true"></span> Enviando…
+          } @else if (espera() > 0) {
+            Tente novamente em {{ relogio() }}
           } @else {
             Enviar link
             <svg

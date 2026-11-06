@@ -19,8 +19,15 @@ export const routes: Routes = [
       ),
   },
   {
-    // link do e-mail: /redefinir-senha?token=...
+    // O token do link de recuperação é recebido pelo fragmento #token=...
     path: 'redefinir-senha',
+    loadComponent: () =>
+      import('./redefinir-senha-page/redefinir-senha-page.component').then(
+        (m) => m.RedefinirSenhaPageComponent,
+      ),
+  },
+  {
+    path: 'reset-password',
     loadComponent: () =>
       import('./redefinir-senha-page/redefinir-senha-page.component').then(
         (m) => m.RedefinirSenhaPageComponent,

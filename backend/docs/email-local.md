@@ -8,9 +8,10 @@ Ele não configura um provedor de e-mail de produção.
 
 ## Teste manual com Mailpit
 
-Requer Docker com Compose instalado e em execução. Na raiz do repositório:
+Requer Docker com Compose instalado e em execução. A partir da raiz do repositório:
 
 ```bash
+cd backend
 docker compose -f compose.mail.yaml up -d
 ./mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev,mail-local"
 ```
@@ -28,13 +29,19 @@ Não exponha a caixa de testes, pois ela contém links de recuperação utilizá
    corpo `{"email":"pessoa@example.test"}`. A resposta é sempre genérica.
 4. Abra a mensagem no Mailpit. O link tem formato
    `http://localhost:4200/reset-password#token=...`.
-5. Como a tela Angular ainda não existe, copie somente o valor após `#token=`.
-   Não é necessário abrir o link. O fragmento foi escolhido para não enviar
-   o token na URL de uma requisição ao servidor.
-6. Faça POST /api/auth/password-reset/confirm com CSRF da mesma sessão e JSON
-   contendo token e newPassword, conforme [contrato](recuperacao-senha.md).
+5. Com o frontend em execução na porta 4200, abra o link. A tela aceita
+   `/reset-password` e `/redefinir-senha`, lê `#token=...` e limpa o endereço.
+   O fragmento evita enviar o token na URL da requisição inicial ao servidor.
+6. Informe e confirme a nova senha. A tela faz POST /api/auth/password-reset/confirm
+   com CSRF e JSON contendo token e newPassword, conforme [contrato](recuperacao-senha.md).
 7. Espere 204; confirme que o link não pode ser reutilizado e efetue login
    com a nova senha. Nenhum login é criado automaticamente pela recuperação.
+
+Para iniciar a interface, em outro terminal a partir da raiz, executar
+`cd frontend` e `npm start`. O frontend usa proxy para a API na porta 8080.
+O endereço de redefinição do e-mail é configurado em
+`app.password-reset.mail.reset-url`; `/reset-password` é mantido como alias.
+O prazo de reenvio da interface é de 60 segundos, alinhado ao cooldown por conta.
 
 Se preferir banco PostgreSQL local já configurado, substitua os perfis por
 `postgres-local,mail-local`. Essa instrução não significa que a integração
