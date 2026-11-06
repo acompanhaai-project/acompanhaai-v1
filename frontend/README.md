@@ -7,6 +7,9 @@ O backend Spring Boot permanece em `../backend/`.
 
 Na pasta `frontend/`, com Node.js 22.13+ e npm 10.9.2+:
 
+Node.js 24 também é compatível. O projeto usa Angular 21 e não requer CLI global.
+O lockfile registra as versões das dependências.
+
 ```bash
 npm ci
 npm start
@@ -38,6 +41,11 @@ o serviço simulado; a integração real pertence à KAN-36, com implementação
 subtarefa KAN-86, na sprint S04 - Angular: acesso.
 Consultar o [cliente de sessão/CSRF](docs/cliente-http-kan-39.md).
 
+Os componentes são standalone, com TypeScript estrito, formulários reativos
+tipados e rotas lazy. Não há rotas privadas ou guard de autenticação nesta
+entrega. O padrão de cores, tipografia e efeitos está no
+[sistema visual](docs/sistema-visual.md).
+
 Os botões Google/Apple e a mensagem de código enviado são simulações locais,
 conforme o protótipo. Nenhuma autenticação, envio de e-mail ou chamada à API é
 executada. Os links de navegação e políticas são placeholders (`href="#"`).
@@ -62,3 +70,19 @@ O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
 para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
 HTTP e sua configuração na aplicação. As telas e simulações são conferidas no
 navegador; isso ainda não comprova integração com a API.
+
+O lint verifica TypeScript e templates. Os testes usam Vitest/jsdom com um
+worker em thread. O build de produção fica em `dist/acompanhaai-web/browser`.
+A integração desses comandos ao GitHub Actions pertence à KAN-41.
+
+Em produção, o host deve devolver `index.html` para rotas de interface e
+preservar o tratamento de `/api` e assets. Não há deploy configurado nesta entrega.
+
+## Próximas entregas
+
+- KAN-36 / KAN-86: integrar o fluxo de acesso à API e proteger a navegação.
+- KAN-37: implementar perfil e foto pela interface.
+- KAN-40: validar as jornadas de conta integradas no navegador.
+- KAN-41: adicionar build e qualidade do frontend ao CI.
+
+Consultar o [contrato HTTP](../docs/integracao-frontend.md) antes de integrar.
