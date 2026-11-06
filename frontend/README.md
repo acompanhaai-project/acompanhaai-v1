@@ -23,7 +23,7 @@ O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 
 ## Estrutura
 
-- `src/app/auth-page/`: cartão de acesso, e-mail e inclinação do cartão.
+- `src/app/auth-page/`: login em duas etapas, confirmação do acesso e logout.
 - `src/app/signup-page/`: cadastro, requisitos de senha e estados do formulário.
 - `src/app/recuperar-senha-page/`: solicitação do link, confirmação e reenvio.
 - `src/app/redefinir-senha-page/`: validação simulada do link e nova senha.
@@ -37,8 +37,9 @@ O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 
 As telas seguem os componentes dos ZIPs. A infraestrutura HTTP da KAN-39 e seus
 testes estão preservados e configurados no bootstrap. O cadastro usa
-`SessionApi.register()` para criar a conta na API. Login e recuperação ainda
-usam simulações. A implementação pertence à KAN-86 / KAN-36, na sprint
+`SessionApi.register()` para criar a conta na API. Login e logout usam os fluxos
+reais de sessão/CSRF; recuperação e redefinição ainda usam simulações.
+A implementação pertence à KAN-86 / KAN-36, na sprint
 S04 - Angular: acesso.
 Consultar o [cliente de sessão/CSRF](docs/cliente-http-kan-39.md).
 
@@ -47,9 +48,13 @@ tipados e rotas lazy. Não há rotas privadas ou guard de autenticação nesta
 entrega. O padrão de cores, tipografia e efeitos está no
 [sistema visual](docs/sistema-visual.md).
 
-Os botões Google/Apple e a mensagem de código enviado são simulações locais,
-conforme o protótipo do login. Não há autenticação ou envio de e-mail nessas
-ações. Os links de navegação e políticas são placeholders (`href="#"`).
+O login pede e-mail e depois senha, sem envio de código. O acesso é confirmado
+somente após login, renovação do CSRF e consulta de `/api/users/me`. O mesmo
+cartão oferece **Sair**, que encerra a sessão na API e prepara um CSRF anônimo.
+Consultar o [fluxo de entrada](docs/tela-entrada.md).
+
+Os botões Google/Apple avisam que esses provedores ainda não estão disponíveis.
+Os links de navegação e políticas são placeholders (`href="#"`).
 
 O cadastro cria uma conta real no banco configurado pelo backend e requer a
 API em execução. Não autentica nem envia e-mail de confirmação. Não há e-mails
@@ -69,9 +74,10 @@ npm run build
 
 O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
 para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
-HTTP, sua configuração na aplicação e o cadastro. O cadastro também é conferido
-no navegador contra uma API real com H2 isolado. Isso não valida os fluxos de
-login e recuperação integrados, que continuam pendentes.
+HTTP, sua configuração, cadastro, login e logout. Os fluxos reais de cadastro,
+entrada e saída também são conferidos no navegador com uma API e H2 isolado.
+Isso não valida recuperação, rotas privadas ou restauração da interface após
+recarregar a página, que continuam pendentes.
 
 O lint verifica TypeScript e templates. Os testes usam Vitest/jsdom com um
 worker em thread. O build de produção fica em `dist/acompanhaai-web/browser`.

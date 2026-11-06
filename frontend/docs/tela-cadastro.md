@@ -31,7 +31,8 @@ devem estar em execução para testar o cadastro; usar o endereço do frontend.
 
 O sucesso é exibido após a resposta da API. O backend devolve `201` e um DTO
 sem credenciais. A tela limpa os campos de senha e orienta a entrar, sem simular
-envio de confirmação ou autenticação automática. Login continua pendente de integração.
+envio de confirmação ou autenticação automática. O link **Ir para o login**
+abre o [fluxo real de entrada](tela-entrada.md).
 
 | Resultado | Comportamento |
 | --- | --- |
