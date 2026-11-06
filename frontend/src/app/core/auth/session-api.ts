@@ -27,7 +27,7 @@ export class SessionApi {
       return this.http.post<User>('/api/auth/login', request, this.sessionOptions()).pipe(
         tap(() => this.csrf.clear()),
         switchMap(() => this.csrf.token()),
-        switchMap(() => this.http.get<User>('/api/users/me')),
+        switchMap(() => this.http.get<User>('/api/users/me', this.sessionOptions())),
         tap((user) => this.session.authenticate(user)),
         catchError((error: unknown) => {
           this.csrf.clear();
@@ -40,7 +40,7 @@ export class SessionApi {
   refresh(): Observable<User | null> {
     return this.queue.exclusive(() => {
       this.session.markUnknown();
-      return this.http.get<User>('/api/users/me').pipe(
+      return this.http.get<User>('/api/users/me', this.sessionOptions()).pipe(
         tap((user) => this.session.authenticate(user)),
         catchError((error: unknown) => {
           if (error instanceof ApiError && error.status === 401) {

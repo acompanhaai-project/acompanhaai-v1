@@ -16,7 +16,8 @@ npm start
 ```
 
 Abrir http://localhost:4200/entrar. A raiz e os endereços desconhecidos
-redirecionam para `/entrar`. A tela de cadastro está em `/cadastro`, acessível
+redirecionam para `/entrar`, que restaura uma sessão existente e segue para
+`/conta` quando autenticada. A tela de cadastro está em `/cadastro`, acessível
 pelo link **Criar conta** na tela de entrada.
 O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 `/redefinir-senha#token=...`, usando um link recebido por e-mail. O endereço
@@ -45,14 +46,16 @@ S04 - Angular: acesso.
 Consultar o [cliente de sessão/CSRF](docs/cliente-http-kan-39.md).
 
 Os componentes são standalone, com TypeScript estrito, formulários reativos
-tipados e rotas lazy. Não há rotas privadas ou guard de autenticação nesta
-entrega. O padrão de cores, tipografia e efeitos está no
+tipados e rotas lazy. `/conta` é uma rota privada de confirmação de acesso,
+protegida por consulta à API. O padrão de cores, tipografia e efeitos está no
 [sistema visual](docs/sistema-visual.md).
 
 O login pede e-mail e depois senha, sem envio de código. O acesso é confirmado
 somente após login, renovação do CSRF e consulta de `/api/users/me`. O mesmo
-cartão oferece **Sair**, que encerra a sessão na API e prepara um CSRF anônimo.
+cartão, agora em `/conta`, oferece **Sair**, que encerra a sessão na API e prepara um CSRF anônimo.
 Consultar o [fluxo de entrada](docs/tela-entrada.md).
+Ver também [sessão e rotas privadas](docs/sessao-e-rotas.md) para restauração,
+expiração, tratamento de falhas e retorno após login.
 
 Os botões Google/Apple avisam que esses provedores ainda não estão disponíveis.
 Os links de navegação e políticas são placeholders (`href="#"`).
@@ -79,8 +82,8 @@ O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
 para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
 HTTP, sua configuração e os fluxos de acesso. Cadastro, login, logout e recuperação
 também são conferidos no navegador com API real e H2 isolado. A recuperação usa
-SMTP real capturado pelo Mailpit local. Rotas privadas e restauração da interface
-após recarregar a página continuam pendentes.
+SMTP real capturado pelo Mailpit local. Proteção, restauração da sessão,
+preservação do destino e falhas de verificação também têm cobertura.
 
 O lint verifica TypeScript e templates. Os testes usam Vitest/jsdom com um
 worker em thread. O build de produção fica em `dist/acompanhaai-web/browser`.
@@ -91,7 +94,7 @@ preservar o tratamento de `/api` e assets. Não há deploy configurado nesta ent
 
 ## Próximas entregas
 
-- KAN-36 / KAN-86: integrar o fluxo de acesso à API e proteger a navegação.
+- KAN-36 / KAN-86: revisar o aceite dos fluxos de acesso e suas evidências.
 - KAN-37: implementar perfil e foto pela interface.
 - KAN-40: validar as jornadas de conta integradas no navegador.
 - KAN-41: adicionar build e qualidade do frontend ao CI.
