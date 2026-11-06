@@ -50,6 +50,6 @@ da futura implementação de inicialização/guards, mesmo que a sessão no serv
 
 ## Pendências
 
-Google/Apple exibem aviso de indisponibilidade. Recuperação e redefinição de
-senha continuam simuladas; os documentos legais e links institucionais ainda
-são placeholders. Não há envio de código por e-mail no login.
+Google/Apple exibem aviso de indisponibilidade. Os documentos legais e links
+institucionais ainda são placeholders. Recuperação e redefinição estão
+[integradas à API](recuperacao-senha.md). Não há envio de código por e-mail no login.

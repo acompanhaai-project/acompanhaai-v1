@@ -66,7 +66,8 @@ Para FormData, deixar o navegador definir Content-Type e boundary.
 
 As telas/guards de acesso pertencem à KAN-36; perfil/foto à KAN-37. Cadastro,
 login e logout usam `SessionApi` e o interceptor de sessão/CSRF. Recuperação e
-redefinição continuam simuladas. Rotas privadas, restauração da interface após
+redefinição usam `PasswordResetApi`, com os mesmos mecanismos. Após redefinição,
+o cliente limpa a sessão e o CSRF locais. Rotas privadas, restauração da interface após
 recarregar a página e redirecionamento global de autenticação ainda estão pendentes.
 
 ## Erros para os formulários
