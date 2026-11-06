@@ -24,10 +24,7 @@
           />
         </svg>
         <h1 id="titulo">Conta criada!</h1>
-        <p class="sub">
-          Enviamos um e-mail de confirmação para <strong>{{ form.controls.email.value }}</strong
-          >. Abra a mensagem para ativar sua conta.
-        </p>
+        <p class="sub">Sua conta foi criada. Entre com seu e-mail e senha para continuar.</p>
         <a class="btn go" routerLink="/entrar">Ir para o login</a>
       </div>
     } @else {
@@ -55,6 +52,7 @@
             autocomplete="name"
             placeholder="Maria da Silva"
             formControlName="nome"
+            maxlength="100"
             [attr.aria-invalid]="invalido(form.controls.nome)"
             aria-describedby="erro-nome"
           />
@@ -72,6 +70,7 @@
             autocomplete="email"
             placeholder="voce@exemplo.com"
             formControlName="email"
+            maxlength="254"
             [attr.aria-invalid]="invalido(form.controls.email)"
             aria-describedby="erro-email"
           />
@@ -89,6 +88,7 @@
               [type]="verSenha() ? 'text' : 'password'"
               autocomplete="new-password"
               formControlName="senha"
+              maxlength="128"
               [attr.aria-invalid]="invalido(form.controls.senha)"
               aria-describedby="requisitos erro-senha"
             />
@@ -152,6 +152,7 @@
               [type]="verConfirma() ? 'text' : 'password'"
               autocomplete="new-password"
               formControlName="confirma"
+              maxlength="128"
               [attr.aria-invalid]="confirmaInvalida"
               aria-describedby="erro-confirma"
             />
