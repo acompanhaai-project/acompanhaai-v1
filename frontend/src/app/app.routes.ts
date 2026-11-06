@@ -1,9 +1,18 @@
 import { Routes } from '@angular/router';
+import { requireSession, restoreSessionOnLogin } from './core/auth/session-guards';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'entrar' },
   {
     path: 'entrar',
+    canActivate: [restoreSessionOnLogin],
+    loadComponent: () => import('./auth-page/auth-page.component').then((m) => m.AuthPageComponent),
+  },
+  {
+    path: 'conta',
+    canActivate: [requireSession],
+    runGuardsAndResolvers: 'always',
+    data: { requiresAuth: true },
     loadComponent: () => import('./auth-page/auth-page.component').then((m) => m.AuthPageComponent),
   },
   {

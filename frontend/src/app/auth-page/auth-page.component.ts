@@ -10,10 +10,12 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SessionApi } from '../core/auth/session-api';
 import { SessionState } from '../core/auth/session-state';
+import { SessionAccess } from '../core/auth/session-access';
+import { safeReturnUrl } from '../core/auth/return-url';
 import { ApiError, toApiError } from '../core/http/api-error';
 import { NeonCardDirective } from '../shared/neon-card.directive';
 
@@ -31,6 +33,9 @@ export class AuthPageComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly document = inject(DOCUMENT);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly access = inject(SessionAccess);
 
   readonly email = new FormControl('', {
     nonNullable: true,
@@ -55,6 +60,20 @@ export class AuthPageComponent {
   readonly erroServidor = signal('');
   readonly autenticado = this.state.authenticated;
   readonly usuario = this.state.user;
+  readonly areaPrivada = this.route.snapshot.data['requiresAuth'] === true;
+  readonly verificando = this.access.checking;
+  readonly erroVerificacao = this.access.error;
+
+  constructor() {
+    if (this.route.snapshot.queryParamMap.get('reason') === 'expired') {
+      this.mensagem.set('Sua sessão expirou. Entre novamente para continuar.');
+    } else if (
+      this.route.snapshot.queryParamMap.get('notice') === 'logout' &&
+      this.state.status() === 'anonymous'
+    ) {
+      this.mensagem.set('Sessão encerrada.');
+    }
+  }
 
   get mostrarErro(): boolean {
     return this.email.touched && this.email.invalid;
@@ -87,7 +106,14 @@ export class AuthPageComponent {
   }
 
   onSubmit(): void {
-    if (this.carregando() || this.saindo() || this.autenticado()) {
+    if (
+      this.areaPrivada ||
+      this.carregando() ||
+      this.saindo() ||
+      this.autenticado() ||
+      this.verificando() ||
+      this.erroVerificacao()
+    ) {
       return;
     }
     this.mensagem.set('');
@@ -127,6 +153,7 @@ export class AuthPageComponent {
           this.form.enable();
           this.limparSenha();
           this.etapa.set('email');
+          this.navegarAposLogin();
         },
         error: (cause: unknown) => {
           this.form.enable();
@@ -169,7 +196,10 @@ export class AuthPageComponent {
               'Sessão encerrada. Tente novamente se houver falha de conexão no próximo acesso.',
             );
           } else {
-            this.voltarAoInicio('');
+            this.form.enable();
+            this.form.reset();
+            this.limparSenha();
+            this.etapa.set('email');
             this.erroServidor.set(
               'Não foi possível confirmar o encerramento da sessão. Tente entrar novamente.',
             );
@@ -178,13 +208,47 @@ export class AuthPageComponent {
       });
   }
 
+  verificarNovamente(): void {
+    if (this.verificando()) {
+      return;
+    }
+    this.erroServidor.set('');
+    this.access
+      .check()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (user) => {
+          if (user) {
+            this.navegarAposLogin();
+          } else if (this.areaPrivada) {
+            void this.router.navigate(['/entrar'], {
+              queryParams: { returnUrl: safeReturnUrl(this.router.url), reason: 'expired' },
+              replaceUrl: true,
+            });
+          }
+        },
+        error: () => this.limparSenha(),
+      });
+  }
+
+  private navegarAposLogin(): void {
+    const target = this.areaPrivada
+      ? this.router.url
+      : this.route.snapshot.queryParamMap.get('returnUrl');
+    void this.router.navigateByUrl(safeReturnUrl(target), { replaceUrl: true });
+  }
+
   private voltarAoInicio(message: string): void {
     this.form.enable();
     this.form.reset();
     this.verSenha.set(false);
     this.etapa.set('email');
     this.mensagem.set(message);
-    this.focar('email');
+    if (this.areaPrivada) {
+      void this.router.navigateByUrl('/entrar?notice=logout', { replaceUrl: true });
+    } else {
+      this.focar('email');
+    }
   }
 
   private limparSenha(): void {

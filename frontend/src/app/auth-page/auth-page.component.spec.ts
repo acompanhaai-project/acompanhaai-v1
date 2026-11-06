@@ -1,5 +1,6 @@
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { appConfig } from '../app.config';
 import { SessionState } from '../core/auth/session-state';
 import { AuthPageComponent } from './auth-page.component';
@@ -29,6 +30,7 @@ describe('Login integrado à sessão e CSRF', () => {
     TestBed.configureTestingModule({
       providers: [...appConfig.providers, provideHttpClientTesting()],
     });
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     fixture = TestBed.createComponent(AuthPageComponent);
     page = fixture.componentInstance;
     backend = TestBed.inject(HttpTestingController);

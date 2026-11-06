@@ -33,6 +33,12 @@ O contexto IN_SESSION_FLOW evita entrar na fila novamente durante um fluxo
 que já está coordenado pelo SessionApi. É um detalhe interno, não uma opção
 de autenticação ou autorização.
 
+As consultas `GET me` feitas por `refresh()` e pela confirmação de login também
+levam esse contexto. Nesses casos, o guard ou formulário trata o `401`. Outros
+`401` privados publicam a expiração da revisão corrente da sessão, sem repetir
+a operação. `SessionNavigation`, inicializado no componente raiz, redireciona
+somente quando a rota ativa está marcada como privada.
+
 O interceptor só modifica URLs da mesma origem cujo caminho normalizado seja
 /api ou comece com /api/. URLs externas e assets não recebem credenciais ou
 CSRF adicionados por ele. Não configurar serviços externos com esses headers.
@@ -47,7 +53,9 @@ CSRF adicionados por ele. Não configurar serviços externos com esses headers.
 continuam sendo propagadas. Cadastro retorna o DTO, mas não autentica.
 Um login que não consegue renovar CSRF ou confirmar a conta não anuncia sucesso.
 O estado fica somente em memória e deve ser consultado novamente ao recarregar
-as futuras páginas privadas. Não há consulta automática ao abrir o esboço público.
+as páginas privadas. Os guards agora consultam a API ao abrir `/conta` e ao
+restaurar uma sessão ainda desconhecida na entrada. As demais páginas públicas
+continuam acessíveis sem consulta automática da sessão.
 
 Uma revisão de sessão impede que um 401 atrasado de uma requisição anterior
 apague a nova autenticação. A sessão de outra aba pode mudar o cookie;
@@ -67,8 +75,9 @@ Para FormData, deixar o navegador definir Content-Type e boundary.
 As telas/guards de acesso pertencem à KAN-36; perfil/foto à KAN-37. Cadastro,
 login e logout usam `SessionApi` e o interceptor de sessão/CSRF. Recuperação e
 redefinição usam `PasswordResetApi`, com os mesmos mecanismos. Após redefinição,
-o cliente limpa a sessão e o CSRF locais. Rotas privadas, restauração da interface após
-recarregar a página e redirecionamento global de autenticação ainda estão pendentes.
+o cliente limpa a sessão e o CSRF locais. A rota `/conta` é protegida e restaura
+a identidade após recarregar. Falhas de verificação oferecem nova tentativa;
+`401` em operações privadas redireciona ao login com destino interno validado.
 
 ## Erros para os formulários
 

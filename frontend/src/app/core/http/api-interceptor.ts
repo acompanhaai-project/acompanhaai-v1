@@ -52,7 +52,11 @@ export const apiInterceptor: HttpInterceptorFn = (request, next) => {
         const error = toApiError(cause);
         if (revision === session.revision()) {
           if (error.status === 401 && !anonymousRoute) {
-            session.markAnonymous();
+            if (request.context.get(IN_SESSION_FLOW)) {
+              session.markAnonymous();
+            } else {
+              session.markExpired();
+            }
             csrf.clear();
           } else if (error.status === 403) {
             csrf.clear();

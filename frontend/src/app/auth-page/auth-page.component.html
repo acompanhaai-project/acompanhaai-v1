@@ -5,9 +5,27 @@
     appNeonCard
     class="card"
     aria-labelledby="titulo"
-    [attr.aria-busy]="carregando() || saindo()"
+    [attr.aria-busy]="carregando() || saindo() || verificando()"
   >
-    @if (autenticado() || saindo()) {
+    @if (
+      verificando() ||
+      (areaPrivada && !autenticado() && !saindo() && !erroVerificacao() && !erroServidor())
+    ) {
+      <div class="carga" role="status">
+        <span class="spinner neon" aria-hidden="true"></span>
+        <h1 id="titulo">Verificando sua sessão…</h1>
+      </div>
+    } @else if (erroVerificacao() || (areaPrivada && !autenticado() && !saindo())) {
+      <div class="painel" role="alert">
+        <h1 id="titulo">Não foi possível verificar sua sessão</h1>
+        <p class="sub">
+          {{ erroServidor() || 'Confira a conexão e tente novamente para continuar.' }}
+        </p>
+        <button class="btn go" type="button" (click)="verificarNovamente()">
+          Tentar novamente
+        </button>
+      </div>
+    } @else if (autenticado() || saindo()) {
       <div class="painel" role="status">
         <h1 id="titulo">Acesso confirmado</h1>
         @if (usuario(); as conta) {

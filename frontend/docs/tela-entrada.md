@@ -1,7 +1,8 @@
 # Tela de entrada
 
 A rota `/entrar` preserva o padrão visual fornecido nos arquivos de interface.
-A raiz e os caminhos desconhecidos redirecionam para ela.
+A raiz e os caminhos desconhecidos redirecionam para ela. Ao entrar, a sessão
+é conferida na API; uma sessão válida segue para a rota privada `/conta`.
 
 ## Fontes
 
@@ -21,7 +22,7 @@ A raiz e os caminhos desconhecidos redirecionam para ela.
    seguir para recuperação. Alterar o e-mail limpa a senha.
 3. Ao clicar em **Entrar**, a tela usa `SessionApi.login()` e bloqueia envios
    repetidos. O fluxo obtém CSRF, faz `POST /api/auth/login`, renova o token e
-   consulta `GET /api/users/me` antes de mostrar **Acesso confirmado**.
+   consulta `GET /api/users/me` antes de navegar para o destino protegido.
 
 O backend precisa estar em execução; o proxy local encaminha `/api` à porta
 8080. Apenas espaços externos do e-mail são removidos. A senha é enviada sem
@@ -33,20 +34,27 @@ Erros `400`/`422` com campos são associados ao e-mail ou senha. Falhas de rede,
 `403`, `429` e `5xx` liberam o formulário, sem repetição automática do login.
 A senha é limpa após sucesso ou falha e o fluxo pendente é cancelado ao sair da tela.
 
-O cartão de confirmação ainda fica em `/entrar`; o painel de candidaturas
-será uma entrega própria. A conta exibida vem da resposta autenticada de `GET me`.
+O cartão **Acesso confirmado** fica na rota privada `/conta`, mantendo o mesmo
+design. O guard confere a sessão antes de renderizar a conta. O painel de
+candidaturas será uma entrega própria. A identidade vem de `GET me`.
+
+Se a entrada veio de uma rota protegida, o destino permitido é preservado em
+`returnUrl`. Destinos externos, públicos ou inválidos usam `/conta`. Essa
+lista deverá ser ampliada quando novas rotas privadas forem implementadas.
 
 ## Saída
 
 **Sair** chama `SessionApi.logout()`. Após `204`, o estado passa a anônimo e
-um novo CSRF é preparado. A tela retorna à etapa de e-mail com os campos limpos.
+um novo CSRF é preparado. A navegação retorna a `/entrar` com os campos limpos.
 Se apenas a obtenção do novo CSRF falhar após `204`, a saída continua confirmada;
 se o pedido de logout falhar, a interface informa que não conseguiu confirmar a saída.
 
 Credenciais e tokens não são persistidos em localStorage/sessionStorage nem
 registrados no console. O cookie de sessão continua sob controle do navegador.
-Após recarregar a página, a restauração da interface autenticada ainda depende
-da futura implementação de inicialização/guards, mesmo que a sessão no servidor exista.
+Ao recarregar `/conta`, a sessão é restaurada por consulta à API antes de mostrar
+a conta. Falhas de conexão/servidor mantêm estado desconhecido e oferecem tentativa
+manual, sem presumir logout. Um `401` privado redireciona para login e preserva
+o destino. Detalhes em [sessão e rotas](sessao-e-rotas.md).
 
 ## Pendências
 
