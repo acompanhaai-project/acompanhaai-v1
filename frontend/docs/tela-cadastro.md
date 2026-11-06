@@ -14,18 +14,45 @@ cartão e a diretiva de iluminação e inclinação.
 - Foco no primeiro campo inválido após envio.
 - Campos bloqueados durante carregamento e apresentação de erro ou sucesso.
 - Retorno para `/entrar` pelo link da tela e pela confirmação de sucesso.
+- Limites de 100 caracteres no nome, 254 no e-mail e 128 na senha.
+- A política visual de nome completo e complexidade da senha foi mantida;
+  a API aceita nome de 2 a 100 caracteres e senha de 8 a 128 caracteres.
 
-## Simulação
+## Integração com a API
 
-`src/app/shared/auth.service.ts` usa um atraso de 1,6 segundo e não faz chamadas
-HTTP. A mensagem de confirmação por e-mail é parte da demonstração; nenhum
-e-mail é enviado e nenhuma conta é persistida.
+`SignupPageComponent` usa `SessionApi.register()` para enviar `POST /api/users`.
+O payload contém somente `name`, `email` e `password`; a confirmação da senha
+é validada localmente. Nome e e-mail têm espaços externos removidos, enquanto
+a senha é enviada sem transformação.
 
-| E-mail | Resultado simulado |
+O interceptor obtém o token em `GET /api/auth/csrf` e preserva o cookie de sessão.
+O proxy local encaminha `/api/**` ao backend na porta 8080. Frontend e backend
+devem estar em execução para testar o cadastro; usar o endereço do frontend.
+
+O sucesso é exibido após a resposta da API. O backend devolve `201` e um DTO
+sem credenciais. A tela limpa os campos de senha e orienta a entrar, sem simular
+envio de confirmação ou autenticação automática. Login continua pendente de integração.
+
+| Resultado | Comportamento |
 | --- | --- |
-| `existente@exemplo.com` | E-mail já cadastrado |
-| `rede@exemplo.com` | Erro de conexão |
-| Outro e-mail válido | Sucesso |
+| `201` | Conta criada; senha e confirmação são limpas |
+| `409` | E-mail destacado para correção |
+| `400` / `422` com `errors` | Campos `name`, `email` e `password` recebem os erros da API |
+| `403` | Erro de segurança apresentado; sem repetição automática |
+| `429` | Mensagem de limite de solicitações |
+| Falha de rede ou `5xx` | Formulário liberado para revisão e tentativa manual |
 
-Os requisitos de senha e os estados desta interface precisarão ser alinhados
-ao contrato real da API na etapa de integração.
+Os campos ficam bloqueados durante o envio e cliques repetidos não disparam
+novos cadastros. Ao sair da tela, a inscrição pendente é cancelada. Erros não
+autenticam a conta nem repetem escritas automaticamente.
+
+## Verificação
+
+`signup-page.component.spec.ts` usa o cliente real e o interceptor com
+`HttpTestingController`, verificando payload, CSRF, limites, erros, cancelamento
+e ausência de login automático. Os testes de HTTP não substituem a validação
+do cadastro com a API e banco em execução.
+
+Para conferir manualmente, cadastrar um e-mail fictício exclusivo e observar
+`201` no navegador. Reabrir `/cadastro` e repetir o e-mail deve produzir `409`.
+Corrigir o e-mail permite uma nova tentativa. Não usar dados pessoais nos testes.

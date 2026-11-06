@@ -1,6 +1,6 @@
 # Frontend do Acompanha Aí
 
-Protótipos de entrada, cadastro e recuperação baseados nos arquivos de interface fornecidos.
+Telas de entrada, cadastro e recuperação baseadas nos arquivos de interface fornecidos.
 O backend Spring Boot permanece em `../backend/`.
 
 ## Executar
@@ -27,7 +27,7 @@ O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 - `src/app/signup-page/`: cadastro, requisitos de senha e estados do formulário.
 - `src/app/recuperar-senha-page/`: solicitação do link, confirmação e reenvio.
 - `src/app/redefinir-senha-page/`: validação simulada do link e nova senha.
-- `src/app/shared/`: estilos do cartão, diretiva neon e serviço simulado de cadastro.
+- `src/app/shared/`: estilos do cartão, regras de senha e simulações de recuperação.
 - `src/app/core/auth/`: cliente real de sessão e estado autenticado em memória.
 - `src/app/core/http/`: interceptor, CSRF, fila de requisições e tratamento de erros.
 - `src/app/header/`: cabeçalho e alternância entre temas.
@@ -36,9 +36,10 @@ O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 - `src/app/app.config.ts`: rotas e providers do cliente HTTP, sessão/CSRF e erros globais.
 
 As telas seguem os componentes dos ZIPs. A infraestrutura HTTP da KAN-39 e seus
-testes estão preservados e configurados no bootstrap. As telas continuam usando
-o serviço simulado; a integração real pertence à KAN-36, com implementação na
-subtarefa KAN-86, na sprint S04 - Angular: acesso.
+testes estão preservados e configurados no bootstrap. O cadastro usa
+`SessionApi.register()` para criar a conta na API. Login e recuperação ainda
+usam simulações. A implementação pertence à KAN-86 / KAN-36, na sprint
+S04 - Angular: acesso.
 Consultar o [cliente de sessão/CSRF](docs/cliente-http-kan-39.md).
 
 Os componentes são standalone, com TypeScript estrito, formulários reativos
@@ -47,13 +48,13 @@ entrega. O padrão de cores, tipografia e efeitos está no
 [sistema visual](docs/sistema-visual.md).
 
 Os botões Google/Apple e a mensagem de código enviado são simulações locais,
-conforme o protótipo. Nenhuma autenticação, envio de e-mail ou chamada à API é
-executada. Os links de navegação e políticas são placeholders (`href="#"`).
+conforme o protótipo do login. Não há autenticação ou envio de e-mail nessas
+ações. Os links de navegação e políticas são placeholders (`href="#"`).
 
-O cadastro também é simulado, com atraso de 1,6 segundo. O e-mail
-`existente@exemplo.com` demonstra cadastro duplicado; `rede@exemplo.com`
-demonstra falha de conexão. Outros e-mails válidos demonstram sucesso, sem
-persistência ou envio de mensagem. Consultar [tela de cadastro](docs/tela-cadastro.md).
+O cadastro cria uma conta real no banco configurado pelo backend e requer a
+API em execução. Não autentica nem envia e-mail de confirmação. Não há e-mails
+especiais que simulem erros nessa tela; duplicidade depende dos registros reais.
+Consultar [tela de cadastro](docs/tela-cadastro.md).
 As telas de recuperação também usam simulações. Consultar os
 [cenários de recuperação](docs/recuperacao-senha.md) para demonstrar erros e sucesso.
 
@@ -68,8 +69,9 @@ npm run build
 
 O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
 para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
-HTTP e sua configuração na aplicação. As telas e simulações são conferidas no
-navegador; isso ainda não comprova integração com a API.
+HTTP, sua configuração na aplicação e o cadastro. O cadastro também é conferido
+no navegador contra uma API real com H2 isolado. Isso não valida os fluxos de
+login e recuperação integrados, que continuam pendentes.
 
 O lint verifica TypeScript e templates. Os testes usam Vitest/jsdom com um
 worker em thread. O build de produção fica em `dist/acompanhaai-web/browser`.

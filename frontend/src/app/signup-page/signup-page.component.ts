@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormControl,
@@ -10,7 +17,8 @@ import {
 import { RouterLink } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
 import { NeonCardDirective } from '../shared/neon-card.directive';
-import { AuthService } from '../shared/auth.service';
+import { SessionApi } from '../core/auth/session-api';
+import { ApiError, toApiError } from '../core/http/api-error';
 import { senhaForte, senhasIguais } from '../shared/senha';
 import { RequisitosSenhaComponent } from '../shared/requisitos-senha.component';
 
@@ -25,7 +33,8 @@ type Estado = 'ocioso' | 'carregando' | 'sucesso' | 'erro';
   styleUrl: './signup-page.component.scss',
 })
 export class SignupPageComponent {
-  private readonly auth = inject(AuthService);
+  private readonly session = inject(SessionApi);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly doc = inject(DOCUMENT);
 
   readonly form = new FormGroup(
@@ -35,6 +44,7 @@ export class SignupPageComponent {
         validators: [
           Validators.required,
           Validators.minLength(3),
+          Validators.maxLength(100),
           Validators.pattern(/^\S+(\s+\S+)+$/),
         ],
       }),
@@ -43,12 +53,13 @@ export class SignupPageComponent {
         validators: [
           Validators.required,
           Validators.email,
+          Validators.maxLength(254),
           Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/),
         ],
       }),
       senha: new FormControl('', {
         nonNullable: true,
-        validators: [Validators.required, senhaForte],
+        validators: [Validators.required, Validators.maxLength(128), senhaForte],
       }),
       confirma: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     },
@@ -76,11 +87,23 @@ export class SignupPageComponent {
 
   erroNome(): string {
     const e = this.form.controls.nome.errors;
+    if (e?.['server']) {
+      return e['server'];
+    }
+    if (e?.['maxlength']) {
+      return 'Informe um nome com até 100 caracteres.';
+    }
     return e?.['required'] ? 'Informe seu nome completo.' : 'Informe nome e sobrenome.';
   }
 
   erroEmail(): string {
     const e = this.form.controls.email.errors;
+    if (e?.['server']) {
+      return e['server'];
+    }
+    if (e?.['maxlength']) {
+      return 'Informe um e-mail com até 254 caracteres.';
+    }
     if (e?.['emUso']) {
       return 'Este e-mail já está cadastrado. Tente entrar na sua conta.';
     }
@@ -90,7 +113,14 @@ export class SignupPageComponent {
   }
 
   erroSenha(): string {
-    return this.form.controls.senha.errors?.['required']
+    const errors = this.form.controls.senha.errors;
+    if (errors?.['server']) {
+      return errors['server'];
+    }
+    if (errors?.['maxlength']) {
+      return 'A senha deve ter no máximo 128 caracteres.';
+    }
+    return errors?.['required']
       ? 'Crie uma senha.'
       : 'A senha ainda não atende a todos os requisitos.';
   }
@@ -106,6 +136,8 @@ export class SignupPageComponent {
     if (this.carregando()) {
       return;
     }
+    this.form.controls.nome.setValue(this.form.controls.nome.value.trim());
+    this.form.controls.email.setValue(this.form.controls.email.value.trim());
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
@@ -121,22 +153,54 @@ export class SignupPageComponent {
     const dados = this.form.getRawValue();
     this.form.disable();
 
-    this.auth.cadastrar({ nome: dados.nome, email: dados.email, senha: dados.senha }).subscribe({
-      next: () => this.estado.set('sucesso'),
-      error: (err: Error) => {
-        this.form.enable();
-        this.estado.set('erro');
-        if (err.message === 'EMAIL_EM_USO') {
-          this.form.controls.email.setErrors({ emUso: true });
-          this.form.controls.email.markAsTouched();
-          this.erroServidor.set('Não foi possível criar a conta com este e-mail.');
-          this.doc.getElementById('cad-email')?.focus();
-        } else {
-          this.erroServidor.set(
-            'Sem conexão com o servidor. Verifique sua internet e tente novamente.',
-          );
+    this.session
+      .register({ name: dados.nome, email: dados.email, password: dados.senha })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.form.controls.senha.reset('');
+          this.form.controls.confirma.reset('');
+          this.verSenha.set(false);
+          this.verConfirma.set(false);
+          this.estado.set('sucesso');
+        },
+        error: (cause: unknown) => this.tratarErro(toApiError(cause)),
+      });
+  }
+
+  private tratarErro(error: ApiError): void {
+    this.form.enable();
+    this.estado.set('erro');
+    this.erroServidor.set(error.message);
+
+    if (error.status === 409) {
+      this.form.controls.email.setErrors({ emUso: true });
+      this.form.controls.email.markAsTouched();
+      this.doc.getElementById('cad-email')?.focus();
+      return;
+    }
+
+    if (error.status === 400 || error.status === 422) {
+      const fields = {
+        name: { control: this.form.controls.nome, id: 'cad-nome' },
+        email: { control: this.form.controls.email, id: 'cad-email' },
+        password: { control: this.form.controls.senha, id: 'cad-senha' },
+      };
+      let firstInvalid: string | undefined;
+
+      for (const fieldError of error.fieldErrors) {
+        if (!Object.hasOwn(fields, fieldError.field)) {
+          continue;
         }
-      },
-    });
+        const field = fields[fieldError.field as keyof typeof fields];
+        field.control.setErrors({ ...field.control.errors, server: fieldError.message });
+        field.control.markAsTouched();
+        firstInvalid ??= field.id;
+      }
+
+      if (firstInvalid) {
+        this.doc.getElementById(firstInvalid)?.focus();
+      }
+    }
   }
 }
