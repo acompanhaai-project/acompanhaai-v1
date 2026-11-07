@@ -81,3 +81,7 @@ esses itens também exigem execução, implementação ou validação.
 
 A [fixture Postman v1](../backend/postman/fixtures/v1/README.md) é congelada. Novos
 contratos/testes devem usar uma versão nova, sem alterar suas expectativas.
+
+A [suíte Selenium de acesso — KAN-40](../qa/browser/README.md) descreve a
+execução com PostgreSQL descartável, SMTP em memória e os limites de aceite
+enquanto a interface de perfil da KAN-37 não estiver disponível.

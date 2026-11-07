@@ -1,0 +1,72 @@
+{
+  "task": "KAN-40",
+  "executedAt": "2026-11-06",
+  "baseCommit": "9edcbb1",
+  "command": "./qa/browser/run.ps1",
+  "environment": {
+    "java": "25.0.4.1",
+    "springBoot": "4.0.9",
+    "selenium": "4.52.0",
+    "browser": "Microsoft Edge 156.0.4314.58 (headless)",
+    "database": "PostgreSQL 18.6 (container descartavel)",
+    "smtp": "GreenMail 2.1.15 (loopback)",
+    "widths": [
+      1440,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ]
+  },
+  "results": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 152.633
+  },
+  "cases": [
+    {
+      "name": "accountLifecycle(int, String)[1]",
+      "passed": true
+    },
+    {
+      "name": "accountLifecycle(int, String)[2]",
+      "passed": true
+    },
+    {
+      "name": "accountLifecycle(int, String)[3]",
+      "passed": true
+    },
+    {
+      "name": "accountLifecycle(int, String)[4]",
+      "passed": true
+    },
+    {
+      "name": "keyboardAndFieldErrors(int, String)[1]",
+      "passed": true
+    },
+    {
+      "name": "keyboardAndFieldErrors(int, String)[2]",
+      "passed": true
+    },
+    {
+      "name": "keyboardAndFieldErrors(int, String)[3]",
+      "passed": true
+    },
+    {
+      "name": "keyboardAndFieldErrors(int, String)[4]",
+      "passed": true
+    }
+  ],
+  "pending": [
+    "Perfil e foto dependem da KAN-37",
+    "Aceite final da KAN-40"
+  ],
+  "limits": [
+    "Expiracao por inatividade de 30 minutos nao exercitada",
+    "Sem validacao em outros navegadores ou dispositivos fisicos",
+    "Sem SMTP externo ou ambiente de producao"
+  ]
+}
