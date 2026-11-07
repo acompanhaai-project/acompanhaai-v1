@@ -96,7 +96,8 @@ preservar o tratamento de `/api` e assets. Não há deploy configurado nesta ent
 
 - KAN-36 / KAN-86: revisar o aceite dos fluxos de acesso e suas evidências.
 - KAN-37: implementar perfil e foto pela interface.
-- KAN-40: validar as jornadas de conta integradas no navegador.
+- KAN-40: executar a [suíte Selenium de acesso](../qa/browser/README.md) e
+  completar o perfil após a KAN-37.
 - KAN-41: adicionar build e qualidade do frontend ao CI.
 
 Consultar o [contrato HTTP](../docs/integracao-frontend.md) antes de integrar.
