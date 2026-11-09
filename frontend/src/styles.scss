@@ -47,7 +47,7 @@ body {
   overflow-x: hidden;
   font-family: 'Plus Jakarta Sans Variable', 'Helvetica Neue', Arial, sans-serif;
   color: var(--text);
-  background: radial-gradient(1200px 700px at 20% -10%, var(--bg-2), var(--bg)) fixed;
+  background: var(--bg) radial-gradient(1200px 700px at 20% -10%, var(--bg-2), var(--bg)) fixed;
 
   // grade que acende ao redor do cursor (--mx/--my vêm do NeonCursorComponent)
   &::before {
