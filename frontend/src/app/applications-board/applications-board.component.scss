@@ -1,0 +1,212 @@
+.board {
+  position: relative;
+  z-index: 1;
+  width: min(1280px, 100%);
+  margin-inline: auto;
+  padding: 34px 24px 64px;
+}
+
+.intro {
+  margin-bottom: 26px;
+}
+
+.back {
+  color: var(--accent);
+  font-weight: 700;
+  text-underline-offset: 4px;
+}
+
+h1 {
+  margin: 16px 0 8px;
+  font-size: clamp(29px, 4.5vw, 44px);
+  letter-spacing: -0.045em;
+}
+
+p {
+  margin: 8px 0;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.count,
+.announcement,
+.outcome,
+.hint,
+.error,
+.empty {
+  font-size: 13px;
+}
+
+.announcement:not(:empty),
+.outcome {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.stage-group {
+  margin-bottom: 28px;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+}
+
+.lanes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.lanes.secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lane {
+  --lane-accent: var(--neon);
+  min-width: 0;
+  padding: 0 10px 10px;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--lane-accent);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.lane[data-lane='screening'] {
+  --lane-accent: var(--neon-2);
+}
+
+.lane[data-lane='interview'] {
+  --lane-accent: var(--accent);
+}
+
+.lane[data-lane='offer'] {
+  --lane-accent: var(--ok);
+}
+
+.secondary .lane {
+  --lane-accent: var(--line);
+}
+
+.lane-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 50px;
+  padding-inline: 3px;
+}
+
+h3,
+h4 {
+  margin: 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.lane-count {
+  min-width: 24px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.application,
+.board-message {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--field);
+}
+
+.application + .application {
+  margin-top: 8px;
+}
+
+.company {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+label {
+  display: block;
+  margin: 12px 0 5px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+select,
+button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+select {
+  width: 100%;
+}
+
+button {
+  margin-top: 8px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.move:not(:disabled) {
+  border-color: transparent;
+  background: #2557a7;
+  color: #fff;
+}
+
+.error {
+  padding-inline-start: 8px;
+  border-inline-start: 3px solid var(--err);
+  color: var(--text);
+}
+
+.empty {
+  margin: 6px 3px 4px;
+}
+
+.board-message {
+  margin-bottom: 20px;
+}
+
+:is(a, select, button, article, h1):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+  .lanes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .board {
+    padding-inline: 16px;
+  }
+
+  .lanes,
+  .lanes.secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

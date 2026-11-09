@@ -23,6 +23,15 @@ export const routes: Routes = [
       import('./profile-page/profile-page.component').then((m) => m.ProfilePageComponent),
   },
   {
+    path: 'candidaturas',
+    canActivate: [requireSession],
+    data: { requiresAuth: true },
+    loadComponent: () =>
+      import('./applications-board/applications-board.component').then(
+        (module) => module.ApplicationsBoardComponent,
+      ),
+  },
+  {
     path: 'cadastro',
     loadComponent: () =>
       import('./signup-page/signup-page.component').then((m) => m.SignupPageComponent),

@@ -1,0 +1,122 @@
+<main class="board" aria-labelledby="board-title">
+  <header class="intro">
+    <a routerLink="/conta" class="back">Voltar para a conta</a>
+    <h1 id="board-title" tabindex="-1">Minhas candidaturas</h1>
+    <p>Acompanhe cada vaga e atualize a etapa quando houver novidade.</p>
+    @if (hasPage()) {
+      <p class="count">Mostrando {{ loaded() }} de {{ total() }} candidaturas</p>
+    }
+    <p class="announcement" role="status">{{ announcement() }}</p>
+  </header>
+
+  @if (!hasPage()) {
+    @if (loading()) {
+      <p class="board-message" role="status">Carregando candidaturas…</p>
+    } @else if (listError()) {
+      <div class="board-message">
+        <p role="alert">{{ listError() }}</p>
+        <button type="button" (click)="loadNextPage()">Tentar novamente</button>
+      </div>
+    }
+  } @else {
+    @if (total() === 0) {
+      <p class="board-message">Você ainda não tem candidaturas cadastradas.</p>
+    }
+    @for (group of groups(); track group.id) {
+      <section class="stage-group" [attr.aria-labelledby]="'group-' + group.id">
+        <h2 [id]="'group-' + group.id">{{ group.title }}</h2>
+        <div class="lanes" [class.secondary]="group.id === 'other'">
+          @for (lane of group.lanes; track lane.id) {
+            <section
+              class="lane"
+              [attr.data-lane]="lane.id"
+              [attr.aria-labelledby]="'lane-' + lane.id"
+            >
+              <header class="lane-heading">
+                <h3 [id]="'lane-' + lane.id">{{ lane.label }}</h3>
+                <span
+                  class="lane-count"
+                  [attr.aria-label]="lane.applications.length + ' exibidas'"
+                  >{{ lane.applications.length }}</span
+                >
+              </header>
+
+              @for (application of lane.applications; track application.id) {
+                @let card = cards()[application.id];
+                @let clearsDate = card?.destination === 'SAVED' && application.appliedOn !== null;
+                <article
+                  class="application"
+                  [id]="'application-' + application.id"
+                  [attr.aria-labelledby]="'application-title-' + application.id"
+                  [attr.aria-busy]="!!card?.busy"
+                  tabindex="-1"
+                >
+                  <h4 [id]="'application-title-' + application.id">{{ application.job.title }}</h4>
+                  <p class="company">
+                    {{ application.job.companyName || 'Empresa não informada' }}
+                  </p>
+                  @if (lane.id === 'finished') {
+                    <p class="outcome">{{ labels[application.status] }}</p>
+                  }
+
+                  <label [for]="'move-to-' + application.id">Mover para</label>
+                  <select
+                    #destination
+                    [id]="'move-to-' + application.id"
+                    [disabled]="!!card?.busy"
+                    [attr.aria-label]="'Mover ' + application.job.title + ' para outra etapa'"
+                    (change)="choose(application.id, destination.value)"
+                  >
+                    <option value="" [selected]="!card?.destination">Escolha uma etapa</option>
+                    @for (status of destinations; track status) {
+                      @if (status !== application.status) {
+                        <option [value]="status" [selected]="card?.destination === status">
+                          {{ labels[status] }}
+                        </option>
+                      }
+                    }
+                  </select>
+                  @if (clearsDate) {
+                    <p class="hint" [id]="'date-hint-' + application.id">
+                      Mover para Salvas remove a data da candidatura.
+                    </p>
+                  }
+                  <button
+                    type="button"
+                    class="move"
+                    [disabled]="!card?.destination || !!card?.busy || !!card?.needsRefresh"
+                    [attr.aria-describedby]="clearsDate ? 'date-hint-' + application.id : null"
+                    (click)="move(application)"
+                  >
+                    {{ card?.busy === 'move' ? 'Movendo…' : 'Mover' }}
+                  </button>
+                  @if (card?.error) {
+                    <p class="error" role="alert">{{ card?.error }}</p>
+                  }
+                  @if (card?.needsRefresh) {
+                    <button type="button" [disabled]="!!card?.busy" (click)="refresh(application)">
+                      {{ card?.busy === 'refresh' ? 'Atualizando…' : 'Atualizar candidatura' }}
+                    </button>
+                  }
+                </article>
+              } @empty {
+                <p class="empty">Nenhuma candidatura exibida nesta etapa.</p>
+              }
+            </section>
+          }
+        </div>
+      </section>
+    }
+
+    @if (hasMore()) {
+      <div class="more">
+        @if (listError()) {
+          <p class="error" role="alert">{{ listError() }}</p>
+        }
+        <button type="button" [disabled]="loading()" (click)="loadNextPage()">
+          {{ loading() ? 'Carregando…' : 'Carregar mais candidaturas' }}
+        </button>
+      </div>
+    }
+  }
+</main>
