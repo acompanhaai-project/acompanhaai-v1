@@ -4,11 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,6 +27,11 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chromium.ChromiumDriver;
+import org.openqa.selenium.chromium.ChromiumOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeDriverService;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -231,18 +241,147 @@ class AccessJourneysBrowserIT {
         screenshot("invalid-link-" + width + "-" + theme + ".png");
     }
 
+    @ParameterizedTest(name = "Perfil: {0}px, tema {1}")
+    @CsvSource({ "1440, light", "1440, dark", "390, light", "390, dark" })
+    void profileLifecycle(int width, String theme) throws Exception {
+        openBrowser(width, theme);
+        String email = "qa.perfil." + UUID.randomUUID() + "@example.test";
+        String updatedEmail = "editado." + email;
+        register(email);
+
+        visit("/conta/perfil");
+        visible("#email");
+        assertEquals("/entrar", path());
+        assertEquals("returnUrl=/conta/perfil", URI.create(browser.getCurrentUrl()).getQuery());
+        signIn(email, INITIAL_PASSWORD);
+        heading("Meu perfil");
+        assertEquals(email, visible("#profile-email").getDomProperty("value"));
+        assertEquals("MT", visible(".avatar").getText());
+        visible(".back").sendKeys(Keys.TAB);
+        assertEquals("profile-photo", focusedId());
+        assertTrue((Boolean) script("return document.activeElement.matches(':focus-visible')"));
+
+        type("profile-name", "Pessoa Editada");
+        type("profile-email", "invalido");
+        button("Salvar dados").click();
+        message(".settings [role='alert']", "Confira o nome e o e-mail.");
+        assertEquals("true", visible("#profile-email").getDomAttribute("aria-invalid"));
+        type("profile-email", updatedEmail.toUpperCase(Locale.ROOT));
+        button("Salvar dados").click();
+        message(".settings [role='status']", "Dados atualizados.");
+        assertEquals(updatedEmail, visible("#profile-email").getDomProperty("value"));
+
+        verifyPhotoChanges(width, theme);
+        changeProfilePassword(updatedEmail);
+        deleteProfile(updatedEmail);
+    }
+
+    private void verifyPhotoChanges(int width, String theme) throws Exception {
+        Path png = createImage("profile-test.png", "png", 24, 24);
+        Path jpeg = createImage("profile-test.jpeg", "jpeg", 32, 32);
+        selectPhoto(png);
+        visible("img[alt='Prévia da nova foto']");
+        button("Cancelar prévia").click();
+        assertEquals("PE", visible(".avatar").getText());
+
+        selectPhoto(png);
+        button("Salvar foto").click();
+        message(".photo [role='status']", "Foto atualizada.");
+        waitForSavedPhoto(24);
+        selectPhoto(jpeg);
+        button("Salvar foto").click();
+        message(".photo [role='status']", "Foto atualizada.");
+        waitForSavedPhoto(32);
+        browser.navigate().refresh();
+        heading("Meu perfil");
+        assertEquals("Pessoa Editada", visible("#profile-name").getDomProperty("value"));
+        waitForSavedPhoto(32);
+        assertNoOverflow();
+        screenshot("profile-" + width + "-" + theme + ".png");
+
+        Path largeFile = BrowserEnvironment.OUTPUT.resolve("profile-over-2-mib.png");
+        Files.write(largeFile, new byte[2 * 1024 * 1024 + 1]);
+        selectPhoto(largeFile);
+        message(".photo [role='alert']", "Selecione uma imagem JPEG ou PNG de até 2 MiB.");
+        waitForSavedPhoto(32);
+
+        Path largeImage = createImage("profile-over-4-megapixels.png", "png", 2001, 2000);
+        selectPhoto(largeImage);
+        button("Salvar foto").click();
+        message(".photo [role='alert']", "A imagem deve ter no máximo 4 milhões de pixels.");
+        button("Cancelar prévia").click();
+        waitForSavedPhoto(32);
+        button("Remover foto").click();
+        message(".photo [role='status']", "Foto removida.");
+        assertEquals("PE", visible(".avatar").getText());
+    }
+
+    private void changeProfilePassword(String email) {
+        visible(".password summary").sendKeys(Keys.ENTER);
+        type("profile-current-password", "incorreta");
+        type("profile-new-password", NEW_PASSWORD);
+        type("profile-confirm-password", NEW_PASSWORD);
+        button("Salvar nova senha").click();
+        message(".password [role='alert']", "Senha atual incorreta.");
+        assertEquals("/conta/perfil", path());
+
+        type("profile-current-password", INITIAL_PASSWORD);
+        button("Salvar nova senha").click();
+        message(".ok", "Senha alterada. Entre com a nova senha.");
+        assertEquals("/entrar", path());
+        signIn(email, INITIAL_PASSWORD);
+        message(".alert", "E-mail ou senha inválidos.");
+        loginPassword(NEW_PASSWORD);
+        heading("Acesso confirmado");
+        visible("a[href='/conta/perfil']").click();
+        heading("Meu perfil");
+    }
+
+    private void deleteProfile(String email) {
+        WebElement opener = button("Excluir minha conta");
+        opener.sendKeys(Keys.ENTER);
+        visible("dialog[open]");
+        browser.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("dialog[open]")));
+        assertEquals(opener, browser.switchTo().activeElement());
+
+        opener.sendKeys(Keys.ENTER);
+        type("profile-delete-email", "outra@example.test");
+        button("Confirmar exclusão").click();
+        message("dialog [role='alert']", "Digite o e-mail da sua conta para confirmar a exclusão.");
+        type("profile-delete-email", email);
+        button("Confirmar exclusão").click();
+        message(".ok", "Sua conta foi excluída.");
+        assertEquals("/entrar", path());
+        signIn(email, NEW_PASSWORD);
+        message(".alert", "E-mail ou senha inválidos.");
+    }
+
+    private Path createImage(String filename, String format, int width, int height) throws Exception {
+        Path path = BrowserEnvironment.OUTPUT.resolve(filename);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        assertTrue(ImageIO.write(image, format, path.toFile()));
+        return path;
+    }
+
+    private void selectPhoto(Path path) {
+        browser.findElement(By.id("profile-photo")).sendKeys(path.toString());
+    }
+
+    private void waitForSavedPhoto(int width) {
+        wait.until(driver -> ((Number) script(
+            "return document.querySelector('img[alt=\"Foto de perfil\"]')?.naturalWidth ?? 0"
+        )).intValue() == width);
+    }
+
+    private void message(String selector, String text) {
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector(selector), text));
+    }
+
     private void openBrowser(int width, String theme) throws Exception {
         desiredTheme = theme;
-        EdgeOptions options = new EdgeOptions();
-        options.addArguments("--headless=new", "--disable-gpu", "--no-first-run");
-        options.setExperimentalOption("prefs", java.util.Map.of(
-            "credentials_enable_service", false,
-            "profile.password_manager_enabled", false
-        ));
-        EdgeDriverService service = new EdgeDriverService.Builder()
-            .withLogOutput(java.io.OutputStream.nullOutputStream()).build();
-        EdgeDriver edge = new EdgeDriver(service, options);
-        browser = edge;
+        ChromiumDriver driver = createBrowser();
+        browser = driver;
         Files.writeString(BrowserEnvironment.OUTPUT.resolve("environment.txt"), """
             Java: %s
             Selenium: %s
@@ -250,11 +389,11 @@ class AccessJourneysBrowserIT {
             """.formatted(
                 System.getProperty("java.version"),
                 new org.openqa.selenium.BuildInfo().getReleaseLabel(),
-                edge.getCapabilities().getBrowserName(),
-                edge.getCapabilities().getBrowserVersion()
+                driver.getCapabilities().getBrowserName(),
+                driver.getCapabilities().getBrowserVersion()
             ));
         browser.manage().window().setSize(new Dimension(width, 1000));
-        edge.executeCdpCommand("Emulation.setDeviceMetricsOverride", java.util.Map.of(
+        driver.executeCdpCommand("Emulation.setDeviceMetricsOverride", Map.of(
             "width", width,
             "height", 1000,
             "deviceScaleFactor", 1,
@@ -262,13 +401,41 @@ class AccessJourneysBrowserIT {
         ));
         wait = new WebDriverWait(browser, Duration.ofSeconds(20));
         visit("/cadastro");
-        edge.executeCdpCommand("Emulation.setEmulatedMedia", java.util.Map.of(
-            "features", java.util.List.of(java.util.Map.of(
+        driver.executeCdpCommand("Emulation.setEmulatedMedia", Map.of(
+            "features", java.util.List.of(Map.of(
                 "name", "prefers-color-scheme", "value", theme
             ))
         ));
         // A largura interna é a viewport efetivamente exercitada e registrada no relatório.
         assertEquals(width, ((Number) script("return innerWidth")).intValue());
+    }
+
+    private ChromiumDriver createBrowser() {
+        String chromeBinary = System.getenv("ACOMPANHAAI_QA_CHROME_BINARY");
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            ChromeOptions options = new ChromeOptions();
+            options.setBinary(chromeBinary);
+            configureBrowser(options);
+            ChromeDriverService service = new ChromeDriverService.Builder()
+                .withLogOutput(java.io.OutputStream.nullOutputStream())
+                .build();
+            return new ChromeDriver(service, options);
+        }
+
+        EdgeOptions options = new EdgeOptions();
+        configureBrowser(options);
+        EdgeDriverService service = new EdgeDriverService.Builder()
+            .withLogOutput(java.io.OutputStream.nullOutputStream())
+            .build();
+        return new EdgeDriver(service, options);
+    }
+
+    private void configureBrowser(ChromiumOptions<?> options) {
+        options.addArguments("--headless=new", "--disable-gpu", "--no-first-run");
+        options.setExperimentalOption("prefs", Map.of(
+            "credentials_enable_service", false,
+            "profile.password_manager_enabled", false
+        ));
     }
 
     private void register(String email) {

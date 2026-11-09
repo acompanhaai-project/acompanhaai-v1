@@ -76,10 +76,11 @@ npm run format:check
 npm run lint
 npm run test:ci
 npm run build
+npm run check:bundle
 ```
 
-O Google Fonts fornece Plus Jakarta Sans. O build precisa de acesso à internet
-para incorporar a folha da fonte. Os testes automatizados verificam a infraestrutura
+A Plus Jakarta Sans vem do pacote Fontsource. O build inclui a fonte e sua licença
+nos arquivos estáticos. Os testes automatizados verificam a infraestrutura
 HTTP, sua configuração e os fluxos de acesso. Cadastro, login, logout e recuperação
 também são conferidos no navegador com API real e H2 isolado. A recuperação usa
 SMTP real capturado pelo Mailpit local. Proteção, restauração da sessão,
@@ -87,7 +88,16 @@ preservação do destino e falhas de verificação também têm cobertura.
 
 O lint verifica TypeScript e templates. Os testes usam Vitest/jsdom com um
 worker em thread. O build de produção fica em `dist/acompanhaai-web/browser`.
-A integração desses comandos ao GitHub Actions pertence à KAN-41.
+O GitHub Actions executa esses comandos no check `frontend-build-test`.
+Consultar o [guia de CI](../docs/ci-cd.md#ci-do-frontend--kan-41).
+
+Se o Node encerrar no Windows com código `0xC0000005`, o build pode ser
+executado em modo de CI, com o cache local do Angular desativado:
+
+```powershell
+$env:CI = 'true'
+npm.cmd run build
+```
 
 Em produção, o host deve devolver `index.html` para rotas de interface e
 preservar o tratamento de `/api` e assets. Não há deploy configurado nesta entrega.
@@ -95,9 +105,8 @@ preservar o tratamento de `/api` e assets. Não há deploy configurado nesta ent
 ## Próximas entregas
 
 - KAN-36 / KAN-86: revisar o aceite dos fluxos de acesso e suas evidências.
-- KAN-37: implementar perfil e foto pela interface.
-- KAN-40: executar a [suíte Selenium de acesso](../qa/browser/README.md) e
-  completar o perfil após a KAN-37.
-- KAN-41: adicionar build e qualidade do frontend ao CI.
+- KAN-37: revisar o perfil em `/conta/perfil`, acessível por **Editar perfil**.
+- KAN-40: revisar as jornadas de [acesso e perfil no Selenium](../qa/browser/README.md).
+- KAN-41: validar o check `frontend-build-test` no primeiro PR e na proteção da `main`.
 
 Consultar o [contrato HTTP](../docs/integracao-frontend.md) antes de integrar.

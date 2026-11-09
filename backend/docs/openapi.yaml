@@ -207,6 +207,11 @@ paths:
       operationId: deleteCurrentUser
       summary: Excluir a própria conta
       description: Invalida a sessão atual. Outras sessões são recusadas na próxima requisição.
+      parameters:
+        - name: X-Expected-Account-Id
+          in: header
+          description: Conta confirmada pelo cliente. Se informado, deve corresponder à conta autenticada.
+          schema: { type: integer, format: int64 }
       security:
         - sessionCookie: []
           csrfHeader: []
@@ -214,11 +219,15 @@ paths:
         "204": { description: Conta excluída. }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: A conta confirmada difere da conta autenticada. }
   /api/users/me/password:
     put:
       operationId: changePassword
       summary: Trocar a senha e encerrar todas as sessões
-      description: Exige a senha atual. Outras sessões são recusadas na próxima requisição.
+      description: >-
+        Exige a senha atual. O 401 com code INCORRECT_CURRENT_PASSWORD indica senha atual incorreta
+        e preserva a sessão. O 401 do filtro indica autenticação ausente ou expirada.
+        Após uma troca bem-sucedida, outras sessões são recusadas na próxima requisição.
       security:
         - sessionCookie: []
           csrfHeader: []

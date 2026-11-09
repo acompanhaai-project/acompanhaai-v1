@@ -1,8 +1,8 @@
-# Jornadas de acesso no navegador — KAN-40
+# Jornadas de acesso e perfil no navegador — KAN-40
 
 Suíte Selenium WebDriver/Java com JUnit, API Spring Boot real, Angular real e
-SMTP capturado pelo GreenMail. Não usa mocks de endpoints. A tela de perfil
-da KAN-37 é uma dependência ainda pendente; esta suíte cobre o acesso da KAN-36.
+SMTP capturado pelo GreenMail. A suíte cobre o acesso da KAN-36 e o perfil da
+KAN-37 com requisições reais.
 
 ## Executar no Windows com PostgreSQL descartável
 
@@ -16,6 +16,11 @@ Na raiz do projeto, pelo PowerShell:
 ```powershell
 ./qa/browser/run.ps1
 ```
+
+Para usar um Chrome ou Chromium já disponível, defina
+`ACOMPANHAAI_QA_CHROME_BINARY` com o caminho absoluto do executável antes de
+rodar o comando. O Selenium Manager resolve o driver compatível. O navegador
+padrão é o Edge.
 
 O executor cria um contêiner PostgreSQL 18 exclusivo, com porta aleatória
 publicada apenas em `127.0.0.1`. As migrações são aplicadas ao banco novo.
@@ -45,15 +50,16 @@ seus módulos gerenciados pelo parent do Spring Boot.
 ## Cenários
 
 Cada método roda em quatro combinações: viewport de 1440 e 390 pixels,
-tema claro e escuro. O Edge usa viewport emulada, sem simular aparelho físico
+tema claro e escuro. O navegador usa viewport emulada, sem simular aparelho físico
 ou comportamento específico de Safari/Android. As esperas são condicionais.
 
 | Método | Verificações |
 | --- | --- |
 | `accountLifecycle` | Cadastro exclusivo, duplicidade e foco, credenciais inválidas, limpeza da senha, destino preservado, cookie HttpOnly, ausência de tokens/identidade em storage, restauração após recarga, logout em outra aba, recuperação SMTP, cooldown visível, redefinição, revogação da sessão anterior, senha antiga rejeitada, senha nova aceita e token de uso único |
 | `keyboardAndFieldErrors` | Primeiro campo inválido, Tab entre campos, e-mail inválido e `aria-invalid`, confirmação divergente e mensagem associada, Enter para avançar no login, foco na senha, Space no botão de mostrar senha, erro na recuperação e link sem token |
+| `profileLifecycle` | Retorno ao perfil após login, edição e persistência de nome/e-mail, foco no seletor de foto, prévia e cancelamento, envio PNG e substituição JPEG, limites de 2 MiB e 4 milhões de pixels, remoção e avatar padrão, senha atual incorreta e troca com novo login, confirmação de exclusão com e-mail, cancelamento com Escape e restauração de foco |
 
-As duas jornadas também conferem ausência de rolagem horizontal. O tema é
+As jornadas também conferem ausência de rolagem horizontal. O tema é
 selecionado pelo controle da interface e pela preferência de mídia emulada.
 Somente screenshots de estados sem senhas preenchidas são produzidos.
 
@@ -68,10 +74,10 @@ Somente screenshots de estados sem senhas preenchidas são produzidos.
   espera de 30 minutos pelo vencimento por inatividade nesta suíte.
 - Reenvio após 60 segundos, limites de requisições e falhas de rede têm
   verificações anteriores; esta suíte não substitui sua cobertura específica.
-- Perfil/foto, leitores de tela, outros navegadores, dispositivos físicos e
-  ambiente de produção permanecem fora desta execução.
+- Leitores de tela, Safari, Firefox, dispositivos físicos e ambiente de produção
+  permanecem fora da cobertura desta suíte.
 
-A KAN-40 só pode ser concluída após cobrir também a KAN-37 e obter aceite.
+A KAN-40 depende da execução e do aceite das jornadas de acesso e perfil.
 Problemas funcionais reproduzíveis encontrados devem seguir o
 [fluxo de Bugs](../../docs/bugs.md), com vínculo à história afetada.
 

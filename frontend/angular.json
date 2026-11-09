@@ -28,9 +28,17 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "LICENSE",
+                "input": "node_modules/@fontsource-variable/plus-jakarta-sans",
+                "output": "licenses/plus-jakarta-sans"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "node_modules/@fontsource-variable/plus-jakarta-sans/index.css",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {

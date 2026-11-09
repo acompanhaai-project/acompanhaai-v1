@@ -65,6 +65,182 @@ describe('Cliente de sessão e interceptor da API', () => {
     request.flush(user);
   });
 
+  it('salva nome e e-mail com CSRF e atualiza os dados retornados na mesma sessão', async () => {
+    state.authenticate(user);
+    const revision = state.revision();
+    const profile = { name: 'Pessoa Editada', email: 'EDITADO@example.test' };
+    const saved = { ...user, ...profile, email: 'editado@example.test' };
+    const received = vi.fn();
+    session.updateProfile(profile).subscribe(received);
+
+    await turn();
+    token('profile-token');
+    const request = backend.expectOne({ method: 'PUT', url: '/api/users/me' });
+    expect(request.request.body).toEqual(profile);
+    expect(request.request.headers.get('X-CSRF-TOKEN')).toBe('profile-token');
+    expect(state.user()).toEqual(user);
+
+    request.flush(saved);
+    expect(received).toHaveBeenCalledWith(saved);
+    expect(state.user()).toEqual(saved);
+    expect(state.revision()).toBe(revision);
+  });
+
+  it('preserva o perfil atual quando o servidor rejeita o e-mail duplicado', async () => {
+    state.authenticate(user);
+    session.updateProfile({ name: user.name, email: 'ocupado@example.test' }).subscribe({
+      error: (error: ApiError) => errors.push(error),
+    });
+
+    await turn();
+    token('profile-token');
+    backend
+      .expectOne({ method: 'PUT', url: '/api/users/me' })
+      .flush({ detail: 'E-mail já cadastrado.' }, { status: 409, statusText: 'Conflict' });
+
+    expect(errors).toMatchObject([{ status: 409, message: 'E-mail já cadastrado.' }]);
+    expect(state.user()).toEqual(user);
+  });
+
+  it('descarta a edição enfileirada se a sessão mudar antes do envio', async () => {
+    state.authenticate(user);
+    http.post('/api/applications', {}).subscribe();
+    session.updateProfile({ name: 'Pessoa Editada', email: user.email }).subscribe({
+      error: (error: ApiError) => errors.push(error),
+    });
+
+    await turn();
+    token('profile-token');
+    const blockingRequest = backend.expectOne('/api/applications');
+    const otherUser = { ...user, id: 2 };
+    state.authenticate(otherUser);
+    blockingRequest.flush({});
+
+    await turn();
+    backend.expectNone('/api/users/me');
+    expect(errors).toMatchObject([{ status: 409 }]);
+    expect(state.user()).toEqual(otherUser);
+  });
+
+  it('ignora a resposta da edição se uma nova sessão já estiver ativa', async () => {
+    state.authenticate(user);
+    session.updateProfile({ name: 'Pessoa Editada', email: user.email }).subscribe({
+      error: (error: ApiError) => errors.push(error),
+    });
+
+    await turn();
+    token('profile-token');
+    const request = backend.expectOne({ method: 'PUT', url: '/api/users/me' });
+    const otherUser = { ...user, id: 2 };
+    state.authenticate(otherUser);
+    request.flush({ ...user, name: 'Pessoa Editada' });
+
+    expect(errors).toMatchObject([{ status: 409 }]);
+    expect(state.user()).toEqual(otherUser);
+  });
+
+  it('permite corrigir a senha atual e descarta sessão e CSRF após a troca', async () => {
+    state.authenticate(user);
+    const change = { currentPassword: 'AtualFicticia123!', newPassword: 'NovaFicticia123!' };
+    session.changePassword({ ...change, currentPassword: 'incorreta' }).subscribe({
+      error: (error: ApiError) => errors.push(error),
+    });
+
+    await turn();
+    token('authenticated-token');
+    backend
+      .expectOne({ method: 'PUT', url: '/api/users/me/password' })
+      .flush(
+        { detail: 'Senha atual incorreta.', code: 'INCORRECT_CURRENT_PASSWORD' },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+    expect(errors).toMatchObject([{ status: 401, code: 'INCORRECT_CURRENT_PASSWORD' }]);
+    expect(state.user()).toEqual(user);
+    expect(state.expiredRevision()).toBeNull();
+
+    const completed = vi.fn();
+    session.changePassword(change).subscribe({ complete: completed });
+    await turn();
+    const retry = backend.expectOne({ method: 'PUT', url: '/api/users/me/password' });
+    expect(retry.request.body).toEqual(change);
+    expect(retry.request.headers.get('X-CSRF-TOKEN')).toBe('authenticated-token');
+    retry.flush(null, { status: 204, statusText: 'No Content' });
+    expect(completed).toHaveBeenCalledOnce();
+    expect(state.status()).toBe('anonymous');
+    expect(state.user()).toBeNull();
+    expect(state.expiredRevision()).toBeNull();
+
+    session.register({ ...credentials, name: user.name }).subscribe();
+    await turn();
+    token('anonymous-token');
+    const registration = backend.expectOne({ method: 'POST', url: '/api/users' });
+    expect(registration.request.headers.get('X-CSRF-TOKEN')).toBe('anonymous-token');
+    registration.flush(user, { status: 201, statusText: 'Created' });
+  });
+
+  it('trata o 401 do filtro durante a troca como sessão expirada', async () => {
+    state.authenticate(user);
+    session.changePassword({ currentPassword: 'Atual123!', newPassword: 'Nova123!' }).subscribe({
+      error: (error: ApiError) => errors.push(error),
+    });
+
+    await turn();
+    token('expired-session-token');
+    backend
+      .expectOne({ method: 'PUT', url: '/api/users/me/password' })
+      .flush(
+        { status: 401, error: 'Autenticação necessária.' },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+
+    expect(errors).toMatchObject([{ status: 401, code: null }]);
+    expect(state.status()).toBe('anonymous');
+    expect(state.expiredRevision()).toBe(state.revision());
+  });
+
+  it('bloqueia a exclusão quando o e-mail informado difere da conta ativa', async () => {
+    state.authenticate(user);
+    session.deleteAccount('outra@example.test').subscribe({
+      error: (error: ApiError) => errors.push(error),
+    });
+
+    await turn();
+    expect(errors).toMatchObject([{ status: 422 }]);
+    expect(state.user()).toEqual(user);
+    backend.expectNone('/api/auth/csrf');
+    backend.expectNone('/api/users/me');
+  });
+
+  it('vincula a exclusão à conta confirmada e limpa a sessão após o 204', async () => {
+    state.authenticate(user);
+    session.deleteAccount(user.email).subscribe({ error: (error: ApiError) => errors.push(error) });
+
+    await turn();
+    token('account-token');
+    const deletion = backend.expectOne({ method: 'DELETE', url: '/api/users/me' });
+    expect(deletion.request.headers.get('X-Expected-Account-Id')).toBe(String(user.id));
+    expect(deletion.request.headers.get('X-CSRF-TOKEN')).toBe('account-token');
+    deletion.flush(null, { status: 409, statusText: 'Conflict' });
+    expect(errors).toMatchObject([{ status: 409 }]);
+    expect(state.user()).toEqual(user);
+
+    session.deleteAccount(user.email).subscribe();
+    await turn();
+    const confirmed = backend.expectOne({ method: 'DELETE', url: '/api/users/me' });
+    expect(state.authenticated()).toBe(true);
+    confirmed.flush(null, { status: 204, statusText: 'No Content' });
+    expect(state.status()).toBe('anonymous');
+    expect(state.user()).toBeNull();
+
+    session.register({ ...credentials, name: user.name }).subscribe();
+    await turn();
+    token('new-token');
+    backend.expectOne({ method: 'POST', url: '/api/users' }).flush(user, {
+      status: 201,
+      statusText: 'Created',
+    });
+  });
+
   it.each([
     'https://example.test/api/events',
     '//example.test/api/events',

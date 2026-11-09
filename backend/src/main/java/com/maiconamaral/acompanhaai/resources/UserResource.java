@@ -6,6 +6,7 @@ import com.maiconamaral.acompanhaai.services.UserService;
 import jakarta.servlet.http.*;
 import jakarta.validation.Valid;
 import java.net.URI;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,10 +56,15 @@ public class UserResource {
     @DeleteMapping("/me")
     public ResponseEntity<Void> delete(
         @AuthenticationPrincipal UserPrincipal principal,
+        @RequestHeader(name = "X-Expected-Account-Id", required = false) Long expectedAccountId,
         HttpServletRequest request,
         HttpServletResponse response,
         Authentication authentication
     ) {
+        if (expectedAccountId != null && !expectedAccountId.equals(principal.getId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
         service.delete(principal.getId());
         logoutHandler.logout(request, response, authentication);
         return ResponseEntity.noContent().build();

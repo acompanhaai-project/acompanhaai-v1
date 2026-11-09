@@ -16,6 +16,13 @@ export const routes: Routes = [
     loadComponent: () => import('./auth-page/auth-page.component').then((m) => m.AuthPageComponent),
   },
   {
+    path: 'conta/perfil',
+    canActivate: [requireSession],
+    data: { requiresAuth: true },
+    loadComponent: () =>
+      import('./profile-page/profile-page.component').then((m) => m.ProfilePageComponent),
+  },
+  {
     path: 'cadastro',
     loadComponent: () =>
       import('./signup-page/signup-page.component').then((m) => m.SignupPageComponent),
