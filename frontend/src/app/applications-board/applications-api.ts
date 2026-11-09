@@ -3,7 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SessionState } from '../core/auth/session-state';
 import { EXPECTED_SESSION_REVISION } from '../core/http/api-interceptor';
-import { Application, ApplicationPage, ApplicationStatus } from './application.models';
+import {
+  Application,
+  ApplicationHistoryEntry,
+  ApplicationInput,
+  ApplicationPage,
+  ApplicationStatus,
+} from './application.models';
 
 const APPLICATIONS = '/api/applications';
 
@@ -20,9 +26,29 @@ export class ApplicationsApi {
     return this.http.get<Application>(`${APPLICATIONS}/${id}`);
   }
 
+  history(id: number): Observable<readonly ApplicationHistoryEntry[]> {
+    return this.http.get<readonly ApplicationHistoryEntry[]>(`${APPLICATIONS}/${id}/history`);
+  }
+
+  create(input: ApplicationInput): Observable<Application> {
+    return this.http.post<Application>(APPLICATIONS, input, { context: this.writeContext() });
+  }
+
+  update(id: number, version: number, input: ApplicationInput): Observable<Application> {
+    return this.http.put<Application>(
+      `${APPLICATIONS}/${id}`,
+      { ...input, version },
+      { context: this.writeContext() },
+    );
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${APPLICATIONS}/${id}`, { context: this.writeContext() });
+  }
+
   move(application: Application, status: ApplicationStatus): Observable<Application> {
     const job = application.job;
-    const body = {
+    return this.update(application.id, application.version, {
       job: {
         title: job.title,
         companyName: job.companyName,
@@ -39,9 +65,10 @@ export class ApplicationsApi {
       status,
       appliedOn: status === 'SAVED' ? null : application.appliedOn,
       notes: application.notes,
-      version: application.version,
-    };
-    const context = new HttpContext().set(EXPECTED_SESSION_REVISION, this.session.revision());
-    return this.http.put<Application>(`${APPLICATIONS}/${application.id}`, body, { context });
+    });
+  }
+
+  private writeContext(): HttpContext {
+    return new HttpContext().set(EXPECTED_SESSION_REVISION, this.session.revision());
   }
 }

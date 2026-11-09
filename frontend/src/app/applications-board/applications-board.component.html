@@ -3,6 +3,7 @@
     <a routerLink="/conta" class="back">Voltar para a conta</a>
     <h1 id="board-title" tabindex="-1">Minhas candidaturas</h1>
     <p>Acompanhe cada vaga e atualize a etapa quando houver novidade.</p>
+    <a class="back" routerLink="/candidaturas/nova">Nova candidatura</a>
     @if (hasPage()) {
       <p class="count">Mostrando {{ loaded() }} de {{ total() }} candidaturas</p>
     }
@@ -51,7 +52,11 @@
                   [attr.aria-busy]="!!card?.busy"
                   tabindex="-1"
                 >
-                  <h4 [id]="'application-title-' + application.id">{{ application.job.title }}</h4>
+                  <h4 [id]="'application-title-' + application.id">
+                    <a class="back" [routerLink]="['/candidaturas', application.id]">
+                      {{ application.job.title }}
+                    </a>
+                  </h4>
                   <p class="company">
                     {{ application.job.companyName || 'Empresa não informada' }}
                   </p>

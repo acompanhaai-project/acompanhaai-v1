@@ -44,3 +44,14 @@ export interface ApplicationPage {
   readonly totalElements: number;
   readonly totalPages: number;
 }
+
+export type ApplicationInput = Pick<Application, 'status' | 'appliedOn' | 'notes'> & {
+  readonly job: Omit<Job, 'id'>;
+};
+
+export interface ApplicationHistoryEntry {
+  readonly id: number;
+  readonly fromStatus: ApplicationStatus | null;
+  readonly toStatus: ApplicationStatus;
+  readonly changedAt: string;
+}

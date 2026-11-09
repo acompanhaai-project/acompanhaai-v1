@@ -1,0 +1,271 @@
+<main class="page" aria-labelledby="application-title">
+  <a routerLink="/candidaturas">Voltar para candidaturas</a>
+
+  <header>
+    <h1 id="application-title">
+      {{
+        isNew
+          ? 'Nova candidatura'
+          : editing()
+            ? 'Editar candidatura'
+            : (record()?.job?.title ?? 'Candidatura')
+      }}
+    </h1>
+    @if (isNew) {
+      <p>Registre uma oportunidade e escolha a etapa atual.</p>
+    }
+  </header>
+
+  @if (notice()) {
+    <p role="status">{{ notice() }}</p>
+  }
+  @if (error() || fieldErrors().length) {
+    <div class="error" role="alert">
+      @if (error()) {
+        <p>{{ error() }}</p>
+      }
+      @if (fieldErrors().length) {
+        <ul>
+          @for (field of fieldErrors(); track $index) {
+            <li>{{ field.message }}</li>
+          }
+        </ul>
+      }
+      @if (loadFailed()) {
+        <button type="button" (click)="retry()">Tentar novamente</button>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <p role="status">Carregando candidatura…</p>
+  } @else if (editing()) {
+    <form class="panel" [formGroup]="form" (ngSubmit)="save()" ngNativeValidate>
+      <p>O título da vaga é obrigatório.</p>
+      <fieldset [disabled]="busy()">
+        <legend>Dados da vaga</legend>
+        <div class="grid">
+          <label>
+            Título da vaga
+            <input formControlName="title" required maxlength="255" />
+          </label>
+          <label>
+            Empresa
+            <input formControlName="companyName" maxlength="255" />
+          </label>
+          <label class="wide">
+            Link da vaga
+            <input formControlName="sourceUrl" type="url" maxlength="2048" placeholder="https://" />
+          </label>
+          <label>
+            Localização
+            <input formControlName="location" maxlength="255" />
+          </label>
+          <label>
+            Modelo de trabalho
+            <select formControlName="workMode">
+              <option [ngValue]="null">Não informado</option>
+              @for (mode of workModeOptions; track mode) {
+                <option [ngValue]="mode">{{ workModes[mode] }}</option>
+              }
+            </select>
+          </label>
+          <label class="wide">
+            Descrição
+            <textarea formControlName="description" rows="5" maxlength="30000"></textarea>
+          </label>
+          <label>
+            Salário (R$)
+            <input
+              formControlName="salary"
+              type="number"
+              min="0.01"
+              max="9999999999999.99"
+              step="0.01"
+            />
+          </label>
+          <label>
+            Período do salário
+            <select formControlName="salaryPeriod">
+              <option [ngValue]="null">Selecione se informou um salário</option>
+              @for (period of periodOptions; track period) {
+                <option [ngValue]="period">Por {{ periods[period] }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Habilidades técnicas
+            <textarea
+              formControlName="hardSkills"
+              rows="3"
+              aria-describedby="skill-hint"
+            ></textarea>
+          </label>
+          <label>
+            Habilidades comportamentais
+            <textarea
+              formControlName="softSkills"
+              rows="3"
+              aria-describedby="skill-hint"
+            ></textarea>
+          </label>
+          <p id="skill-hint" class="wide hint">
+            Informe uma habilidade por linha, até 50 por campo.
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset [disabled]="busy()">
+        <legend>Acompanhamento</legend>
+        <div class="grid">
+          <label>
+            Etapa
+            <select formControlName="status">
+              @for (status of statuses; track status) {
+                <option [ngValue]="status">{{ labels[status] }}</option>
+              }
+            </select>
+          </label>
+          @if (form.controls.status.value !== 'SAVED') {
+            <label>
+              Data da candidatura
+              <input formControlName="appliedOn" type="date" />
+            </label>
+          } @else {
+            <p class="hint">Vagas na etapa Salva ficam sem data de candidatura.</p>
+          }
+          <label class="wide">
+            Anotações
+            <textarea formControlName="notes" rows="4" maxlength="5000"></textarea>
+          </label>
+        </div>
+      </fieldset>
+      <div class="actions">
+        <button class="primary" type="submit" [disabled]="busy() || conflict()">
+          {{ busy() ? 'Salvando…' : 'Salvar candidatura' }}
+        </button>
+        @if (isNew) {
+          <a routerLink="/candidaturas">Cancelar</a>
+        } @else {
+          <button type="button" (click)="cancelEdit()" [disabled]="busy()">
+            {{ conflict() ? 'Descartar rascunho e recarregar' : 'Cancelar edição' }}
+          </button>
+        }
+      </div>
+    </form>
+  } @else if (record(); as application) {
+    <section class="panel" aria-labelledby="details-title">
+      <h2 id="details-title">Dados da vaga</h2>
+      <dl class="grid">
+        <div>
+          <dt>Empresa</dt>
+          <dd>{{ application.job.companyName || 'Não informada' }}</dd>
+        </div>
+        <div>
+          <dt>Etapa</dt>
+          <dd>{{ labels[application.status] }}</dd>
+        </div>
+        <div>
+          <dt>Localização</dt>
+          <dd>{{ application.job.location || 'Não informada' }}</dd>
+        </div>
+        <div>
+          <dt>Modelo de trabalho</dt>
+          <dd>
+            {{ application.job.workMode ? workModes[application.job.workMode] : 'Não informado' }}
+          </dd>
+        </div>
+        <div>
+          <dt>Salário</dt>
+          <dd>
+            @if (application.job.salary !== null && application.job.salaryPeriod; as period) {
+              R$ {{ application.job.salary | number: '1.2-2' : 'pt' }} por {{ periods[period] }}
+            } @else {
+              Não informado
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Data da candidatura</dt>
+          <dd>
+            {{
+              application.appliedOn ? (application.appliedOn | date: 'dd/MM/yyyy') : 'Não informada'
+            }}
+          </dd>
+        </div>
+        <div class="wide">
+          <dt>Link da vaga</dt>
+          <dd>
+            @if (application.job.sourceUrl; as url) {
+              @if (isWebUrl(url)) {
+                <a [href]="url" target="_blank" rel="noopener noreferrer">{{ url }}</a>
+              } @else {
+                {{ url }}
+              }
+            } @else {
+              Não informado
+            }
+          </dd>
+        </div>
+        <div class="wide">
+          <dt>Descrição</dt>
+          <dd class="multiline">{{ application.job.description || 'Não informada' }}</dd>
+        </div>
+        <div>
+          <dt>Habilidades técnicas</dt>
+          <dd>{{ application.job.hardSkills.join(', ') || 'Não informadas' }}</dd>
+        </div>
+        <div>
+          <dt>Habilidades comportamentais</dt>
+          <dd>{{ application.job.softSkills.join(', ') || 'Não informadas' }}</dd>
+        </div>
+        <div class="wide">
+          <dt>Anotações</dt>
+          <dd class="multiline">{{ application.notes || 'Nenhuma anotação' }}</dd>
+        </div>
+      </dl>
+      @if (confirmingDelete()) {
+        <div class="confirmation" role="group" aria-labelledby="delete-title">
+          <h3 id="delete-title">Excluir esta candidatura?</h3>
+          <p>Os dados do acompanhamento e seu histórico serão removidos.</p>
+          <div class="actions">
+            <button type="button" (click)="confirmingDelete.set(false)" [disabled]="busy()">
+              Manter candidatura
+            </button>
+            <button type="button" class="danger" (click)="remove()" [disabled]="busy()">
+              {{ busy() ? 'Excluindo…' : 'Confirmar exclusão' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="actions">
+          <button type="button" class="primary" (click)="startEdit()">Editar candidatura</button>
+          <button type="button" class="danger" (click)="confirmDelete()">
+            Excluir candidatura
+          </button>
+        </div>
+      }
+    </section>
+
+    <section class="panel" aria-labelledby="history-title">
+      <h2 id="history-title">Histórico de etapas</h2>
+      @if (history().length) {
+        <ol>
+          @for (entry of history(); track entry.id) {
+            <li>
+              <time [attr.datetime]="entry.changedAt">{{
+                entry.changedAt | date: 'dd/MM/yyyy HH:mm'
+              }}</time>
+              @if (entry.fromStatus) {
+                {{ labels[entry.fromStatus] }} →
+              }
+              <strong>{{ labels[entry.toStatus] }}</strong>
+            </li>
+          }
+        </ol>
+      } @else if (!loadFailed()) {
+        <p>Nenhuma mudança de etapa registrada.</p>
+      }
+    </section>
+  }
+</main>

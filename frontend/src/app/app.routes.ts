@@ -23,6 +23,24 @@ export const routes: Routes = [
       import('./profile-page/profile-page.component').then((m) => m.ProfilePageComponent),
   },
   {
+    path: 'candidaturas/nova',
+    canActivate: [requireSession],
+    data: { requiresAuth: true },
+    loadComponent: () =>
+      import('./application-page/application-page.component').then(
+        (m) => m.ApplicationPageComponent,
+      ),
+  },
+  {
+    path: 'candidaturas/:id',
+    canActivate: [requireSession],
+    data: { requiresAuth: true },
+    loadComponent: () =>
+      import('./application-page/application-page.component').then(
+        (m) => m.ApplicationPageComponent,
+      ),
+  },
+  {
     path: 'candidaturas',
     canActivate: [requireSession],
     data: { requiresAuth: true },
