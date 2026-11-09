@@ -2,6 +2,7 @@ package com.maiconamaral.acompanhaai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
@@ -9,6 +10,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -274,6 +277,150 @@ class AccessJourneysBrowserIT {
         verifyPhotoChanges(width, theme);
         changeProfilePassword(updatedEmail);
         deleteProfile(updatedEmail);
+    }
+
+    @ParameterizedTest(name = "Quadro: {0}px, tema {1}")
+    @CsvSource({ "1440, light", "1440, dark", "390, light", "390, dark" })
+    void boardLifecycle(int width, String theme) throws Exception {
+        openBrowser(width, theme);
+        String email = "qa.quadro." + UUID.randomUUID() + "@example.test";
+        register(email);
+
+        visit("/candidaturas");
+        visible("#email");
+        assertEquals("/entrar", path());
+        assertEquals("returnUrl=/candidaturas", URI.create(browser.getCurrentUrl()).getQuery());
+        signIn(email, INITIAL_PASSWORD);
+        heading("Minhas candidaturas");
+        message(".board-message", "Você ainda não tem candidaturas cadastradas.");
+
+        Map<String, Object> job = Map.of(
+            "title", "Pessoa desenvolvedora Java",
+            "companyName", "Empresa Teste",
+            "description", "Desenvolvimento de APIs",
+            "hardSkills", List.of("Java"),
+            "softSkills", List.of("Comunicação")
+        );
+        Map<?, ?> initial = seedApplication(job, "APPLIED");
+        Map<String, String> stages = Map.of(
+            "SCREENING", "screening",
+            "INTERVIEW", "interview",
+            "OFFER", "offer",
+            "SAVED", "saved",
+            "HIRED", "finished",
+            "REJECTED", "finished",
+            "WITHDRAWN", "finished"
+        );
+        Map<Long, String> expectedLanes = new LinkedHashMap<>();
+        long id = ((Number) initial.get("id")).longValue();
+        expectedLanes.put(id, "applied");
+        for (var stage : stages.entrySet()) {
+            Map<?, ?> created = seedApplication(Map.of("title", "Vaga " + stage.getKey()), stage.getKey());
+            expectedLanes.put(((Number) created.get("id")).longValue(), stage.getValue());
+        }
+
+        browser.navigate().refresh();
+        message(".count", "Mostrando 8 de 8 candidaturas");
+        for (var expected : expectedLanes.entrySet()) {
+            assertEquals(expected.getValue(), laneOf(expected.getKey()));
+        }
+        assertEquals(4, browser.findElements(By.cssSelector(".lanes:not(.secondary) .lane")).size());
+        message("[data-lane='finished']", "Contratação");
+        message("[data-lane='finished']", "Rejeitada");
+        message("[data-lane='finished']", "Desistência");
+        assertNoOverflow();
+        screenshot("board-" + width + "-" + theme + ".png");
+
+        String resource = "/api/applications/" + id;
+        String card = "#application-" + id;
+        WebElement destination = visible(card + " select");
+        destination.sendKeys(Keys.HOME, Keys.ARROW_DOWN, Keys.ARROW_DOWN, Keys.ARROW_DOWN);
+        assertEquals("INTERVIEW", destination.getDomProperty("value"));
+        destination.sendKeys(Keys.TAB);
+        WebElement move = browser.switchTo().activeElement();
+        assertEquals("Mover", move.getText());
+
+        String freshNotes = "Retorno registrado em outra aba.";
+        browserApi("PUT", resource, Map.of(
+            "job", job,
+            "status", "SCREENING",
+            "appliedOn", initial.get("appliedOn"),
+            "notes", freshNotes,
+            "version", initial.get("version")
+        ), 200);
+        move.sendKeys(Keys.ENTER);
+        message(card + " [role='alert']", "O registro foi alterado.");
+        assertEquals("applied", laneOf(id));
+        assertEquals("INTERVIEW", destination.getDomProperty("value"));
+        assertFalse(visible(card + " .move").isEnabled());
+
+        button("Atualizar candidatura").click();
+        message(".announcement", "Candidatura atualizada.");
+        assertEquals("screening", laneOf(id));
+        assertEquals("INTERVIEW", visible(card + " select").getDomProperty("value"));
+        visible(card + " .move").click();
+        message(".announcement", "Candidatura movida para Entrevista.");
+        assertEquals("interview", laneOf(id));
+        wait.until(driver -> ("application-" + id).equals(focusedId()));
+
+        Map<?, ?> persisted = (Map<?, ?>) browserApi("GET", resource, null, 200);
+        assertEquals("INTERVIEW", persisted.get("status"));
+        assertEquals(freshNotes, persisted.get("notes"));
+        Map<?, ?> persistedJob = (Map<?, ?>) persisted.get("job");
+        assertEquals(job.get("hardSkills"), persistedJob.get("hardSkills"));
+        assertEquals(job.get("description"), persistedJob.get("description"));
+
+        destination = visible(card + " select");
+        destination.sendKeys(Keys.HOME, Keys.ARROW_DOWN);
+        message(card + " .hint", "Mover para Salvas remove a data da candidatura.");
+        visible(card + " .move").click();
+        message(".announcement", "Candidatura movida para Salva.");
+        assertEquals("saved", laneOf(id));
+        Map<?, ?> saved = (Map<?, ?>) browserApi("GET", resource, null, 200);
+        assertEquals("SAVED", saved.get("status"));
+        assertNull(saved.get("appliedOn"));
+        List<?> history = (List<?>) browserApi("GET", resource + "/history", null, 200);
+        assertEquals(List.of("APPLIED", "SCREENING", "INTERVIEW", "SAVED"), history.stream()
+            .map(entry -> ((Map<?, ?>) entry).get("toStatus"))
+            .toList());
+    }
+
+    private Map<?, ?> seedApplication(Map<String, ?> job, String status) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("job", job);
+        body.put("status", status);
+        if (!"SAVED".equals(status)) {
+            body.put("appliedOn", "2026-10-31");
+        }
+        return (Map<?, ?>) browserApi("POST", "/api/applications", body, 201);
+    }
+
+    private String laneOf(long id) {
+        return visible("#application-" + id)
+            .findElement(By.xpath("ancestor::section[@data-lane]"))
+            .getDomAttribute("data-lane");
+    }
+
+    private Object browserApi(String method, String route, Map<String, ?> body, int status) {
+        Map<?, ?> result = (Map<?, ?>) ((JavascriptExecutor) browser).executeAsyncScript("""
+            const [method, route, body, done] = arguments;
+            (async () => {
+                const options = { method };
+                if (body !== null) {
+                    const csrf = await fetch('/api/auth/csrf');
+                    if (!csrf.ok) {
+                        return { status: csrf.status };
+                    }
+                    const { headerName, token } = await csrf.json();
+                    options.headers = { 'Content-Type': 'application/json', [headerName]: token };
+                    options.body = JSON.stringify(body);
+                }
+                const response = await fetch(route, options);
+                return { status: response.status, body: response.ok ? await response.json() : null };
+            })().then(done, () => done({ status: 0 }));
+            """, method, route, body);
+        assertEquals(status, ((Number) result.get("status")).intValue(), method + " " + route);
+        return result.get("body");
     }
 
     private void verifyPhotoChanges(int width, String theme) throws Exception {
