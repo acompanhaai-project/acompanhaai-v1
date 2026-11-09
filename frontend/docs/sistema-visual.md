@@ -2,7 +2,7 @@
 
 O protótipo atual segue exclusivamente os estilos de `files.zip`.
 
-- Fonte Plus Jakarta Sans, carregada do Google Fonts.
+- Fonte Plus Jakarta Sans, incluída no build pelo pacote Fontsource.
 - Tema claro com fundo `#f4f7ff` e tema escuro com fundo `#050a1c`.
 - Cores neon `#2f7bff` e `#00c2ff`.
 - Cartão translúcido com largura máxima de 600px e raio de 22px.

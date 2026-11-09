@@ -1,0 +1,217 @@
+<main class="profile" aria-labelledby="profile-title">
+  <a class="back" routerLink="/conta">Voltar para a conta</a>
+  <header class="intro">
+    <h1 id="profile-title">Meu perfil</h1>
+    <p>Gerencie seus dados, sua foto e a segurança da sua conta.</p>
+  </header>
+
+  @if (user(); as account) {
+    @let notice = feedback();
+    <div class="panel" appNeonCard>
+      <section
+        class="photo"
+        aria-labelledby="photo-title"
+        [attr.aria-busy]="photoLoading() || busy() === 'photo'"
+      >
+        <h2 id="photo-title">Foto de perfil</h2>
+        <div class="avatar">
+          @if (preview() || savedPhoto(); as image) {
+            <img [src]="image" [alt]="preview() ? 'Prévia da nova foto' : 'Foto de perfil'" />
+          } @else {
+            <span aria-hidden="true">{{ initials() }}</span>
+          }
+        </div>
+        <p id="photo-hint">JPEG ou PNG, até 2 MiB.</p>
+        @if (photoLoading()) {
+          <p role="status">Carregando foto…</p>
+        }
+        @if (photoLoadError()) {
+          <p class="feedback error" role="alert">{{ photoLoadError() }}</p>
+          <button class="quiet" type="button" (click)="loadPhoto()" [disabled]="busy() !== null">
+            Carregar novamente
+          </button>
+        }
+
+        <input
+          #fileInput
+          class="file-input"
+          id="profile-photo"
+          type="file"
+          accept="image/jpeg,image/png"
+          aria-describedby="photo-hint"
+          [disabled]="busy() !== null"
+          (change)="selectPhoto(fileInput)"
+        />
+        <label class="file-label" for="profile-photo">Selecionar foto</label>
+        @if (selected(); as file) {
+          <p class="filename">{{ file.name }}</p>
+          <div class="actions">
+            <button
+              type="button"
+              class="primary"
+              (click)="savePhoto()"
+              [disabled]="busy() !== null"
+            >
+              Salvar foto
+            </button>
+            <button
+              type="button"
+              class="quiet"
+              (click)="cancelPreview()"
+              [disabled]="busy() !== null"
+            >
+              Cancelar prévia
+            </button>
+          </div>
+        } @else if (account.photoUrl) {
+          <button type="button" class="quiet" (click)="removePhoto()" [disabled]="busy() !== null">
+            Remover foto
+          </button>
+        }
+        @if (busy() === 'photo') {
+          <p role="status">Atualizando foto…</p>
+        }
+        @if (notice && notice.area === 'photo') {
+          <p
+            class="feedback"
+            [class.error]="notice.error"
+            [attr.role]="notice.error ? 'alert' : 'status'"
+          >
+            {{ notice.message }}
+          </p>
+        }
+      </section>
+
+      <div class="settings">
+        <section aria-labelledby="details-title">
+          <h2 id="details-title">Dados da conta</h2>
+          <form [formGroup]="profile" (ngSubmit)="saveProfile()" novalidate>
+            <fieldset [disabled]="busy() !== null" [attr.aria-busy]="busy() === 'details'">
+              <label for="profile-name">Nome</label>
+              <input
+                id="profile-name"
+                type="text"
+                formControlName="name"
+                autocomplete="name"
+                maxlength="100"
+                [attr.aria-invalid]="profile.controls.name.touched && profile.controls.name.invalid"
+              />
+              <label for="profile-email">E-mail</label>
+              <input
+                id="profile-email"
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                maxlength="254"
+                [attr.aria-invalid]="
+                  profile.controls.email.touched && profile.controls.email.invalid
+                "
+              />
+              <button class="primary" type="submit">
+                {{ busy() === 'details' ? 'Salvando…' : 'Salvar dados' }}
+              </button>
+            </fieldset>
+          </form>
+          @if (notice && notice.area === 'details') {
+            <p
+              class="feedback"
+              [class.error]="notice.error"
+              [attr.role]="notice.error ? 'alert' : 'status'"
+            >
+              {{ notice.message }}
+            </p>
+          }
+        </section>
+
+        <details class="password">
+          <summary>Alterar senha</summary>
+          <p id="password-hint">
+            Use ao menos 8 caracteres com maiúscula, minúscula, número e símbolo. Depois da
+            alteração, entre novamente.
+          </p>
+          <form [formGroup]="password" (ngSubmit)="changePassword()" novalidate>
+            <fieldset [disabled]="busy() !== null" [attr.aria-busy]="busy() === 'password'">
+              <label for="profile-current-password">Senha atual</label>
+              <input
+                id="profile-current-password"
+                type="password"
+                formControlName="currentPassword"
+                autocomplete="current-password"
+                maxlength="128"
+              />
+              <label for="profile-new-password">Nova senha</label>
+              <input
+                id="profile-new-password"
+                type="password"
+                formControlName="senha"
+                autocomplete="new-password"
+                maxlength="128"
+                aria-describedby="password-hint"
+              />
+              <label for="profile-confirm-password">Confirme a nova senha</label>
+              <input
+                id="profile-confirm-password"
+                type="password"
+                formControlName="confirma"
+                autocomplete="new-password"
+                maxlength="128"
+              />
+              <button class="primary" type="submit">
+                {{ busy() === 'password' ? 'Alterando…' : 'Salvar nova senha' }}
+              </button>
+            </fieldset>
+          </form>
+          @if (notice && notice.area === 'password') {
+            <p class="feedback error" role="alert">{{ notice.message }}</p>
+          }
+        </details>
+
+        <section class="danger-zone" aria-labelledby="delete-title">
+          <h2 id="delete-title">Excluir conta</h2>
+          <p>A exclusão é permanente e remove seu perfil, sua foto e suas candidaturas.</p>
+          <button
+            type="button"
+            class="danger"
+            (click)="openDeletion(deleteDialog)"
+            [disabled]="busy() !== null"
+          >
+            Excluir minha conta
+          </button>
+        </section>
+      </div>
+    </div>
+
+    <dialog
+      #deleteDialog
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-instructions"
+      (cancel)="preventBusyClose($event)"
+    >
+      <h2 id="delete-dialog-title">Confirmar exclusão</h2>
+      <p id="delete-instructions">
+        Digite <strong>{{ account.email }}</strong> para confirmar a exclusão permanente.
+      </p>
+      <form (submit)="confirmDeletion($event, deleteDialog)" novalidate>
+        <fieldset [disabled]="busy() !== null" [attr.aria-busy]="busy() === 'delete'">
+          <label for="profile-delete-email">E-mail da conta</label>
+          <input
+            id="profile-delete-email"
+            type="email"
+            [formControl]="confirmation"
+            autocomplete="off"
+            maxlength="254"
+          />
+          <div class="actions">
+            <button class="quiet" type="button" (click)="deleteDialog.close()">Cancelar</button>
+            <button class="danger" type="submit" [disabled]="confirmation.invalid">
+              {{ busy() === 'delete' ? 'Excluindo…' : 'Confirmar exclusão' }}
+            </button>
+          </div>
+        </fieldset>
+      </form>
+      @if (notice && notice.area === 'delete') {
+        <p class="feedback error" role="alert">{{ notice.message }}</p>
+      }
+    </dialog>
+  }
+</main>

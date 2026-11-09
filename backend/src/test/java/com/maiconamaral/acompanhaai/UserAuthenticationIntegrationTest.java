@@ -270,11 +270,20 @@ class UserAuthenticationIntegrationTest {
         var secondSession = login(EMAIL, PASSWORD);
         mvc.perform(
             put("/api/users/me/password")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"currentPassword\":\"incorreta\",\"newPassword\":\"NovaSenha123!\"}")
+        ).andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").doesNotHaveJsonPath());
+        mvc.perform(
+            put("/api/users/me/password")
                 .session(session)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"currentPassword\":\"incorreta\",\"newPassword\":\"NovaSenha123!\"}")
-        ).andExpect(status().isUnauthorized());
+        ).andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("INCORRECT_CURRENT_PASSWORD"));
+        mvc.perform(get("/api/users/me").session(session)).andExpect(status().isOk());
         mvc.perform(
             put("/api/users/me/password")
                 .session(session)
@@ -301,8 +310,23 @@ class UserAuthenticationIntegrationTest {
         var session = login(EMAIL, PASSWORD);
         var secondSession = login(EMAIL, PASSWORD);
         var otherSession = login(otherEmail, PASSWORD);
+        Long confirmedAccountId = repository.findByEmail(EMAIL).orElseThrow().getId();
 
-        mvc.perform(delete("/api/users/me").session(session).with(csrf())).andExpect(status().isNoContent());
+        mvc.perform(
+            delete("/api/users/me")
+                .session(otherSession)
+                .with(csrf())
+                .header("X-Expected-Account-Id", confirmedAccountId)
+        ).andExpect(status().isConflict());
+        assertThat(repository.count()).isEqualTo(2);
+        assertThat(otherSession.isInvalid()).isFalse();
+
+        mvc.perform(
+            delete("/api/users/me")
+                .session(session)
+                .with(csrf())
+                .header("X-Expected-Account-Id", confirmedAccountId)
+        ).andExpect(status().isNoContent());
 
         assertThat(repository.findByEmail(EMAIL)).isEmpty();
         assertThat(repository.findByEmail(otherEmail)).isPresent();

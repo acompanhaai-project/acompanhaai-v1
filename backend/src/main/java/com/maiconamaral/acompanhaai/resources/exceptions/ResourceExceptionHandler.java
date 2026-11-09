@@ -75,6 +75,13 @@ public class ResourceExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
+    @ExceptionHandler(IncorrectCurrentPasswordException.class)
+    public ProblemDetail incorrectCurrentPassword(IncorrectCurrentPasswordException exception) {
+        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problem.setProperty("code", "INCORRECT_CURRENT_PASSWORD");
+        return problem;
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ProblemDetail authentication(AuthenticationException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.");

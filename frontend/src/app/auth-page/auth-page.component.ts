@@ -65,13 +65,17 @@ export class AuthPageComponent {
   readonly erroVerificacao = this.access.error;
 
   constructor() {
+    const notice = this.route.snapshot.queryParamMap.get('notice');
     if (this.route.snapshot.queryParamMap.get('reason') === 'expired') {
       this.mensagem.set('Sua sessão expirou. Entre novamente para continuar.');
-    } else if (
-      this.route.snapshot.queryParamMap.get('notice') === 'logout' &&
-      this.state.status() === 'anonymous'
-    ) {
-      this.mensagem.set('Sessão encerrada.');
+    } else if (this.state.status() === 'anonymous') {
+      if (notice === 'logout') {
+        this.mensagem.set('Sessão encerrada.');
+      } else if (notice === 'password-changed') {
+        this.mensagem.set('Senha alterada. Entre com a nova senha.');
+      } else if (notice === 'account-deleted') {
+        this.mensagem.set('Sua conta foi excluída.');
+      }
     }
   }
 

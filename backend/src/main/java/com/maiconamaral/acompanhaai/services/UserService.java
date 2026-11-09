@@ -7,7 +7,6 @@ import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.exceptions.*;
 import java.util.Locale;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +51,7 @@ public class UserService {
     public void updatePassword(Long id, PasswordUpdateDTO dto) {
         User user = findEntity(id);
         if (!passwordEncoder.matches(dto.currentPassword(), user.getPasswordHash())) {
-            throw new BadCredentialsException("Senha atual incorreta.");
+            throw new IncorrectCurrentPasswordException();
         }
         user.changePassword(passwordEncoder.encode(dto.newPassword()));
     }

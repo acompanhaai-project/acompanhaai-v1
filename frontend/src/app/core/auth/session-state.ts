@@ -21,6 +21,15 @@ export class SessionState {
     this.currentRevision.update((revision) => revision + 1);
   }
 
+  updateUser(user: User, revision: number): boolean {
+    if (this.revision() !== revision || this.user()?.id !== user.id) {
+      return false;
+    }
+
+    this.currentUser.set(user);
+    return true;
+  }
+
   markUnknown(): void {
     this.currentExpiry.set(null);
     this.currentUser.set(null);

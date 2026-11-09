@@ -129,6 +129,41 @@ a autorrevisão sem bloquear todos os PRs.
 O teste falhando é um exercício de validação do gate, não um defeito real
 do produto a cadastrar como Bug. Não deixá-lo na main.
 
+## CI do frontend — KAN-41
+
+O [workflow do frontend](../.github/workflows/frontend-ci.yml) executa o check
+`frontend-build-test` em PRs para a `main`, em pushes à `main` e sob demanda.
+Ele instala pelo lockfile e roda formatação, lint, testes Angular, build de
+produção e verificação do bundle, nessa ordem. O cache do npm usa o lockfile
+do frontend. O check roda em todos os PRs para poder ser exigido na proteção
+da branch.
+
+Após as verificações, o workflow publica `frontend-<sha>-<tentativa>` com os
+arquivos de `frontend/dist/acompanhaai-web/browser`, por sete dias. Uma falha
+anterior impede o upload. A verificação do bundle identifica padrões conhecidos
+de chaves e senhas e arquivos como `.env`. O relatório informa arquivo e
+categoria, sem imprimir o valor encontrado.
+
+Para repetir os comandos do check na pasta `frontend/`, com Node.js 22:
+
+```bash
+npm ci --no-audit --no-fund
+npm run format:check
+npm run lint
+npm run test:ci
+npm run build
+npm run check:bundle
+```
+
+Para conferir o frontend com a API, inicie o backend no perfil `dev` e o
+Angular com `npm start` em outro terminal. O Angular encaminha `/api` para
+`127.0.0.1:8080`. Veja os passos no [README do frontend](../frontend/README.md).
+A validação Selenium com PostgreSQL segue o [executor de QA](../qa/browser/README.md).
+
+Depois que o primeiro PR exibir o check, adicione `frontend-build-test` à
+regra que exige checks na `main`. A regra é o que impede o merge se o build
+falhar. Use o roteiro de falha controlada acima para validar o bloqueio.
+
 ## Evolução por etapa
 
 - KAN-34: política imutável, regressão v2 no CI e validação local implementadas;
@@ -136,7 +171,8 @@ do produto a cadastrar como Bug. Não deixá-lo na main.
 
 - PostgreSQL efêmero, migrações e comportamento específico já estão incluídos
   no CI. Essa implementação não encerra automaticamente os critérios da KAN-34.
-- KAN-41: build, verificações e artefato Angular, quando o frontend existir.
+- KAN-41: workflow do frontend implementado. Execução remota e proteção da
+  `main` aguardam validação.
 - Homologação: artefato imutável promovido para ambiente separado.
 - Produção: aprovação da release, migração, implantação, smoke e recuperação.
 

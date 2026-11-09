@@ -2,10 +2,10 @@
 
 ## Rotas
 
-`/conta` reutiliza o cartão de confirmação de acesso, com identidade recebida
-da API e ação **Sair**. Não é a tela de edição de perfil nem o quadro de
-candidaturas. Seu `canActivate` consulta `GET /api/users/me` antes de ativar
-o conteúdo. Query e fragmento são preservados ao retornar após o login.
+`/conta` exibe a identidade recebida da API e oferece as ações **Editar perfil**
+e **Sair**. `/conta/perfil` permite editar dados, foto e senha ou excluir a
+conta. As duas rotas consultam `GET /api/users/me` antes de ativar o conteúdo.
+Query e fragmento são preservados ao retornar após o login.
 
 `/entrar` consulta a sessão quando o estado ainda é desconhecido. Se a sessão
 existe, segue para `/conta`; se a API devolve `401`, mostra o formulário.
@@ -37,7 +37,10 @@ uma requisição.
 Um `401` de operação privada limpa a sessão/CSRF e publica a revisão expirada.
 `SessionNavigation` redireciona a rota privada ativa para `/entrar`, com aviso
 de expiração e destino preservado. `403` não é tratado como sessão expirada.
-Um `401` atrasado de revisão anterior não apaga a sessão mais recente.
+Um `401` atrasado de revisão anterior não apaga a sessão mais recente. Na troca
+de senha, `INCORRECT_CURRENT_PASSWORD` indica senha atual incorreta e mantém a
+sessão. Após trocar a senha ou excluir a conta, o perfil volta ao login com a
+confirmação.
 
 As consultas de verificação e a confirmação do login são identificadas como
 fluxos de sessão; seus guards/formulários tratam o resultado, evitando dois
@@ -54,7 +57,7 @@ recarga. A API continua sendo a autoridade de autenticação e autorização.
 
 ## Destino seguro
 
-`safeReturnUrl()` aceita somente `/conta`, com query/fragmento opcionais.
+`safeReturnUrl()` aceita `/conta` e `/conta/perfil`, com query/fragmento opcionais.
 URLs externas, barras invertidas, controles, rotas públicas e sintaxes de
 outlet/matriz são rejeitadas. O padrão é `/conta`, evitando redirecionamento
 aberto e retorno em loop para login.
