@@ -25,6 +25,9 @@ A foto é opcional. `GET /api/users/me` retorna `photoUrl: null` quando não hou
 | PUT    | `/api/applications/{id}`         | Substitui os dados manuais da vaga e do acompanhamento; exige `version` |
 | GET    | `/api/applications/{id}/history` | Consulta o histórico de etapas, incluindo o registro inicial            |
 | DELETE | `/api/applications/{id}`         | Exclui a candidatura, sua vaga e histórico; retorna 204                 |
+| POST   | `/api/import-tasks`              | Enfileira a importação por URL ou descrição; retorna 202 com `Location` |
+| GET    | `/api/import-tasks/{id}`         | Consulta estado, proposta ou motivo da falha da importação              |
+| DELETE | `/api/import-tasks/{id}`         | Cancela a importação; retorna 204 ou 409 se já confirmada               |
 
 As novas rotas exigem autenticação; operações de escrita também exigem CSRF. IDs de outros usuários retornam 404. Fotos: JPEG/PNG de até 2 MiB e 4 milhões de pixels. O servidor identifica o formato pelos bytes e regrava a imagem sem os metadados originais. Arquivo inválido retorna 422; requisição multipart acima do limite retorna 413.
 
@@ -332,7 +335,7 @@ O pacote executável é gerado em `target/acompanhaai-0.0.1-SNAPSHOT.jar`:
 java -jar target/acompanhaai-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
-Recuperação de senha possui entrega SMTP local de testes; provedor de produção, confirmação de e-mail, limitação de tentativas de login e perfis administrativos ficam para etapas futuras. A importação de vagas e a integração com IA ainda não fazem parte desta etapa.
+Recuperação de senha possui entrega SMTP local de testes; provedor de produção, confirmação de e-mail, limitação de tentativas de login e perfis administrativos ficam para etapas futuras. A importação de vagas já coleta a página e gera a proposta inicial ([KAN-53](docs/importacao-kan-53.md)); a extração com IA e a confirmação ficam para as próximas etapas.
 
 ## Contribuição
 

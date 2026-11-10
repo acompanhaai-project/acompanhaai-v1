@@ -22,6 +22,13 @@ public class ResourceExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(ImportAlreadyCompletedException.class)
+    public ProblemDetail importAlreadyCompleted(ImportAlreadyCompletedException exception) {
+        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setProperty("code", "IMPORT_ALREADY_COMPLETED");
+        return problem;
+    }
+
     @ExceptionHandler(PasswordResetRateLimitException.class)
     public ResponseEntity<ProblemDetail> passwordResetLimit(PasswordResetRateLimitException exception) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
