@@ -2,8 +2,9 @@
 
 O [OpenAPI de importação](openapi-importacao.yaml) define as rotas planejadas.
 A V5 já contém a tabela de tarefas. A KAN-50 implementa a fila, o worker
-e a limpeza. As rotas e o processador de coleta e extração serão integrados
-nas próximas tarefas. A revisão e a confirmação fazem parte da KAN-55.
+e a limpeza. O `JobImportProcessor` faz a coleta da página e monta a proposta
+inicial. As rotas e a extração com IA serão integradas nas próximas tarefas.
+A revisão e a confirmação fazem parte da KAN-55.
 
 ## Máquina de estados
 
@@ -97,6 +98,32 @@ ou cancelar tarefa alheia, vencida ou inexistente retorna o mesmo `404`.
 5. Para cancelar, envie `DELETE /api/import-tasks/{id}` com sessão e CSRF.
    Ao receber `204`, interrompa o acompanhamento e descarte o estado da tela.
 
-O OpenAPI traz exemplos de aceitação, consulta e erros. Os limites de
-coleta, a estratégia de rede e as regras de extração serão tratados
-nas tarefas responsáveis pela implementação.
+O OpenAPI traz exemplos de aceitação, consulta e erros. As regras de
+extração com IA serão tratadas na tarefa responsável.
+
+## Coleta e proposta inicial
+
+- Só HTTP e HTTPS nas portas padrão, sem credenciais na URL.
+- Cada endereço resolvido é validado no momento da conexão. Loopback, redes
+  privadas, link-local, CGNAT, multicast, faixas reservadas e de documentação,
+  IPv6 local e formas com IPv4 embutido geram `FAILED` com `SOURCE_NOT_ALLOWED`.
+- Redirecionamentos são seguidos manualmente, até 5, e cada destino passa
+  pela mesma validação. Redirecionamento para login gera `SOURCE_REQUIRES_LOGIN`.
+- Limites: 5 s para conectar, 10 s sem dados, 20 s no total
+  (`app.import-collector.timeout`), terminando 5 s antes do fim da posse;
+  2 MiB de corpo após descompressão (`app.import-collector.max-bytes`);
+  100 cabeçalhos de até 16 KiB. Sem cookies, cache de autenticação ou
+  reaproveitamento de conexão.
+- Aceita `text/html`, `application/xhtml+xml` e `text/plain`. Outros tipos,
+  corpo acima do limite ou 404 geram `SOURCE_NO_USABLE_CONTENT`. 401 gera
+  `SOURCE_REQUIRES_LOGIN`; 403 e 429 geram `SOURCE_BLOCKED`. 5xx, timeout e
+  falha de conexão devolvem a tarefa à fila.
+- `JobPosting` em JSON-LD tem prioridade e preenche título, empresa,
+  descrição, localização, modalidade remota e salário. O salário só entra com
+  valor exato, moeda BRL e período explícito.
+- Sem dados estruturados, o texto visível (sem scripts, estilos e comentários)
+  vira a descrição proposta quando tiver pelo menos 200 caracteres. Abaixo
+  disso: campo de senha gera `SOURCE_REQUIRES_LOGIN`, página com scripts gera
+  `SOURCE_REQUIRES_JAVASCRIPT` e os demais casos, `SOURCE_NO_USABLE_CONTENT`.
+- Entrada TEXT vira a descrição proposta após normalizar espaços e remover
+  caracteres de controle, com limite de 30000 caracteres.
