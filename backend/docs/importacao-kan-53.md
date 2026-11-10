@@ -1,9 +1,9 @@
 # Importação assíncrona de vagas — KAN-53
 
 O [OpenAPI de importação](openapi-importacao.yaml) define as rotas planejadas.
-A V5 já contém a tabela de tarefas. As rotas, o worker e a rotina de
-limpeza serão implementados nas tarefas de importação. A revisão e a
-confirmação fazem parte da KAN-55.
+A V5 já contém a tabela de tarefas. A KAN-50 implementa a fila, o worker
+e a limpeza. As rotas e o processador de coleta e extração serão integrados
+nas próximas tarefas. A revisão e a confirmação fazem parte da KAN-55.
 
 ## Máquina de estados
 
@@ -26,9 +26,16 @@ durante a confirmação preserva a tarefa para revisão, enquanto vigente.
 
 ### Posse e concorrência
 
-- A reivindicação atualiza o estado, gera um novo token, registra o prazo
-  e incrementa as tentativas na mesma transação. Só uma instância obtém
-  a posse. O agendamento e os limites do worker ficam na KAN-50.
+- A reivindicação usa `FOR UPDATE SKIP LOCKED`. Ela atualiza o estado, gera
+  um novo token, registra o prazo e incrementa as tentativas na mesma
+  transação. Só uma instância obtém a posse de cada tarefa.
+- O worker executa uma tarefa por instância por vez e aguarda 5 segundos
+  entre ciclos. Sem um `ImportTaskProcessor`, mantém as tarefas na fila
+  e executa somente a recuperação e a limpeza. O processador deve
+  respeitar o prazo recebido. A posse dura até 2 minutos e termina antes
+  se a tarefa expirar.
+- São permitidas 3 tentativas. O reagendamento aguarda 15 segundos após
+  a primeira e 30 após a segunda.
 - A gravação do worker exige tarefa existente e vigente, estado
   `PROCESSING`, token correspondente e posse vigente. Se a atualização
   afetar zero linhas, descarta o resultado. Transições que saem de

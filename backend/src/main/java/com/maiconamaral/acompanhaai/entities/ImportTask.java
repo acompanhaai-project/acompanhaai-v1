@@ -77,14 +77,18 @@ public class ImportTask extends BaseEntity {
     @Column(name = "error_message", columnDefinition = "text")
     private String errorMessage;
 
-    protected ImportTask() {}
+    protected ImportTask() {
+    }
 
     public ImportTask(User user, ImportInputType inputType, String input) {
         this.user = Objects.requireNonNull(user);
         this.inputType = Objects.requireNonNull(inputType);
         Objects.requireNonNull(input);
-        if (inputType == ImportInputType.URL) this.sourceUrl = input;
-        else this.inputText = input;
+        if (inputType == ImportInputType.URL) {
+            this.sourceUrl = input;
+        } else {
+            this.inputText = input;
+        }
         this.status = ImportStatus.PENDING;
     }
 
