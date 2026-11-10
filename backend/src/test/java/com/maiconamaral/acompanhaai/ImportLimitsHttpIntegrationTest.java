@@ -29,9 +29,9 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest(
     properties = {
-        "app.import.limits.per-user-hourly=3",
-        "app.import.limits.per-user-active=2",
-        "app.import.limits.global-active=3"
+        "app.import-limits.per-user-hourly=3",
+        "app.import-limits.per-user-active=2",
+        "app.import-limits.global-active=3"
     }
 )
 @AutoConfigureMockMvc

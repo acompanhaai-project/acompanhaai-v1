@@ -5,7 +5,7 @@ A V5 já contém a tabela de tarefas. A KAN-50 implementa a fila, o worker
 e a limpeza. O `JobImportProcessor` faz a coleta da página e monta a proposta
 inicial. As rotas de criação, consulta e cancelamento estão disponíveis.
 A extração com IA será integrada nas próximas tarefas.
-A revisão e a confirmação fazem parte da KAN-55.
+A KAN-55 implementa a confirmação da proposta revisada.
 
 ## Máquina de estados
 
@@ -96,8 +96,25 @@ ou cancelar tarefa alheia, vencida ou inexistente retorna o mesmo `404`.
    fica ausente. Em `FAILED`, exiba o motivo e permita nova tentativa por
    ação explícita. Em `COMPLETED`, use `jobId` para identificar a vaga
    vinculada.
-5. Para cancelar, envie `DELETE /api/import-tasks/{id}` com sessão e CSRF.
+5. Para confirmar, envie `POST /api/import-tasks/{id}/confirm` com sessão,
+   CSRF e o mesmo corpo do cadastro manual (`job`, `status`, `appliedOn`,
+   `notes`), já com as correções. A resposta `201` traz a candidatura e
+   `Location`. Uma repetição retorna `200` com a mesma candidatura. Em
+   `409` ou `422`, a tarefa continua em revisão.
+6. Para cancelar, envie `DELETE /api/import-tasks/{id}` com sessão e CSRF.
    Ao receber `204`, interrompa o acompanhamento e descarte o estado da tela.
+
+## Confirmação
+
+- Bloqueia a conta e depois a tarefa, na mesma ordem do cadastro manual.
+  Confirmação e cancelamento disputam a mesma linha.
+- Reaproveita as validações do cadastro manual: campos, salário com BRL e
+  período, habilidades sem duplicidade e link único por conta. Um link já
+  cadastrado gera `409` e não altera a candidatura existente.
+- Na mesma transação, cria vaga, habilidades, candidatura e histórico,
+  marca a tarefa como `COMPLETED`, registra `reviewed_at` e descarta texto
+  coletado e proposta.
+- Em importação por URL, `job.sourceUrl` omitido assume a URL da tarefa.
 
 O OpenAPI traz exemplos de aceitação, consulta e erros. As regras de
 extração com IA serão tratadas na tarefa responsável.
@@ -138,9 +155,9 @@ extração com IA serão tratadas na tarefa responsável.
 | `app.import-worker.max-attempts` | `3` | Tentativas antes de `ATTEMPTS_EXHAUSTED`. |
 | `app.import-collector.timeout` | `20s` | Tempo total da coleta, limitado pela posse. |
 | `app.import-collector.max-bytes` | `2097152` | Corpo máximo da página após descompressão. |
-| `app.import.limits.per-user-hourly` | `30` | Tarefas criadas por conta na última hora. |
-| `app.import.limits.per-user-active` | `5` | Tarefas `PENDING` ou `PROCESSING` por conta. |
-| `app.import.limits.global-active` | `200` | Tarefas `PENDING` ou `PROCESSING` em toda a aplicação. |
+| `app.import-limits.per-user-hourly` | `30` | Tarefas criadas por conta na última hora. |
+| `app.import-limits.per-user-active` | `5` | Tarefas `PENDING` ou `PROCESSING` por conta. |
+| `app.import-limits.global-active` | `200` | Tarefas `PENDING` ou `PROCESSING` em toda a aplicação. |
 
 A criação bloqueia a linha da conta antes de contar, para que solicitações
 paralelas não ultrapassem as cotas. A entrada é validada antes das cotas.

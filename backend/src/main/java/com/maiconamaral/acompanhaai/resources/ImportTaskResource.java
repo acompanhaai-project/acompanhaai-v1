@@ -1,5 +1,7 @@
 package com.maiconamaral.acompanhaai.resources;
 
+import com.maiconamaral.acompanhaai.dto.ApplicationDTO;
+import com.maiconamaral.acompanhaai.dto.ApplicationInsertDTO;
 import com.maiconamaral.acompanhaai.dto.ImportTaskDTO;
 import com.maiconamaral.acompanhaai.dto.ImportTaskInputDTO;
 import com.maiconamaral.acompanhaai.security.UserPrincipal;
@@ -40,6 +42,24 @@ public class ImportTaskResource {
         @PathVariable Long id
     ) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.findById(principal.getId(), id));
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<ApplicationDTO> confirm(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable Long id,
+        @Valid @RequestBody ApplicationInsertDTO dto
+    ) {
+        var confirmation = service.confirm(principal.getId(), id, dto);
+        var application = confirmation.application();
+        if (!confirmation.created()) {
+            return ResponseEntity.ok(application);
+        }
+        var location = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("/api/applications/{id}")
+            .buildAndExpand(application.id())
+            .toUri();
+        return ResponseEntity.created(location).body(application);
     }
 
     @DeleteMapping("/{id}")

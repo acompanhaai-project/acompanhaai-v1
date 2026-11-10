@@ -1,13 +1,18 @@
 package com.maiconamaral.acompanhaai.services;
 
+import com.maiconamaral.acompanhaai.dto.ApplicationDTO;
+import com.maiconamaral.acompanhaai.dto.ApplicationInsertDTO;
 import com.maiconamaral.acompanhaai.dto.ImportTaskDTO;
 import com.maiconamaral.acompanhaai.dto.ImportTaskInputDTO;
+import com.maiconamaral.acompanhaai.dto.JobInputDTO;
 import com.maiconamaral.acompanhaai.entities.ImportTask;
 import com.maiconamaral.acompanhaai.entities.enums.ImportInputType;
 import com.maiconamaral.acompanhaai.entities.enums.ImportStatus;
+import com.maiconamaral.acompanhaai.repositories.ApplicationRepository;
 import com.maiconamaral.acompanhaai.repositories.ImportTaskRepository;
+import com.maiconamaral.acompanhaai.repositories.JobRepository;
 import com.maiconamaral.acompanhaai.repositories.UserRepository;
-import com.maiconamaral.acompanhaai.services.exceptions.ImportAlreadyCompletedException;
+import com.maiconamaral.acompanhaai.services.exceptions.ImportConflictException;
 import com.maiconamaral.acompanhaai.services.exceptions.ImportLimitException;
 import com.maiconamaral.acompanhaai.services.exceptions.InvalidDataException;
 import com.maiconamaral.acompanhaai.services.exceptions.ResourceNotFoundException;
@@ -27,6 +32,9 @@ public class ImportTaskService {
 
     private final ImportTaskRepository tasks;
     private final UserRepository users;
+    private final JobRepository jobs;
+    private final ApplicationRepository applications;
+    private final ApplicationService applicationService;
     private final JobUrlService urls;
     private final DatabaseClock clock;
     private final int hourlyLimit;
@@ -36,14 +44,20 @@ public class ImportTaskService {
     public ImportTaskService(
         ImportTaskRepository tasks,
         UserRepository users,
+        JobRepository jobs,
+        ApplicationRepository applications,
+        ApplicationService applicationService,
         JobUrlService urls,
         DatabaseClock clock,
-        @Value("${app.import.limits.per-user-hourly:30}") int hourlyLimit,
-        @Value("${app.import.limits.per-user-active:5}") int activeLimit,
-        @Value("${app.import.limits.global-active:200}") int globalActiveLimit
+        @Value("${app.import-limits.per-user-hourly:30}") int hourlyLimit,
+        @Value("${app.import-limits.per-user-active:5}") int activeLimit,
+        @Value("${app.import-limits.global-active:200}") int globalActiveLimit
     ) {
         this.tasks = tasks;
         this.users = users;
+        this.jobs = jobs;
+        this.applications = applications;
+        this.applicationService = applicationService;
         this.urls = urls;
         this.clock = clock;
         this.hourlyLimit = hourlyLimit;
@@ -71,9 +85,34 @@ public class ImportTaskService {
     public void delete(Long userId, Long id) {
         var task = tasks.lockActive(id, userId, cutoff()).orElseThrow(ImportTaskService::notFound);
         if (task.getStatus() == ImportStatus.COMPLETED) {
-            throw new ImportAlreadyCompletedException();
+            throw ImportConflictException.alreadyCompleted();
         }
         tasks.delete(task);
+    }
+
+    @Transactional
+    public Confirmation confirm(Long userId, Long id, ApplicationInsertDTO dto) {
+        // Mesma ordem de bloqueio da criação de candidaturas: conta e depois tarefa.
+        users.findByIdForUpdate(userId).orElseThrow(ImportTaskService::notFound);
+        var task = tasks.lockActive(id, userId, cutoff()).orElseThrow(ImportTaskService::notFound);
+        if (task.getStatus() == ImportStatus.COMPLETED) {
+            var existing = applications
+                .findByJob_IdAndUser_Id(task.getJob().getId(), userId)
+                .orElseThrow(ImportTaskService::notFound);
+            return new Confirmation(new ApplicationDTO(existing), false);
+        }
+        if (task.getStatus() != ImportStatus.READY_FOR_REVIEW) {
+            throw ImportConflictException.notReady();
+        }
+
+        var application = applicationService.insert(userId, withSourceUrl(dto, task));
+        task.setJob(jobs.getReferenceById(application.job().id()));
+        task.setStatus(ImportStatus.COMPLETED);
+        task.setReviewedAt(clock.now());
+        task.setCollectedText(null);
+        task.setExtractedData(null);
+        tasks.saveAndFlush(task);
+        return new Confirmation(application, true);
     }
 
     private String input(ImportTaskInputDTO dto) {
@@ -94,6 +133,27 @@ public class ImportTaskService {
             throw new InvalidDataException("Informe a descrição da vaga.");
         }
         return dto.text();
+    }
+
+    private static ApplicationInsertDTO withSourceUrl(ApplicationInsertDTO dto, ImportTask task) {
+        var job = dto.job();
+        if (job.sourceUrl() != null || task.getInputType() != ImportInputType.URL) {
+            return dto;
+        }
+        var revised = new JobInputDTO(
+            job.title(),
+            job.companyName(),
+            task.getSourceUrl(),
+            job.description(),
+            job.location(),
+            job.workMode(),
+            job.salary(),
+            job.salaryCurrency(),
+            job.salaryPeriod(),
+            job.hardSkills(),
+            job.softSkills()
+        );
+        return new ApplicationInsertDTO(revised, dto.status(), dto.appliedOn(), dto.notes());
     }
 
     private void checkLimits(long userId) {
@@ -125,4 +185,6 @@ public class ImportTaskService {
     private static ResourceNotFoundException notFound() {
         return new ResourceNotFoundException("Tarefa de importação não encontrada.");
     }
+
+    public record Confirmation(ApplicationDTO application, boolean created) {}
 }

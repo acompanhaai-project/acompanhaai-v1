@@ -40,8 +40,7 @@ app:
   import-collector:
     timeout: 20s
     max-bytes: 2097152
-  import:
-    limits:
-      per-user-hourly: 30
-      per-user-active: 5
-      global-active: 200
+  import-limits:
+    per-user-hourly: 30
+    per-user-active: 5
+    global-active: 200
