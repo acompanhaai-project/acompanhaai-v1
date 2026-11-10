@@ -124,8 +124,8 @@ pessoal daquela oportunidade.
 O worker roda na mesma aplicação. A requisição inicial, quando implementada,
 retorna após enfileirar a tarefa. A coleta e a extração acontecem separadamente.
 
-A entidade, a persistência e o controle da fila já existem. O processador
-de conteúdo e a confirmação da importação serão integrados nas próximas tarefas.
+A entidade, a persistência, o controle da fila e a coleta de páginas já existem.
+A extração com IA e a confirmação da importação serão integradas nas próximas tarefas.
 As transições, a retenção e o contrato HTTP planejado estão na
 [KAN-53](../backend/docs/importacao-kan-53.md).
 
