@@ -39,6 +39,7 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeDriverService;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -383,6 +384,115 @@ class AccessJourneysBrowserIT {
         assertEquals(List.of("APPLIED", "SCREENING", "INTERVIEW", "SAVED"), history.stream()
             .map(entry -> ((Map<?, ?>) entry).get("toStatus"))
             .toList());
+    }
+
+    @ParameterizedTest(name = "Gerenciar candidatura: {0}px, tema {1}")
+    @CsvSource({ "1440, light", "1440, dark", "390, light", "390, dark" })
+    void applicationLifecycle(int width, String theme) throws Exception {
+        openBrowser(width, theme);
+        String email = "qa.candidatura." + UUID.randomUUID() + "@example.test";
+        String url = "https://example.test/vagas/" + UUID.randomUUID();
+        String title = "Pessoa desenvolvedora Java";
+        register(email);
+
+        visit("/candidaturas/nova");
+        visible("#email");
+        assertEquals("/entrar", path());
+        signIn(email, INITIAL_PASSWORD);
+        heading("Nova candidatura");
+        assertEquals("/candidaturas/nova", path());
+        assertNoOverflow();
+
+        button("Salvar candidatura").click();
+        assertEquals("", applicationField("title").getDomProperty("value"));
+        assertEquals(Boolean.FALSE, script("return document.querySelector('form').checkValidity()"));
+        assertEquals("/candidaturas/nova", path());
+
+        fillApplicationField("title", title);
+        fillApplicationField("companyName", "Empresa Fictícia");
+        fillApplicationField("sourceUrl", url);
+        fillApplicationField("location", "Curitiba");
+        new Select(applicationField("workMode")).selectByVisibleText("Híbrido");
+        fillApplicationField("description", "Desenvolvimento de APIs");
+        fillApplicationField("hardSkills", "Java\nSpring Boot");
+        fillApplicationField("softSkills", "java");
+        fillApplicationField("notes", "Aguardar retorno");
+        button("Salvar candidatura").click();
+        message("main [role='alert']", "Não são permitidas habilidades duplicadas");
+        assertEquals(title, applicationField("title").getDomProperty("value"));
+
+        fillApplicationField("softSkills", "Comunicação");
+        button("Salvar candidatura").click();
+        heading(title);
+        message(".panel dl", "Aguardar retorno");
+        String detail = path();
+        assertTrue(detail.matches("/candidaturas/[1-9]\\d*"));
+        String resource = "/api" + detail.replace("/candidaturas", "/applications");
+        WebElement salaryValue = browser.findElement(By.xpath(
+            "//dt[normalize-space(.)='Salário']/following-sibling::dd"
+        ));
+        assertEquals("Não informado", salaryValue.getText());
+        assertNoOverflow();
+
+        browser.findElement(By.linkText("Voltar para candidaturas")).click();
+        heading("Minhas candidaturas");
+        wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Nova candidatura"))).click();
+        heading("Nova candidatura");
+        fillApplicationField("title", "Candidatura duplicada");
+        fillApplicationField("sourceUrl", url);
+        button("Salvar candidatura").click();
+        message("main [role='alert']", "Esta vaga já foi cadastrada com esse link.");
+        assertEquals(url, applicationField("sourceUrl").getDomProperty("value"));
+
+        browser.findElement(By.linkText("Cancelar")).click();
+        heading("Minhas candidaturas");
+        wait.until(ExpectedConditions.elementToBeClickable(By.linkText(title))).click();
+        heading(title);
+        button("Editar candidatura").click();
+        heading("Editar candidatura");
+        fillApplicationField("salary", "9500");
+        button("Salvar candidatura").click();
+        message("main [role='alert']", "Selecione o período do salário.");
+        new Select(applicationField("salaryPeriod")).selectByVisibleText("Por mês");
+        new Select(applicationField("status")).selectByVisibleText("Entrevista");
+        button("Salvar candidatura").click();
+        heading(title);
+        message("main [role='status']", "Candidatura atualizada.");
+        message(".panel dl", "R$ 9.500,00 por mês");
+        message("ol li:nth-child(2)", "Candidatura realizada → Entrevista");
+        assertEquals(2, browser.findElements(By.cssSelector("ol li")).size());
+        assertNoOverflow();
+
+        Map<?, ?> persisted = (Map<?, ?>) browserApi("GET", resource, null, 200);
+        Map<?, ?> job = (Map<?, ?>) persisted.get("job");
+        assertEquals("Empresa Fictícia", job.get("companyName"));
+        assertEquals("Curitiba", job.get("location"));
+        assertEquals("HYBRID", job.get("workMode"));
+        assertEquals("Desenvolvimento de APIs", job.get("description"));
+        assertEquals(List.of("Java", "Spring Boot"), job.get("hardSkills"));
+        assertEquals(List.of("Comunicação"), job.get("softSkills"));
+        assertEquals("BRL", job.get("salaryCurrency"));
+        assertEquals("MONTH", job.get("salaryPeriod"));
+        assertEquals("Aguardar retorno", persisted.get("notes"));
+
+        button("Excluir candidatura").click();
+        button("Manter candidatura").click();
+        browserApi("GET", resource, null, 200);
+        button("Excluir candidatura").click();
+        button("Confirmar exclusão").click();
+        heading("Minhas candidaturas");
+        message(".board-message", "Você ainda não tem candidaturas cadastradas.");
+        browserApi("GET", resource, null, 404);
+    }
+
+    private WebElement applicationField(String name) {
+        return visible("[formcontrolname='" + name + "']");
+    }
+
+    private void fillApplicationField(String name, String value) {
+        WebElement field = applicationField(name);
+        field.clear();
+        field.sendKeys(value);
     }
 
     private Map<?, ?> seedApplication(Map<String, ?> job, String status) {
