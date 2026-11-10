@@ -27,6 +27,7 @@ A foto é opcional. `GET /api/users/me` retorna `photoUrl: null` quando não hou
 | DELETE | `/api/applications/{id}`         | Exclui a candidatura, sua vaga e histórico; retorna 204                 |
 | POST   | `/api/import-tasks`              | Enfileira a importação por URL ou descrição; retorna 202 com `Location` |
 | GET    | `/api/import-tasks/{id}`         | Consulta estado, proposta ou motivo da falha da importação              |
+| POST   | `/api/import-tasks/{id}/confirm` | Confirma a proposta revisada e cria a candidatura; repetição retorna 200 |
 | DELETE | `/api/import-tasks/{id}`         | Cancela a importação; retorna 204 ou 409 se já confirmada               |
 
 As novas rotas exigem autenticação; operações de escrita também exigem CSRF. IDs de outros usuários retornam 404. Fotos: JPEG/PNG de até 2 MiB e 4 milhões de pixels. O servidor identifica o formato pelos bytes e regrava a imagem sem os metadados originais. Arquivo inválido retorna 422; requisição multipart acima do limite retorna 413.
