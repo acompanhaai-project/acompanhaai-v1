@@ -3,7 +3,7 @@ info:
   title: Acompanhaai - Importação de vagas
   version: 0.1.0
   description: |
-    Contrato definido pela KAN-53 e implementado nas KAN-48 e KAN-49.
+    Contrato definido pela KAN-53 e implementado nas KAN-48, KAN-49, KAN-52 e KAN-55.
     O contrato de sessão e CSRF é o mesmo da API de contas e candidaturas.
     Consulte importacao-kan-53.md para transições, retenção e integração.
 servers:
@@ -182,6 +182,59 @@ paths:
                 status: 409
                 code: IMPORT_ALREADY_COMPLETED
                 detail: A importação já foi confirmada.
+  /api/import-tasks/{id}/confirm:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer, format: int64, minimum: 1 }
+    post:
+      operationId: confirmImportTask
+      summary: Confirmar a proposta revisada e criar a candidatura
+      description: |
+        Aceita somente tarefas em READY_FOR_REVIEW. Cria vaga, habilidades, candidatura e
+        histórico e conclui a tarefa na mesma transação. Em importação por URL, `job.sourceUrl`
+        omitido assume a URL da tarefa. A repetição retorna 200 com a mesma candidatura, sem
+        aplicar o corpo. Falha de validação ou conflito preserva a tarefa para revisão.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "./openapi.yaml#/components/schemas/ApplicationInput" }
+      responses:
+        "201":
+          description: Candidatura criada e tarefa concluída.
+          headers:
+            Location:
+              required: true
+              schema: { type: string }
+              example: /api/applications/73
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Application" }
+        "200":
+          description: Tarefa já confirmada. Retorna a candidatura criada na primeira confirmação.
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Application" }
+        "401": { $ref: "./openapi.yaml#/components/responses/Unauthorized" }
+        "403": { $ref: "./openapi.yaml#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/ImportNotFound" }
+        "409":
+          description: |
+            Tarefa sem proposta pronta (IMPORT_NOT_READY) ou link já cadastrado
+            (JOB_URL_ALREADY_EXISTS, JOB_URL_HASH_COLLISION).
+          content:
+            application/problem+json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Problem" }
+              example:
+                status: 409
+                code: IMPORT_NOT_READY
+                detail: A importação ainda não tem uma proposta pronta para revisão.
+        "422": { $ref: "./openapi.yaml#/components/responses/ValidationError" }
 components:
   securitySchemes:
     sessionCookie: { $ref: "./openapi.yaml#/components/securitySchemes/sessionCookie" }
