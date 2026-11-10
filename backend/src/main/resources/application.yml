@@ -32,3 +32,15 @@ server:
   error:
     include-message: never
     include-stacktrace: never
+app:
+  import-worker:
+    poll-delay: 5s
+    lease: 2m
+    max-attempts: 3
+  import-collector:
+    timeout: 20s
+    max-bytes: 2097152
+  import-limits:
+    per-user-hourly: 30
+    per-user-active: 5
+    global-active: 200

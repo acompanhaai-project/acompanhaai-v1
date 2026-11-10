@@ -12,6 +12,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Optional<Application> findByIdAndUser_Id(Long id, Long userId);
 
     @EntityGraph(attributePaths = "job")
+    Optional<Application> findByJob_IdAndUser_Id(Long jobId, Long userId);
+
+    @EntityGraph(attributePaths = "job")
     @Query(
         """
         SELECT a FROM Application a JOIN a.job j

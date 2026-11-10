@@ -21,7 +21,7 @@ public class ImportWorker {
         this.processors = processors;
     }
 
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelayString = "${app.import-worker.poll-delay:5s}")
     void poll() {
         queue.recoverInterrupted();
         var processor = processors.getIfAvailable();

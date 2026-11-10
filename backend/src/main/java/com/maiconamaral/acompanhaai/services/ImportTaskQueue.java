@@ -8,6 +8,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,22 +19,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class ImportTaskQueue {
 
     static final Duration RETENTION = Duration.ofHours(24);
-    private static final Duration LEASE = Duration.ofMinutes(2);
-    private static final int MAX_ATTEMPTS = 3;
     static final int BATCH_SIZE = 100;
+    private static final Logger log = LoggerFactory.getLogger(ImportTaskQueue.class);
 
     private final ImportTaskRepository tasks;
     private final DatabaseClock clock;
+    private final Duration lease;
+    private final int maxAttempts;
 
-    public ImportTaskQueue(ImportTaskRepository tasks, DatabaseClock clock) {
+    @Autowired
+    public ImportTaskQueue(
+        ImportTaskRepository tasks,
+        DatabaseClock clock,
+        @Value("${app.import-worker.lease:2m}") Duration lease,
+        @Value("${app.import-worker.max-attempts:3}") int maxAttempts
+    ) {
+        if (lease.isNegative() || lease.isZero() || maxAttempts < 1) {
+            throw new IllegalArgumentException("Posse e tentativas da importação devem ser positivas.");
+        }
         this.tasks = tasks;
         this.clock = clock;
+        this.lease = lease;
+        this.maxAttempts = maxAttempts;
     }
 
     @Transactional
     public Optional<Claim> claim() {
         var now = databaseTime();
-        var pending = tasks.lockNext(now, now.minus(RETENTION), MAX_ATTEMPTS);
+        var pending = tasks.lockNext(now, now.minus(RETENTION), maxAttempts);
         if (pending.isEmpty()) {
             return Optional.empty();
         }
@@ -42,7 +58,7 @@ public class ImportTaskQueue {
             return Optional.empty();
         }
 
-        var deadline = startedAt.plus(LEASE);
+        var deadline = startedAt.plus(lease);
         if (expiresAt.isBefore(deadline)) {
             deadline = expiresAt;
         }
@@ -91,6 +107,7 @@ public class ImportTaskQueue {
             case ImportTaskProcessor.Failed failed -> fail(task, failed.reason());
             case ImportTaskProcessor.Retry retry -> requeueOrFail(task, now);
         }
+        record(task, now);
         release(task, now);
         return true;
     }
@@ -101,6 +118,7 @@ public class ImportTaskQueue {
         var interrupted = tasks.lockInterrupted(now, now.minus(RETENTION), BATCH_SIZE);
         for (var task : interrupted) {
             requeueOrFail(task, now);
+            record(task, now);
             release(task, now);
         }
         return interrupted.size();
@@ -122,7 +140,7 @@ public class ImportTaskQueue {
     }
 
     private void requeueOrFail(ImportTask task, Instant now) {
-        if (task.getAttemptCount() >= MAX_ATTEMPTS) {
+        if (task.getAttemptCount() >= maxAttempts) {
             task.setStatus(ImportStatus.FAILED);
             task.setNextAttemptAt(null);
             task.setErrorCode("ATTEMPTS_EXHAUSTED");
@@ -132,6 +150,19 @@ public class ImportTaskQueue {
 
         task.setStatus(ImportStatus.PENDING);
         task.setNextAttemptAt(now.plusSeconds(15L * task.getAttemptCount()));
+    }
+
+    private void record(ImportTask task, Instant now) {
+        // Somente identificadores e categorias: URL, descrição e proposta ficam fora dos logs.
+        log.info(
+            "importacao id={} tipo={} tentativa={} status={} codigo={} duracaoMs={}",
+            task.getId(),
+            task.getInputType(),
+            task.getAttemptCount(),
+            task.getStatus(),
+            task.getErrorCode() == null ? "-" : task.getErrorCode(),
+            task.getStartedAt() == null ? 0 : Duration.between(task.getStartedAt(), now).toMillis()
+        );
     }
 
     private void release(ImportTask task, Instant now) {

@@ -22,11 +22,20 @@ public class ResourceExceptionHandler {
         return problem;
     }
 
-    @ExceptionHandler(ImportAlreadyCompletedException.class)
-    public ProblemDetail importAlreadyCompleted(ImportAlreadyCompletedException exception) {
+    @ExceptionHandler(ImportConflictException.class)
+    public ProblemDetail importConflict(ImportConflictException exception) {
         var problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
-        problem.setProperty("code", "IMPORT_ALREADY_COMPLETED");
+        problem.setProperty("code", exception.getCode());
         return problem;
+    }
+
+    @ExceptionHandler(ImportLimitException.class)
+    public ResponseEntity<ProblemDetail> importLimit(ImportLimitException exception) {
+        var problem = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
+        problem.setProperty("code", exception.getCode());
+        return ResponseEntity.status(exception.getStatus())
+            .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.getRetryAfter()))
+            .body(problem);
     }
 
     @ExceptionHandler(PasswordResetRateLimitException.class)
