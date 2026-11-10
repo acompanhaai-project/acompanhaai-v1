@@ -1,10 +1,12 @@
 package com.maiconamaral.acompanhaai.repositories;
 
 import com.maiconamaral.acompanhaai.entities.ImportTask;
+import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -50,4 +52,19 @@ public interface ImportTaskRepository extends JpaRepository<ImportTask, Long> {
         LIMIT :batchSize FOR UPDATE SKIP LOCKED
         """, nativeQuery = true)
     List<Long> lockExpired(@Param("cutoff") Instant cutoff, @Param("batchSize") int batchSize);
+
+    @Query("select t from ImportTask t where t.id = :id and t.user.id = :userId and t.createdAt > :cutoff")
+    Optional<ImportTask> findActive(
+        @Param("id") long id,
+        @Param("userId") long userId,
+        @Param("cutoff") Instant cutoff
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from ImportTask t where t.id = :id and t.user.id = :userId and t.createdAt > :cutoff")
+    Optional<ImportTask> lockActive(
+        @Param("id") long id,
+        @Param("userId") long userId,
+        @Param("cutoff") Instant cutoff
+    );
 }

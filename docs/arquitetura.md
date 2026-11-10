@@ -18,8 +18,8 @@ Fluxo de uma requisição:
 
 Frontend → Resource → Service → Repository → PostgreSQL
 
-O frontend e a importação ainda estão planejados. O backend já
-possui autenticação, perfil e CRUD manual de candidaturas.
+O backend possui autenticação, perfil, CRUD manual de candidaturas e
+importação assíncrona com coleta de páginas. A extração com IA está planejada.
 
 ## Decisão 1 — Backend monolítico em camadas
 
@@ -125,8 +125,9 @@ O worker roda na mesma aplicação. A requisição inicial, quando implementada,
 retorna após enfileirar a tarefa. A coleta e a extração acontecem separadamente.
 
 A entidade, a persistência, o controle da fila e a coleta de páginas já existem.
+As rotas de criação, consulta e cancelamento também estão disponíveis.
 A extração com IA e a confirmação da importação serão integradas nas próximas tarefas.
-As transições, a retenção e o contrato HTTP planejado estão na
+As transições, a retenção e o contrato HTTP estão na
 [KAN-53](../backend/docs/importacao-kan-53.md).
 
 ## Decisão 3 — Autenticação por sessão

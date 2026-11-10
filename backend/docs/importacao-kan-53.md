@@ -1,9 +1,10 @@
 # Importação assíncrona de vagas — KAN-53
 
-O [OpenAPI de importação](openapi-importacao.yaml) define as rotas planejadas.
+O [OpenAPI de importação](openapi-importacao.yaml) define as rotas.
 A V5 já contém a tabela de tarefas. A KAN-50 implementa a fila, o worker
 e a limpeza. O `JobImportProcessor` faz a coleta da página e monta a proposta
-inicial. As rotas e a extração com IA serão integradas nas próximas tarefas.
+inicial. As rotas de criação, consulta e cancelamento estão disponíveis.
+A extração com IA será integrada nas próximas tarefas.
 A revisão e a confirmação fazem parte da KAN-55.
 
 ## Máquina de estados

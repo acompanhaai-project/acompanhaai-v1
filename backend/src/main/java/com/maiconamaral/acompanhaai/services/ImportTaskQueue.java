@@ -6,29 +6,25 @@ import com.maiconamaral.acompanhaai.entities.enums.ImportStatus;
 import com.maiconamaral.acompanhaai.repositories.ImportTaskRepository;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.jdbc.core.ConnectionCallback;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ImportTaskQueue {
 
-    private static final Duration RETENTION = Duration.ofHours(24);
+    static final Duration RETENTION = Duration.ofHours(24);
     private static final Duration LEASE = Duration.ofMinutes(2);
     private static final int MAX_ATTEMPTS = 3;
     static final int BATCH_SIZE = 100;
 
     private final ImportTaskRepository tasks;
-    private final JdbcTemplate jdbc;
+    private final DatabaseClock clock;
 
-    public ImportTaskQueue(ImportTaskRepository tasks, JdbcTemplate jdbc) {
+    public ImportTaskQueue(ImportTaskRepository tasks, DatabaseClock clock) {
         this.tasks = tasks;
-        this.jdbc = jdbc;
+        this.clock = clock;
     }
 
     @Transactional
@@ -145,19 +141,7 @@ public class ImportTaskQueue {
     }
 
     private Instant databaseTime() {
-        return Objects.requireNonNull(jdbc.execute((ConnectionCallback<Instant>) connection -> {
-            // No PostgreSQL, CURRENT_TIMESTAMP permanece fixo enquanto a transação aguarda um lock.
-            String expression = "PostgreSQL".equals(connection.getMetaData().getDatabaseProductName())
-                ? "clock_timestamp()"
-                : "CURRENT_TIMESTAMP";
-            try (
-                var statement = connection.createStatement();
-                var result = statement.executeQuery("SELECT " + expression)
-            ) {
-                result.next();
-                return result.getObject(1, OffsetDateTime.class).toInstant();
-            }
-        }));
+        return clock.now();
     }
 
     public record Claim(

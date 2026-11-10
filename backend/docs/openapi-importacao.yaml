@@ -3,7 +3,7 @@ info:
   title: Acompanhaai - Importação de vagas
   version: 0.1.0
   description: |
-    Contrato planejado pela KAN-53. As rotas ainda não estão disponíveis.
+    Contrato definido pela KAN-53 e implementado nas KAN-48 e KAN-49.
     O contrato de sessão e CSRF é o mesmo da API de contas e candidaturas.
     Consulte importacao-kan-53.md para transições, retenção e integração.
 servers:
