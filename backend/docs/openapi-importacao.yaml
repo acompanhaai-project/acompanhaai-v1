@@ -1,0 +1,255 @@
+openapi: 3.0.3
+info:
+  title: Acompanhaai - Importação de vagas
+  version: 0.1.0
+  description: |
+    Contrato planejado pela KAN-53. As rotas ainda não estão disponíveis.
+    O contrato de sessão e CSRF é o mesmo da API de contas e candidaturas.
+    Consulte importacao-kan-53.md para transições, retenção e integração.
+servers:
+  - url: http://localhost:8080
+    description: Ambiente de desenvolvimento previsto
+security:
+  - sessionCookie: []
+paths:
+  /api/import-tasks:
+    post:
+      operationId: createImportTask
+      summary: Solicitar importação por URL ou descrição
+      description: |
+        Enfileira uma tarefa para a conta autenticada. Uma descrição colada pode
+        substituir a leitura de uma página bloqueada por meio de uma nova tarefa TEXT.
+        Cada POST aceito cria uma tarefa. Evite repetir automaticamente após falha de rede.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - { $ref: "#/components/schemas/UrlImportInput" }
+                - { $ref: "#/components/schemas/TextImportInput" }
+            examples:
+              url:
+                value: { inputType: URL, url: "https://example.test/vagas/java" }
+              text:
+                value: { inputType: TEXT, text: "Pessoa desenvolvedora Java. Empresa Exemplo. Trabalho remoto." }
+      responses:
+        "202":
+          description: Tarefa criada em PENDING. Use Location para acompanhar.
+          headers:
+            Location:
+              required: true
+              schema: { type: string }
+              example: /api/import-tasks/41
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportTask" }
+              example:
+                id: 41
+                inputType: URL
+                status: PENDING
+                expiresAt: "2026-11-11T13:00:00Z"
+        "400": { $ref: "./openapi.yaml#/components/responses/BadRequest" }
+        "401": { $ref: "./openapi.yaml#/components/responses/Unauthorized" }
+        "403": { $ref: "./openapi.yaml#/components/responses/Forbidden" }
+        "422":
+          description: Entrada inválida, vazia ou acima do limite.
+          content:
+            application/problem+json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Problem" }
+              example:
+                status: 422
+                detail: Confira os dados enviados.
+                errors: [{ field: text, message: "Informe uma descrição com até 30000 caracteres." }]
+  /api/import-tasks/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer, format: int64, minimum: 1 }
+    get:
+      operationId: getImportTask
+      summary: Acompanhar uma tarefa da própria conta
+      description: |
+        Continue consultando enquanto o estado for PENDING ou PROCESSING.
+        Em NEEDS_INPUT, mostre a orientação para colar a descrição.
+        Em FAILED, mostre o motivo e permita iniciar outra tarefa.
+      responses:
+        "200":
+          description: Estado atual, com proposta, motivo ou vínculo quando aplicável.
+          headers:
+            Cache-Control:
+              required: true
+              schema: { type: string, enum: [no-store] }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportTask" }
+              examples:
+                processing:
+                  value:
+                    id: 41
+                    inputType: URL
+                    status: PROCESSING
+                    expiresAt: "2026-11-11T13:00:00Z"
+                needsInput:
+                  value:
+                    id: 41
+                    inputType: URL
+                    status: NEEDS_INPUT
+                    expiresAt: "2026-11-11T13:00:00Z"
+                    failure:
+                      code: SOURCE_REQUIRES_LOGIN
+                      message: A página pede login. Cole a descrição para continuar.
+                readyForReview:
+                  value:
+                    id: 42
+                    inputType: TEXT
+                    status: READY_FOR_REVIEW
+                    expiresAt: "2026-11-11T13:05:00Z"
+                    result:
+                      title: Pessoa desenvolvedora Java
+                      companyName: Empresa Exemplo
+                      workMode: REMOTE
+                      hardSkills: [Java]
+                failed:
+                  value:
+                    id: 43
+                    inputType: URL
+                    status: FAILED
+                    expiresAt: "2026-11-11T13:10:00Z"
+                    failure:
+                      code: ATTEMPTS_EXHAUSTED
+                      message: O processamento não terminou após novas tentativas.
+                completed:
+                  value:
+                    id: 42
+                    inputType: TEXT
+                    status: COMPLETED
+                    expiresAt: "2026-11-11T13:05:00Z"
+                    jobId: 73
+        "401": { $ref: "./openapi.yaml#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/ImportNotFound" }
+    delete:
+      operationId: cancelImportTask
+      summary: Cancelar e excluir uma tarefa da própria conta
+      description: |
+        Exclui a tarefa enquanto estiver disponível e não confirmada.
+        A primeira exclusão retorna 204. Repetições retornam 404.
+      security:
+        - sessionCookie: []
+          csrfHeader: []
+      responses:
+        "204":
+          description: Tarefa excluída. Uma execução em curso não pode gravar o resultado.
+        "401": { $ref: "./openapi.yaml#/components/responses/Unauthorized" }
+        "403": { $ref: "./openapi.yaml#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/ImportNotFound" }
+        "409":
+          description: A tarefa já foi confirmada. A vaga segue seu próprio ciclo de vida.
+          content:
+            application/problem+json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Problem" }
+              example:
+                status: 409
+                code: IMPORT_ALREADY_COMPLETED
+                detail: A importação já foi confirmada.
+components:
+  securitySchemes:
+    sessionCookie: { $ref: "./openapi.yaml#/components/securitySchemes/sessionCookie" }
+    csrfHeader: { $ref: "./openapi.yaml#/components/securitySchemes/csrfHeader" }
+  responses:
+    ImportNotFound:
+      description: Tarefa inexistente, expirada, excluída ou pertencente a outra conta.
+      content:
+        application/problem+json:
+          schema: { $ref: "./openapi.yaml#/components/schemas/Problem" }
+          example: { status: 404, detail: Tarefa de importação não encontrada. }
+  schemas:
+    UrlImportInput:
+      type: object
+      additionalProperties: false
+      required: [inputType, url]
+      properties:
+        inputType: { type: string, enum: [URL] }
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
+          pattern: '^[Hh][Tt][Tt][Pp][Ss]?://[^\s]+$'
+          description: URL absoluta HTTP ou HTTPS com host válido e sem credenciais embutidas.
+    TextImportInput:
+      type: object
+      additionalProperties: false
+      required: [inputType, text]
+      properties:
+        inputType: { type: string, enum: [TEXT] }
+        text:
+          type: string
+          minLength: 1
+          maxLength: 30000
+          pattern: '\S'
+          description: Descrição com ao menos um caractere que não seja espaço em branco.
+    ImportTask:
+      type: object
+      required: [id, inputType, status, expiresAt]
+      properties:
+        id: { type: integer, format: int64, minimum: 1 }
+        inputType: { type: string, enum: [URL, TEXT] }
+        status:
+          type: string
+          enum: [PENDING, PROCESSING, READY_FOR_REVIEW, NEEDS_INPUT, FAILED, COMPLETED]
+        expiresAt:
+          type: string
+          format: date-time
+          description: Momento a partir do qual a consulta retorna 404.
+        failure:
+          $ref: "#/components/schemas/ImportFailure"
+        result:
+          $ref: "#/components/schemas/ImportProposal"
+        jobId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID da vaga vinculada. Presente somente em COMPLETED.
+    ImportFailure:
+      type: object
+      description: Presente em NEEDS_INPUT ou FAILED. A mensagem é adequada para exibição.
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Categoria estável da falha. Novas categorias podem ser adicionadas.
+        message: { type: string }
+    ImportProposal:
+      type: object
+      description: |
+        Presente somente em READY_FOR_REVIEW. Omita campos sem evidência.
+        Antes de confirmar, valide a versão revisada pelo contrato JobInput da vaga manual.
+      properties:
+        title: { type: string, maxLength: 255 }
+        companyName: { type: string, maxLength: 255 }
+        description: { type: string, maxLength: 30000 }
+        location: { type: string, maxLength: 255 }
+        workMode: { type: string, enum: [REMOTE, HYBRID, ONSITE] }
+        salary:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 9999999999999.99
+          multipleOf: 0.01
+          description: Valor declarado em BRL. Presente somente junto com moeda e período.
+        salaryCurrency: { type: string, enum: [BRL] }
+        salaryPeriod: { type: string, enum: [HOUR, DAY, WEEK, MONTH, YEAR] }
+        hardSkills:
+          type: array
+          maxItems: 50
+          uniqueItems: true
+          items: { type: string, minLength: 1, maxLength: 150 }
+        softSkills:
+          type: array
+          maxItems: 50
+          uniqueItems: true
+          items: { type: string, minLength: 1, maxLength: 150 }

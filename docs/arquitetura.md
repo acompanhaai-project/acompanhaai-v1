@@ -127,6 +127,8 @@ a coleta e a extração.
 
 A entidade e sua estrutura de persistência já existem.
 O worker e a confirmação da importação ainda serão implementados.
+As transições, a retenção e o contrato HTTP planejado estão na
+[KAN-53](../backend/docs/importacao-kan-53.md).
 
 ## Decisão 3 — Autenticação por sessão
 
