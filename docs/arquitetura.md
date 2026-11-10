@@ -121,12 +121,11 @@ ImportTask acompanha o processamento; Job guarda os dados
 da oportunidade; Application registra o acompanhamento
 pessoal daquela oportunidade.
 
-O processamento está planejado para um worker na mesma
-aplicação, sem manter a requisição inicial aguardando
-a coleta e a extração.
+O worker roda na mesma aplicação. A requisição inicial, quando implementada,
+retorna após enfileirar a tarefa. A coleta e a extração acontecem separadamente.
 
-A entidade e sua estrutura de persistência já existem.
-O worker e a confirmação da importação ainda serão implementados.
+A entidade, a persistência e o controle da fila já existem. O processador
+de conteúdo e a confirmação da importação serão integrados nas próximas tarefas.
 As transições, a retenção e o contrato HTTP planejado estão na
 [KAN-53](../backend/docs/importacao-kan-53.md).
 
@@ -204,8 +203,8 @@ sem manter a requisição inicial esperando pela conclusão.
 
 ### Consequências
 
-O worker precisará controlar concorrência, expiração da posse,
-tentativas e recuperação após falhas.
+O worker controla concorrência, expiração da posse, tentativas e
+recuperação após falhas. A KAN-50 define esses limites por instância.
 
 A coleta terá limites de tempo e tamanho e proteção contra
 acesso a endereços internos.

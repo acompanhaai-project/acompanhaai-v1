@@ -9,6 +9,8 @@ spring:
   flyway:
     locations: classpath:db/migration
 app:
+  import-worker:
+    scheduling-enabled: false
   password-reset:
     limits:
       per-ip: 1000
