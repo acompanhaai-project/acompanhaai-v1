@@ -29,6 +29,15 @@ public class ResourceExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(ImportLimitException.class)
+    public ResponseEntity<ProblemDetail> importLimit(ImportLimitException exception) {
+        var problem = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
+        problem.setProperty("code", exception.getCode());
+        return ResponseEntity.status(exception.getStatus())
+            .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.getRetryAfter()))
+            .body(problem);
+    }
+
     @ExceptionHandler(PasswordResetRateLimitException.class)
     public ResponseEntity<ProblemDetail> passwordResetLimit(PasswordResetRateLimitException exception) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)

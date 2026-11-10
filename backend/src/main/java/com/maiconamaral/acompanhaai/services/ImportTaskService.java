@@ -8,36 +8,56 @@ import com.maiconamaral.acompanhaai.entities.enums.ImportStatus;
 import com.maiconamaral.acompanhaai.repositories.ImportTaskRepository;
 import com.maiconamaral.acompanhaai.repositories.UserRepository;
 import com.maiconamaral.acompanhaai.services.exceptions.ImportAlreadyCompletedException;
+import com.maiconamaral.acompanhaai.services.exceptions.ImportLimitException;
 import com.maiconamaral.acompanhaai.services.exceptions.InvalidDataException;
 import com.maiconamaral.acompanhaai.services.exceptions.ResourceNotFoundException;
+import java.time.Duration;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ImportTaskService {
 
+    private static final Duration QUOTA_WINDOW = Duration.ofHours(1);
+    private static final Logger log = LoggerFactory.getLogger(ImportTaskService.class);
+
     private final ImportTaskRepository tasks;
     private final UserRepository users;
     private final JobUrlService urls;
     private final DatabaseClock clock;
+    private final int hourlyLimit;
+    private final int activeLimit;
+    private final int globalActiveLimit;
 
     public ImportTaskService(
         ImportTaskRepository tasks,
         UserRepository users,
         JobUrlService urls,
-        DatabaseClock clock
+        DatabaseClock clock,
+        @Value("${app.import.limits.per-user-hourly:30}") int hourlyLimit,
+        @Value("${app.import.limits.per-user-active:5}") int activeLimit,
+        @Value("${app.import.limits.global-active:200}") int globalActiveLimit
     ) {
         this.tasks = tasks;
         this.users = users;
         this.urls = urls;
         this.clock = clock;
+        this.hourlyLimit = hourlyLimit;
+        this.activeLimit = activeLimit;
+        this.globalActiveLimit = globalActiveLimit;
     }
 
     @Transactional
     public ImportTaskDTO insert(Long userId, ImportTaskInputDTO dto) {
-        var user = users.getReferenceById(userId);
-        var task = tasks.saveAndFlush(new ImportTask(user, dto.inputType(), input(dto)));
+        var input = input(dto);
+        // Serializa as solicitações da conta para que as cotas não sejam ultrapassadas em paralelo.
+        var user = users.findByIdForUpdate(userId).orElseThrow(ImportTaskService::notFound);
+        checkLimits(userId);
+        var task = tasks.saveAndFlush(new ImportTask(user, dto.inputType(), input));
         return new ImportTaskDTO(task, ImportTaskQueue.RETENTION);
     }
 
@@ -74,6 +94,28 @@ public class ImportTaskService {
             throw new InvalidDataException("Informe a descrição da vaga.");
         }
         return dto.text();
+    }
+
+    private void checkLimits(long userId) {
+        var now = clock.now();
+        var cutoff = now.minus(ImportTaskQueue.RETENTION);
+        var windowStart = now.minus(QUOTA_WINDOW);
+        if (tasks.countCreatedSince(userId, windowStart) >= hourlyLimit) {
+            var oldest = tasks.oldestCreatedSince(userId, windowStart).orElse(now);
+            var wait = Math.max(1, Duration.between(now, oldest.plus(QUOTA_WINDOW)).toSeconds());
+            reject(ImportLimitException.hourlyQuota(wait));
+        }
+        if (tasks.countActiveByUser(userId, cutoff) >= activeLimit) {
+            reject(ImportLimitException.activeLimit());
+        }
+        if (tasks.countActive(cutoff) >= globalActiveLimit) {
+            reject(ImportLimitException.overloaded());
+        }
+    }
+
+    private static void reject(ImportLimitException limit) {
+        log.info("importacao recusada codigo={}", limit.getCode());
+        throw limit;
     }
 
     private Instant cutoff() {

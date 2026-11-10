@@ -55,6 +55,32 @@ paths:
         "400": { $ref: "./openapi.yaml#/components/responses/BadRequest" }
         "401": { $ref: "./openapi.yaml#/components/responses/Unauthorized" }
         "403": { $ref: "./openapi.yaml#/components/responses/Forbidden" }
+        "429":
+          description: Cota por hora (IMPORT_QUOTA_EXCEEDED) ou de tarefas ativas da conta (IMPORT_ACTIVE_LIMIT).
+          headers:
+            Retry-After:
+              required: true
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/problem+json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Problem" }
+              example:
+                status: 429
+                code: IMPORT_ACTIVE_LIMIT
+                detail: Aguarde o processamento das importações em andamento.
+        "503":
+          description: Fila de importação sobrecarregada. O cadastro manual continua disponível.
+          headers:
+            Retry-After:
+              required: true
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/problem+json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/Problem" }
+              example:
+                status: 503
+                code: IMPORT_OVERLOADED
+                detail: A importação está temporariamente sobrecarregada. Cadastre a vaga manualmente ou tente mais tarde.
         "422":
           description: Entrada inválida, vazia ou acima do limite.
           content:

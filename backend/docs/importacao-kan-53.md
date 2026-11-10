@@ -128,3 +128,29 @@ extração com IA serão tratadas na tarefa responsável.
   `SOURCE_REQUIRES_JAVASCRIPT` e os demais casos, `SOURCE_NO_USABLE_CONTENT`.
 - Entrada TEXT vira a descrição proposta após normalizar espaços e remover
   caracteres de controle, com limite de 30000 caracteres.
+
+## Limites e observabilidade
+
+| Propriedade | Padrão | Efeito |
+| --- | --- | --- |
+| `app.import-worker.poll-delay` | `5s` | Intervalo entre ciclos do worker. Cada instância processa uma tarefa por vez. |
+| `app.import-worker.lease` | `2m` | Prazo de posse de cada tentativa. |
+| `app.import-worker.max-attempts` | `3` | Tentativas antes de `ATTEMPTS_EXHAUSTED`. |
+| `app.import-collector.timeout` | `20s` | Tempo total da coleta, limitado pela posse. |
+| `app.import-collector.max-bytes` | `2097152` | Corpo máximo da página após descompressão. |
+| `app.import.limits.per-user-hourly` | `30` | Tarefas criadas por conta na última hora. |
+| `app.import.limits.per-user-active` | `5` | Tarefas `PENDING` ou `PROCESSING` por conta. |
+| `app.import.limits.global-active` | `200` | Tarefas `PENDING` ou `PROCESSING` em toda a aplicação. |
+
+A criação bloqueia a linha da conta antes de contar, para que solicitações
+paralelas não ultrapassem as cotas. A entrada é validada antes das cotas.
+
+- Cota por hora: `429` com `IMPORT_QUOTA_EXCEEDED` e `Retry-After` até a
+  tarefa mais antiga sair da janela.
+- Tarefas ativas da conta: `429` com `IMPORT_ACTIVE_LIMIT` e `Retry-After: 30`.
+- Fila global cheia: `503` com `IMPORT_OVERLOADED` e `Retry-After: 60`. O
+  cadastro manual continua disponível.
+
+Cada tentativa encerrada registra uma linha `importacao id tipo tentativa
+status codigo duracaoMs`, e cada recusa registra `importacao recusada codigo`.
+URL, descrição, texto coletado, proposta e dados da conta não entram nos logs.

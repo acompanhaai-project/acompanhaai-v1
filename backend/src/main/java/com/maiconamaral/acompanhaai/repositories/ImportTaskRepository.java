@@ -67,4 +67,26 @@ public interface ImportTaskRepository extends JpaRepository<ImportTask, Long> {
         @Param("userId") long userId,
         @Param("cutoff") Instant cutoff
     );
+
+    @Query("select count(t) from ImportTask t where t.user.id = :userId and t.createdAt > :since")
+    long countCreatedSince(@Param("userId") long userId, @Param("since") Instant since);
+
+    @Query("select min(t.createdAt) from ImportTask t where t.user.id = :userId and t.createdAt > :since")
+    Optional<Instant> oldestCreatedSince(@Param("userId") long userId, @Param("since") Instant since);
+
+    @Query("""
+        select count(t) from ImportTask t
+        where t.user.id = :userId and t.createdAt > :cutoff
+          and t.status in (com.maiconamaral.acompanhaai.entities.enums.ImportStatus.PENDING,
+                           com.maiconamaral.acompanhaai.entities.enums.ImportStatus.PROCESSING)
+        """)
+    long countActiveByUser(@Param("userId") long userId, @Param("cutoff") Instant cutoff);
+
+    @Query("""
+        select count(t) from ImportTask t
+        where t.createdAt > :cutoff
+          and t.status in (com.maiconamaral.acompanhaai.entities.enums.ImportStatus.PENDING,
+                           com.maiconamaral.acompanhaai.entities.enums.ImportStatus.PROCESSING)
+        """)
+    long countActive(@Param("cutoff") Instant cutoff);
 }
