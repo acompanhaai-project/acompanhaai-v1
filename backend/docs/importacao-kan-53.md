@@ -196,9 +196,9 @@ Para o Ollama, instale um modelo (`ollama pull llama3.2`) e use
 | `app.import-worker.max-attempts` | `3` | Tentativas antes de `ATTEMPTS_EXHAUSTED`. |
 | `app.import-collector.timeout` | `20s` | Tempo total da coleta, limitado pela posse. |
 | `app.import-collector.max-bytes` | `2097152` | Corpo máximo da página após descompressão. |
-| `app.import.limits.per-user-hourly` | `30` | Tarefas criadas por conta na última hora. |
-| `app.import.limits.per-user-active` | `5` | Tarefas `PENDING` ou `PROCESSING` por conta. |
-| `app.import.limits.global-active` | `200` | Tarefas `PENDING` ou `PROCESSING` em toda a aplicação. |
+| `app.import-limits.per-user-hourly` | `30` | Tarefas criadas por conta na última hora. |
+| `app.import-limits.per-user-active` | `5` | Tarefas `PENDING` ou `PROCESSING` por conta. |
+| `app.import-limits.global-active` | `200` | Tarefas `PENDING` ou `PROCESSING` em toda a aplicação. |
 
 A criação bloqueia a linha da conta antes de contar, para que solicitações
 paralelas não ultrapassem as cotas. A entrada é validada antes das cotas.

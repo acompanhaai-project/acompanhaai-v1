@@ -53,8 +53,7 @@ app:
     ollama:
       base-url: http://localhost:11434
       model: llama3.2
-  import:
-    limits:
-      per-user-hourly: 30
-      per-user-active: 5
-      global-active: 200
+  import-limits:
+    per-user-hourly: 30
+    per-user-active: 5
+    global-active: 200
