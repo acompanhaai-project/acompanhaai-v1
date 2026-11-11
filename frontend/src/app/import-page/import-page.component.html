@@ -107,54 +107,161 @@
     }
 
     @case ('ready') {
-      @if (task()?.result; as result) {
-        <section class="panel" aria-labelledby="ready-title">
-          <h2 id="ready-title">Dados encontrados</h2>
-          <p role="status">Confira as informações antes de salvar a vaga.</p>
-          <dl class="summary">
-            <div>
-              <dt>Título</dt>
-              <dd>{{ result.title || 'Não encontrado' }}</dd>
-            </div>
-            <div>
-              <dt>Empresa</dt>
-              <dd>{{ result.companyName || 'Não encontrada' }}</dd>
-            </div>
-            @if (result.location) {
-              <div>
-                <dt>Localização</dt>
-                <dd>{{ result.location }}</dd>
-              </div>
+      <form class="panel" [formGroup]="review" (ngSubmit)="save()" aria-labelledby="ready-title">
+        <h2 id="ready-title">Revise os dados da vaga</h2>
+        <p role="status">
+          Confira e complete as informações. Nada é salvo até você escolher uma das opções abaixo.
+        </p>
+
+        <fieldset [disabled]="busy()">
+          <legend class="sr-only">Vaga</legend>
+          <div class="grid">
+            <label class="wide">
+              <span>
+                Título
+                @if (isMissing('title')) {
+                  <span class="missing">Não encontrado</span>
+                }
+              </span>
+              <input formControlName="title" maxlength="255" required />
+            </label>
+            <label>
+              <span>
+                Empresa
+                @if (isMissing('companyName')) {
+                  <span class="missing">Não encontrada</span>
+                }
+              </span>
+              <input formControlName="companyName" maxlength="255" />
+            </label>
+            <label>
+              <span>
+                Localização
+                @if (isMissing('location')) {
+                  <span class="missing">Não encontrada</span>
+                }
+              </span>
+              <input formControlName="location" maxlength="255" />
+            </label>
+            <label>
+              <span>
+                Modelo de trabalho
+                @if (isMissing('workMode')) {
+                  <span class="missing">Não encontrado</span>
+                }
+              </span>
+              <select formControlName="workMode">
+                <option [ngValue]="null">Não informado</option>
+                @for (mode of workModeOptions; track mode) {
+                  <option [ngValue]="mode">{{ workModes[mode] }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Link da vaga
+              <input
+                formControlName="sourceUrl"
+                type="url"
+                maxlength="2048"
+                aria-describedby="link-hint"
+              />
+            </label>
+            @if (task()?.inputType === 'URL') {
+              <p id="link-hint" class="wide hint">
+                Se ficar vazio, a vaga é salva com o link importado.
+              </p>
             }
-            @if (result.workMode) {
-              <div>
-                <dt>Modalidade</dt>
-                <dd>{{ workModes[result.workMode] }}</dd>
-              </div>
-            }
-            @if (result.salary && result.salaryPeriod) {
-              <div>
-                <dt>Salário</dt>
-                <dd>
-                  R$ {{ result.salary | number: '1.2-2' : 'pt' }} por
-                  {{ periods[result.salaryPeriod] }}
-                </dd>
-              </div>
-            }
-            @if (result.description) {
-              <div class="wide">
-                <dt>Descrição</dt>
-                <dd class="description">{{ excerpt(result.description) }}</dd>
-              </div>
-            }
-          </dl>
-          <div class="actions">
-            <button type="button" (click)="cancel()" [disabled]="busy()">
-              Descartar importação
-            </button>
+            <label>
+              <span>
+                Salário (R$)
+                @if (isMissing('salary')) {
+                  <span class="missing">Não encontrado</span>
+                }
+              </span>
+              <input
+                formControlName="salary"
+                type="number"
+                min="0.01"
+                max="9999999999999.99"
+                step="0.01"
+              />
+            </label>
+            <label>
+              Período do salário
+              <select formControlName="salaryPeriod">
+                <option [ngValue]="null">Selecione se informou um salário</option>
+                @for (period of periodOptions; track period) {
+                  <option [ngValue]="period">Por {{ periods[period] }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              <span>
+                Habilidades técnicas
+                @if (isMissing('hardSkills')) {
+                  <span class="missing">Não encontradas</span>
+                }
+              </span>
+              <textarea
+                formControlName="hardSkills"
+                rows="3"
+                aria-describedby="skill-hint"
+              ></textarea>
+            </label>
+            <label>
+              <span>
+                Habilidades comportamentais
+                @if (isMissing('softSkills')) {
+                  <span class="missing">Não encontradas</span>
+                }
+              </span>
+              <textarea
+                formControlName="softSkills"
+                rows="3"
+                aria-describedby="skill-hint"
+              ></textarea>
+            </label>
+            <p id="skill-hint" class="wide hint">Uma habilidade por linha, até 50 por campo.</p>
+            <label class="wide">
+              Descrição
+              <textarea formControlName="description" rows="8" maxlength="30000"></textarea>
+            </label>
           </div>
-        </section>
-      }
+        </fieldset>
+
+        <fieldset class="decision" [disabled]="busy()">
+          <legend>Como quer salvar?</legend>
+          <div class="choices">
+            <label class="choice">
+              <input type="radio" formControlName="decision" value="SAVED" />
+              Salvar como interesse
+            </label>
+            <label class="choice">
+              <input type="radio" formControlName="decision" value="APPLIED" />
+              Registrar inscrição
+            </label>
+          </div>
+          <div class="grid">
+            @if (review.controls.decision.value === 'APPLIED') {
+              <label>
+                Data da inscrição
+                <input formControlName="appliedOn" type="date" />
+              </label>
+            }
+            <label class="wide">
+              Anotações
+              <textarea formControlName="notes" rows="3" maxlength="5000"></textarea>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="primary" [disabled]="busy()">
+            {{ busy() ? 'Salvando…' : 'Salvar vaga' }}
+          </button>
+          <button type="button" (click)="cancel()" [disabled]="busy()">Descartar importação</button>
+        </div>
+      </form>
     }
 
     @case ('attention') {

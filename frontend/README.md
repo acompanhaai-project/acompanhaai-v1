@@ -30,7 +30,7 @@ O link **Esqueci minha senha** abre `/recuperar-senha`. A redefinição fica em
 - `src/app/recuperar-senha-page/`: solicitação do link, confirmação e reenvio.
 - `src/app/redefinir-senha-page/`: leitura segura do token e nova senha.
 - `src/app/import-page/`: importação por link ou descrição, acompanhamento com consulta
-  periódica, orientação em falhas e cancelamento.
+  periódica, orientação em falhas, revisão editável da proposta e confirmação.
 - `src/app/shared/`: estilos do cartão e regras de senha.
 - `src/app/core/auth/`: cliente real de sessão e estado autenticado em memória.
 - `src/app/core/http/`: interceptor, CSRF, fila de requisições e tratamento de erros.

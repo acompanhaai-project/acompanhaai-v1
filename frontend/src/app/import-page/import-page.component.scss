@@ -79,6 +79,7 @@ label {
 }
 
 input:not([type='radio']),
+select,
 textarea,
 button {
   min-width: 0;
@@ -95,7 +96,7 @@ textarea {
   resize: vertical;
 }
 
-:is(a, button, input, textarea):focus-visible {
+:is(a, button, input, select, textarea):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -157,32 +158,48 @@ button:disabled {
   }
 }
 
-.summary {
+.grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  margin: 0;
 }
 
-.summary .wide {
+.wide {
   grid-column: 1 / -1;
 }
 
-dt {
+.hint {
+  margin: 0;
   font-size: 14px;
 }
 
-dd {
-  margin: 4px 0 0;
-  overflow-wrap: anywhere;
+.missing {
+  display: inline-block;
+  margin-inline-start: 8px;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.description {
-  white-space: pre-wrap;
+.decision {
+  margin-top: 28px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 @media (max-width: 580px) {
-  .summary {
+  .grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
