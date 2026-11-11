@@ -100,6 +100,7 @@ export class ImportPageComponent {
     Job['salaryPeriod']
   >[];
   protected readonly missingFields = signal<ReadonlySet<string>>(new Set());
+  private readonly evidence = signal<NonNullable<ImportProposal['evidence']>>({});
   private reviewedTask: number | null = null;
   protected readonly task = signal<ImportTask | null>(null);
   protected readonly taskId = signal<number | null>(null);
@@ -284,8 +285,20 @@ export class ImportPageComponent {
     return this.missingFields().has(field);
   }
 
+  protected evidenceFor(field: string): string | null {
+    const evidence = this.evidence()[field];
+    if (!evidence) {
+      return null;
+    }
+    if (evidence.source === 'STRUCTURED_DATA') {
+      return 'Origem: dados estruturados da página.';
+    }
+    return evidence.excerpt ? `Trecho da vaga: “${evidence.excerpt}”` : null;
+  }
+
   private fillReview(id: number, result: ImportProposal): void {
     this.reviewedTask = id;
+    this.evidence.set(result.evidence ?? {});
     this.review.reset({
       title: result.title ?? '',
       companyName: result.companyName ?? '',

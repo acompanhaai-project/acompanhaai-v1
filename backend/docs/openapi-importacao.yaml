@@ -332,3 +332,22 @@ components:
           maxItems: 50
           uniqueItems: true
           items: { type: string, minLength: 1, maxLength: 150 }
+        evidence:
+          type: object
+          description: |
+            Origem dos campos title, companyName, location, workMode e salary, quando presentes.
+            Não faz parte do corpo da confirmação.
+          additionalProperties:
+            $ref: "#/components/schemas/ImportEvidence"
+    ImportEvidence:
+      type: object
+      required: [source]
+      properties:
+        source:
+          type: string
+          enum: [TEXT, STRUCTURED_DATA]
+          description: TEXT para trecho da descrição; STRUCTURED_DATA para JobPosting publicado pela página.
+        excerpt:
+          type: string
+          maxLength: 302
+          description: Trecho do texto da vaga que comprova o valor. Presente somente com source TEXT.

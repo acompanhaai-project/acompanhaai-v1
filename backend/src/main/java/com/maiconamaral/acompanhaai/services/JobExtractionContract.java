@@ -28,6 +28,8 @@ final class JobExtractionContract {
           a combinar, outra moeda ou período ausente, use null nos três.
         - hardSkills: tecnologias, ferramentas e conhecimentos técnicos citados.
         - softSkills: competências comportamentais citadas.
+        - evidence: para cada campo preenchido, copie o trecho exato do texto que comprova o
+          valor, com até 200 caracteres. Use null quando o campo for null.
         Responda somente com o JSON do esquema.
         """;
 
@@ -39,6 +41,11 @@ final class JobExtractionContract {
     private static final Pattern SPACES = Pattern.compile("[\\s\\u00A0]+");
     private static final Pattern CONTROLS = Pattern.compile("\\p{Cntrl}");
     private static final List<String> TEXT_FIELDS = List.of("title", "companyName", "location");
+    static final List<String> EVIDENCE_FIELDS = List.of("title", "companyName", "location", "workMode", "salary");
+    static final String EVIDENCE = "evidence";
+    private static final int MAX_EXCERPT = 300;
+    private static final int CONTEXT = 60;
+    private static final int MIN_EXCERPT = 3;
 
     private JobExtractionContract() {
     }
@@ -59,6 +66,14 @@ final class JobExtractionContract {
         properties.put("salaryPeriod", Map.of("type", "STRING", "nullable", true, "enum", sorted(PERIODS)));
         properties.put("hardSkills", Map.of("type", "ARRAY", "items", Map.of("type", "STRING")));
         properties.put("softSkills", Map.of("type", "ARRAY", "items", Map.of("type", "STRING")));
+        var evidence = new LinkedHashMap<String, Object>();
+        for (var field : EVIDENCE_FIELDS) {
+            evidence.put(field, Map.of("type", "STRING", "nullable", true));
+        }
+        properties.put(
+            EVIDENCE,
+            Map.of("type", "OBJECT", "properties", evidence, "required", List.copyOf(evidence.keySet()))
+        );
         return Map.of("type", "OBJECT", "properties", properties, "required", List.copyOf(properties.keySet()));
     }
 
@@ -74,6 +89,14 @@ final class JobExtractionContract {
         properties.put("salaryPeriod", Map.of("type", List.of("string", "null"), "enum", nullable(PERIODS)));
         properties.put("hardSkills", Map.of("type", "array", "items", Map.of("type", "string")));
         properties.put("softSkills", Map.of("type", "array", "items", Map.of("type", "string")));
+        var evidence = new LinkedHashMap<String, Object>();
+        for (var field : EVIDENCE_FIELDS) {
+            evidence.put(field, Map.of("type", List.of("string", "null")));
+        }
+        properties.put(
+            EVIDENCE,
+            Map.of("type", "object", "properties", evidence, "required", List.copyOf(evidence.keySet()))
+        );
         return Map.of("type", "object", "properties", properties, "required", List.copyOf(properties.keySet()));
     }
 
@@ -85,27 +108,56 @@ final class JobExtractionContract {
         if (response == null || !response.isObject()) {
             throw new JobExtractionException(JobExtractionException.Reason.INVALID_RESPONSE);
         }
+        var text = new SourceText(source);
+        var claimed = response.path(EVIDENCE);
         var proposal = new LinkedHashMap<String, Object>();
+        var evidence = new LinkedHashMap<String, Object>();
         for (var field : TEXT_FIELDS) {
             var value = text(response.path(field), MAX_TEXT);
-            if (value != null) {
+            if (value == null) {
+                continue;
+            }
+            var excerpt = text.verify(claimed.path(field));
+            if (excerpt == null) {
+                excerpt = text.around(value);
+            }
+            if (excerpt != null) {
                 proposal.put(field, value);
+                evidence.put(field, fromText(excerpt));
             }
         }
         var workMode = upper(response.path("workMode"));
-        if (workMode != null && WORK_MODES.contains(workMode)) {
+        var workModeExcerpt = text.verify(claimed.path("workMode"));
+        if (workMode != null && WORK_MODES.contains(workMode) && workModeExcerpt != null) {
             proposal.put("workMode", workMode);
+            evidence.put("workMode", fromText(workModeExcerpt));
         }
-        salary(response, source, proposal);
-        skills(response.path("hardSkills"), "hardSkills", proposal);
-        skills(response.path("softSkills"), "softSkills", proposal);
+        var salaryExcerpt = salary(response, text, proposal);
+        if (salaryExcerpt != null) {
+            evidence.put("salary", fromText(salaryExcerpt));
+        }
+        skills(response.path("hardSkills"), "hardSkills", text, proposal);
+        skills(response.path("softSkills"), "softSkills", text, proposal);
+        if (!evidence.isEmpty()) {
+            proposal.put(EVIDENCE, evidence);
+        }
         return proposal;
     }
 
-    private static void salary(JsonNode response, String source, Map<String, Object> proposal) {
+    /** Evidência de campo lido do texto da vaga. */
+    static Map<String, String> fromText(String excerpt) {
+        return Map.of("source", "TEXT", "excerpt", excerpt);
+    }
+
+    /** Evidência de campo publicado pela página como dado estruturado. */
+    static Map<String, String> fromStructuredData() {
+        return Map.of("source", "STRUCTURED_DATA");
+    }
+
+    private static String salary(JsonNode response, SourceText text, Map<String, Object> proposal) {
         var value = response.path("salary");
         if (!value.isNumber()) {
-            return;
+            return null;
         }
         var amount = value.decimalValue().stripTrailingZeros();
         var period = upper(response.path("salaryPeriod"));
@@ -115,18 +167,26 @@ final class JobExtractionContract {
             amount.precision() - amount.scale() > 13 ||
             !"BRL".equals(upper(response.path("salaryCurrency"))) ||
             period == null ||
-            !PERIODS.contains(period) ||
-            !mentions(source, amount)
+            !PERIODS.contains(period)
         ) {
-            return;
+            return null;
+        }
+        var mention = amountPattern(amount).matcher(text.display);
+        if (!mention.find()) {
+            return null;
         }
         proposal.put("salary", amount.scale() < 0 ? amount.setScale(0) : amount);
         proposal.put("salaryCurrency", "BRL");
         proposal.put("salaryPeriod", period);
+        return text.window(mention.start(), mention.end());
     }
 
     /** Exige que o valor apareça no texto original, aceitando separadores de milhar. */
     static boolean mentions(String source, BigDecimal amount) {
+        return amountPattern(amount).matcher(source).find();
+    }
+
+    private static Pattern amountPattern(BigDecimal amount) {
         var integer = amount.toBigInteger().toString();
         var groups = new ArrayList<String>();
         for (int end = integer.length(); end > 0; end -= 3) {
@@ -139,10 +199,10 @@ final class JobExtractionContract {
         pattern += fraction > 0
             ? "[,.]" + String.format(Locale.ROOT, "%02d", fraction) + "(?!\\d)"
             : "(?:[,.]00)?(?!\\d)";
-        return Pattern.compile(pattern).matcher(source).find();
+        return Pattern.compile(pattern);
     }
 
-    private static void skills(JsonNode node, String field, Map<String, Object> proposal) {
+    private static void skills(JsonNode node, String field, SourceText text, Map<String, Object> proposal) {
         if (!node.isArray()) {
             return;
         }
@@ -150,7 +210,12 @@ final class JobExtractionContract {
         var seen = new LinkedHashSet<String>();
         for (var item : node) {
             var skill = text(item, MAX_SKILL);
-            if (skill != null && seen.add(skill.toLowerCase(Locale.ROOT)) && unique.size() < MAX_SKILLS) {
+            if (
+                skill != null &&
+                text.mentions(skill) &&
+                seen.add(skill.toLowerCase(Locale.ROOT)) &&
+                unique.size() < MAX_SKILLS
+            ) {
                 unique.add(skill);
             }
         }
@@ -182,5 +247,59 @@ final class JobExtractionContract {
         var options = new ArrayList<Object>(sorted(values));
         options.add(null);
         return options;
+    }
+
+    /** Texto da vaga com espaços normalizados, usado para conferir valores e trechos. */
+    private static final class SourceText {
+
+        private final String display;
+        private final String lower;
+
+        SourceText(String source) {
+            display = SPACES.matcher(CONTROLS.matcher(source).replaceAll(" ")).replaceAll(" ").strip();
+            var folded = display.toLowerCase(Locale.ROOT);
+            lower = folded.length() == display.length() ? folded : display;
+        }
+
+        String verify(JsonNode claimed) {
+            var candidate = text(claimed, MAX_EXCERPT);
+            if (candidate == null || candidate.length() < MIN_EXCERPT) {
+                return null;
+            }
+            int start = lower.indexOf(fold(candidate));
+            return start < 0 ? null : display.substring(start, start + candidate.length());
+        }
+
+        String around(String value) {
+            int start = lower.indexOf(fold(value));
+            return start < 0 ? null : window(start, start + value.length());
+        }
+
+        boolean mentions(String value) {
+            return Pattern.compile(
+                "(?<![\\p{L}\\p{N}])" + Pattern.quote(fold(value)) + "(?![\\p{L}\\p{N}])"
+            ).matcher(lower).find();
+        }
+
+        String window(int start, int end) {
+            int from = Math.max(0, start - CONTEXT);
+            int to = Math.min(display.length(), Math.max(end, start) + CONTEXT);
+            if (to - from > MAX_EXCERPT) {
+                to = from + MAX_EXCERPT;
+            }
+            while (from > 0 && from < start && display.charAt(from - 1) != ' ') {
+                from++;
+            }
+            while (to < display.length() && to > end && display.charAt(to) != ' ') {
+                to--;
+            }
+            var excerpt = display.substring(from, to).strip();
+            return (from > 0 ? "…" : "") + excerpt + (to < display.length() ? "…" : "");
+        }
+
+        private String fold(String value) {
+            var normalized = SPACES.matcher(value).replaceAll(" ").strip();
+            return lower == display ? normalized : normalized.toLowerCase(Locale.ROOT);
+        }
     }
 }

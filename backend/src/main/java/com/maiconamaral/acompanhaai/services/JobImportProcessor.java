@@ -29,7 +29,7 @@ public class JobImportProcessor implements ImportTaskProcessor {
             var description = ImportPageReader.clean(input);
             return description.isEmpty()
                 ? new Failed(Failure.PROCESSING_FAILED)
-                : ready(null, Map.of("description", description), description, deadline);
+                : ready(null, Map.of("description", description), false, description, deadline);
         }
 
         return switch (collector.collect(input, deadline)) {
@@ -46,7 +46,7 @@ public class JobImportProcessor implements ImportTaskProcessor {
             var source = posting.get("description") instanceof String description
                 ? description + "\n\n" + content.text()
                 : content.text();
-            return ready(content.text(), posting, source, deadline);
+            return ready(content.text(), posting, true, source, deadline);
         }
         if (content.text().length() >= MIN_PAGE_TEXT) {
             return fromText(content.text(), deadline);
@@ -62,29 +62,51 @@ public class JobImportProcessor implements ImportTaskProcessor {
     private Outcome fromText(String text, Instant deadline) {
         return text.length() < MIN_PAGE_TEXT
             ? new NeedsInput(Fallback.SOURCE_NO_USABLE_CONTENT)
-            : ready(text, Map.of("description", text), text, deadline);
+            : ready(text, Map.of("description", text), false, text, deadline);
     }
 
     /**
      * Completa a proposta com a extração, quando houver provedor configurado. Dados estruturados
      * publicados pela página têm prioridade, e uma falha do provedor mantém a proposta sem IA.
      */
-    private Outcome ready(String collected, Map<String, Object> base, String source, Instant deadline) {
+    private Outcome ready(
+        String collected,
+        Map<String, Object> base,
+        boolean structured,
+        String source,
+        Instant deadline
+    ) {
+        var evidence = new LinkedHashMap<String, Object>();
+        if (structured) {
+            for (var field : JobExtractionContract.EVIDENCE_FIELDS) {
+                if (base.containsKey(field)) {
+                    evidence.put(field, JobExtractionContract.fromStructuredData());
+                }
+            }
+        }
         if (extractor.isEmpty() || source.isBlank()) {
-            return new Ready(collected, base);
+            return new Ready(collected, withEvidence(new LinkedHashMap<>(base), evidence));
         }
         var provider = extractor.get();
         long started = System.nanoTime();
         try {
-            var proposal = new LinkedHashMap<>(provider.extract(source, deadline));
-            proposal.putAll(base);
+            var extracted = new LinkedHashMap<>(provider.extract(source, deadline));
+            var found = extracted.remove(JobExtractionContract.EVIDENCE) instanceof Map<?, ?> map ? map : Map.of();
+            extracted.keySet().removeAll(base.keySet());
+            found.forEach((field, excerpt) -> {
+                if (extracted.containsKey(field)) {
+                    evidence.putIfAbsent(String.valueOf(field), excerpt);
+                }
+            });
             log.info(
                 "extracao provedor={} campos={} duracaoMs={}",
                 provider.provider(),
-                proposal.size() - base.size(),
+                extracted.size(),
                 (System.nanoTime() - started) / 1_000_000
             );
-            return new Ready(collected, proposal, provider.provider(), provider.model());
+            var proposal = new LinkedHashMap<String, Object>(base);
+            proposal.putAll(extracted);
+            return new Ready(collected, withEvidence(proposal, evidence), provider.provider(), provider.model());
         } catch (JobExtractionException e) {
             log.info(
                 "extracao provedor={} falha={} duracaoMs={}",
@@ -92,7 +114,14 @@ public class JobImportProcessor implements ImportTaskProcessor {
                 e.getReason(),
                 (System.nanoTime() - started) / 1_000_000
             );
-            return new Ready(collected, base);
+            return new Ready(collected, withEvidence(new LinkedHashMap<>(base), evidence));
         }
+    }
+
+    private static Map<String, Object> withEvidence(Map<String, Object> proposal, Map<String, Object> evidence) {
+        if (!evidence.isEmpty()) {
+            proposal.put(JobExtractionContract.EVIDENCE, Map.copyOf(evidence));
+        }
+        return proposal;
     }
 }

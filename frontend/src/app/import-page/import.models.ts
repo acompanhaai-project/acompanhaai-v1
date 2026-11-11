@@ -9,7 +9,14 @@ export type ImportInput =
   | { readonly inputType: 'URL'; readonly url: string }
   | { readonly inputType: 'TEXT'; readonly text: string };
 
-export type ImportProposal = Partial<Omit<Job, 'id'>>;
+export interface ImportEvidence {
+  readonly source: 'TEXT' | 'STRUCTURED_DATA';
+  readonly excerpt?: string;
+}
+
+export type ImportProposal = Partial<Omit<Job, 'id'>> & {
+  readonly evidence?: Readonly<Record<string, ImportEvidence>>;
+};
 
 export interface ImportFailure {
   readonly code: string;

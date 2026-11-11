@@ -168,6 +168,13 @@ button:disabled {
   grid-column: 1 / -1;
 }
 
+.evidence {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
 .hint {
   margin: 0;
   font-size: 14px;
