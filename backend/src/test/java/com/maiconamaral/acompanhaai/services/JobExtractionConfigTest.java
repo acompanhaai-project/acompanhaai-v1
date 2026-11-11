@@ -40,7 +40,7 @@ class JobExtractionConfigTest {
             .withPropertyValues("app.extraction.provider=GEMINI", "app.extraction.gemini.api-key=chave-ficticia")
             .run(context -> {
                 assertThat(context.getBean(JobExtractor.class).provider()).isEqualTo("gemini");
-                assertThat(context.getBean(JobExtractor.class).model()).isEqualTo("gemini-2.5-flash-lite");
+                assertThat(context.getBean(JobExtractor.class).model()).isEqualTo("gemini-3.5-flash-lite");
             });
     }
 

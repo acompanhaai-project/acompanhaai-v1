@@ -11,6 +11,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -19,6 +21,7 @@ abstract class HttpJobExtractor implements JobExtractor {
 
     record ExtractionLimits(Duration timeout, int maxInputChars, int maxOutputTokens) {}
 
+    private static final Logger log = LoggerFactory.getLogger(HttpJobExtractor.class);
     private static final Duration MARGIN = Duration.ofSeconds(5);
     private static final Duration MINIMUM = Duration.ofSeconds(2);
 
@@ -74,6 +77,12 @@ abstract class HttpJobExtractor implements JobExtractor {
             throw new JobExtractionException(Reason.UNAVAILABLE);
         }
         if (status < 200 || status >= 300) {
+            log.warn(
+                "extracao provedor={} recusada http={} status={}",
+                provider(),
+                status,
+                errorStatus(response.body())
+            );
             throw new JobExtractionException(Reason.REJECTED);
         }
         try {
@@ -84,6 +93,17 @@ abstract class HttpJobExtractor implements JobExtractor {
             return JobExtractionContract.validate(json.readTree(content), source);
         } catch (JacksonException e) {
             throw new JobExtractionException(Reason.INVALID_RESPONSE);
+        }
+    }
+
+    /** Categoria do erro informada pelo provedor, sem a mensagem nem o conteúdo enviado. */
+    private String errorStatus(String body) {
+        try {
+            var status = json.readTree(body).path("error").path("status");
+            var value = status.isString() ? status.stringValue() : "";
+            return value.matches("[A-Z_]{1,40}") ? value : "-";
+        } catch (JacksonException e) {
+            return "-";
         }
     }
 

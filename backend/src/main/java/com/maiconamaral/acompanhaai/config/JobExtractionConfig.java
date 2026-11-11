@@ -29,16 +29,16 @@ public class JobExtractionConfig {
         @Value("${app.extraction.failure-threshold:3}") int failureThreshold,
         @Value("${app.extraction.cooldown:5m}") Duration cooldown,
         @Value("${app.extraction.gemini.base-url:https://generativelanguage.googleapis.com}") String geminiUrl,
-        @Value("${app.extraction.gemini.model:gemini-2.5-flash-lite}") String geminiModel,
+        @Value("${app.extraction.gemini.model:gemini-3.5-flash-lite}") String geminiModel,
         @Value("${app.extraction.gemini.api-key:}") String geminiKey,
-        @Value("${app.extraction.gemini.thinking-budget:0}") int thinkingBudget,
+        @Value("${app.extraction.gemini.thinking-level:minimal}") String thinkingLevel,
         @Value("${app.extraction.ollama.base-url:http://localhost:11434}") String ollamaUrl,
         @Value("${app.extraction.ollama.model:llama3.2}") String ollamaModel
     ) {
         var limits = new JobExtractors.Limits(timeout, maxInput, maxOutput);
         var extractor = switch (provider.strip().toLowerCase(Locale.ROOT)) {
             case "gemini" -> JobExtractors.gemini(
-                json, clock, limits, geminiUrl, geminiModel, geminiKey, thinkingBudget
+                json, clock, limits, geminiUrl, geminiModel, geminiKey, thinkingLevel
             );
             case "ollama" -> JobExtractors.ollama(json, clock, limits, ollamaUrl, ollamaModel);
             default -> throw new IllegalStateException(

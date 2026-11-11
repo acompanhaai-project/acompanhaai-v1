@@ -163,9 +163,9 @@ estruturados da página e a descrição.
 | `app.extraction.daily-limit` | `200` | Chamadas ao provedor por dia (UTC) nesta instância; `0` desativa. |
 | `app.extraction.failure-threshold` | `3` | Falhas transitórias seguidas que pausam o provedor. |
 | `app.extraction.cooldown` | `5m` | Duração da pausa após falhas seguidas. |
-| `app.extraction.gemini.model` | `gemini-2.5-flash-lite` | Modelo do Gemini. |
+| `app.extraction.gemini.model` | `gemini-3.5-flash-lite` | Modelo do Gemini. |
 | `app.extraction.gemini.api-key` | `GEMINI_API_KEY` | Chave do Gemini, obrigatória com esse provedor. |
-| `app.extraction.gemini.thinking-budget` | `0` | Orçamento de raciocínio; negativo omite o parâmetro. |
+| `app.extraction.gemini.thinking-level` | `minimal` | Nível de raciocínio (`thinkingLevel`); vazio omite o parâmetro. |
 | `app.extraction.ollama.base-url` | `http://localhost:11434` | Servidor local do Ollama. |
 | `app.extraction.ollama.model` | `llama3.2` | Modelo local. |
 
@@ -187,7 +187,9 @@ estruturados da página e a descrição.
   e a descrição proposta continua sendo o texto coletado.
 - Falhas de tempo, cota (429), indisponibilidade, recusa ou resposta inválida
   não falham a tarefa. O log registra `extracao provedor falha duracaoMs`,
-  sem texto, resposta ou chave.
+  sem texto, resposta ou chave. Em recusa, registra também o código HTTP e a
+  categoria do erro do provedor (por exemplo, `http=404 status=NOT_FOUND`),
+  sem a mensagem.
 
 ### Falhas, cota e custo
 
@@ -220,6 +222,39 @@ app.extraction.gemini.api-key=SUA_CHAVE
 
 Para o Ollama, instale um modelo (`ollama pull llama3.2`) e use
 `app.extraction.provider=ollama`.
+
+## Avaliação da extração
+
+O conjunto versionado fica em
+`src/test/resources/extraction-eval/v1/cases.json`: 20 vagas fictícias com
+gabarito de título, empresa, localização, modalidade, salário e habilidades.
+Cobre salário exato (mensal, anual, por hora e bolsa), faixa, valor mínimo,
+"a combinar", USD, EUR, anúncios em inglês, empresa confidencial, agência
+recrutadora, habilidades desejáveis e instrução embutida no texto.
+
+| Teste | Quando roda | O que verifica |
+| --- | --- | --- |
+| `ExtractionEvaluationTest` | Sempre, inclusive no CI | Formato e cobertura do conjunto, gabarito presente no texto, regras do contrato e cálculo das métricas. |
+| `ExtractionEvaluationLiveTest` | Somente sob demanda | Chama o provedor configurado para cada caso e grava o relatório. |
+
+Metas da v1: **nenhum salário inventado ou errado** e pelo menos 90% de
+acerto em título e empresa explícitos. Localização, modalidade e habilidades
+são registradas no relatório, sem meta.
+
+Para avaliar o provedor real, com a chave em `application-local.properties`
+ou em `GEMINI_API_KEY`:
+
+```bash
+./mvnw test -Dtest=ExtractionEvaluationLiveTest -Dextraction.eval=true \
+  -Dapp.extraction.provider=gemini \
+  "-Dspring.datasource.url=jdbc:h2:mem:acompanhaai-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1" \
+  "-Dspring.datasource.username=sa" "-Dspring.datasource.password="
+```
+
+O relatório fica em `target/extraction-eval/report-v1-<provedor>.md`, sem
+chave nem dados pessoais. `-Dextraction.eval.pause=4S` controla a espera
+entre chamadas para respeitar a cota gratuita. Alterações no conjunto devem
+criar uma nova versão (`v2`) para manter os resultados comparáveis.
 
 ## Limites e observabilidade
 

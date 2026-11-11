@@ -54,9 +54,9 @@ app:
     cooldown: 5m
     gemini:
       base-url: https://generativelanguage.googleapis.com
-      model: gemini-2.5-flash-lite
+      model: gemini-3.5-flash-lite
       api-key: ${GEMINI_API_KEY:}
-      thinking-budget: 0
+      thinking-level: minimal
     ollama:
       base-url: http://localhost:11434
       model: llama3.2

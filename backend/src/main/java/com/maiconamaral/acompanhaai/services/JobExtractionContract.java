@@ -1,6 +1,7 @@
 package com.maiconamaral.acompanhaai.services;
 
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -25,7 +26,8 @@ final class JobExtractionContract {
         - workMode: REMOTE, HYBRID ou ONSITE somente se o texto disser a modalidade.
         - salary, salaryCurrency e salaryPeriod: somente para um valor único em reais (BRL)
           com período explícito (HOUR, DAY, WEEK, MONTH ou YEAR). Para faixa salarial, valor
-          a combinar, outra moeda ou período ausente, use null nos três.
+          mínimo ("a partir de"), valor máximo ("até"), valor a combinar, outra moeda ou
+          período ausente, use null nos três.
         - hardSkills: tecnologias, ferramentas e conhecimentos técnicos citados.
         - softSkills: competências comportamentais citadas.
         - evidence: para cada campo preenchido, copie o trecho exato do texto que comprova o
@@ -40,6 +42,14 @@ final class JobExtractionContract {
     private static final Set<String> PERIODS = Set.of("HOUR", "DAY", "WEEK", "MONTH", "YEAR");
     private static final Pattern SPACES = Pattern.compile("[\\s\\u00A0]+");
     private static final Pattern CONTROLS = Pattern.compile("\\p{Cntrl}");
+    private static final String CURRENCY = "\\s*(?:r\\$|brl)?\\s*";
+    private static final Pattern BOUND_BEFORE = Pattern.compile(
+        "(?:(?<!\\p{L})(?:a partir de|minimo de|minimo|min\\.|acima de|desde|ate|entre|from|starting at|" +
+            "up to|at least|over|upwards of|between)|\\d\\s*(?:a|ate|e|-|\u2013|to|and))" + CURRENCY + "$"
+    );
+    private static final Pattern RANGE_AFTER = Pattern.compile(
+        "^\\s*(?:mensais|mensal|por mes|/mes|ao mes)?\\s*(?:a|ate|-|\u2013|to)" + CURRENCY + "\\d"
+    );
     private static final List<String> TEXT_FIELDS = List.of("title", "companyName", "location");
     static final List<String> EVIDENCE_FIELDS = List.of("title", "companyName", "location", "workMode", "salary");
     static final String EVIDENCE = "evidence";
@@ -172,13 +182,39 @@ final class JobExtractionContract {
             return null;
         }
         var mention = amountPattern(amount).matcher(text.display);
-        if (!mention.find()) {
+        if (!mention.find() || qualified(text.display, amountPattern(amount))) {
             return null;
         }
         proposal.put("salary", amount.scale() < 0 ? amount.setScale(0) : amount);
         proposal.put("salaryCurrency", "BRL");
         proposal.put("salaryPeriod", period);
         return text.window(mention.start(), mention.end());
+    }
+
+    /**
+     * Indica se alguma menção do valor é um piso, um teto ou um extremo de faixa
+     * ("a partir de R$ 7.000", "até R$ 9.000", "R$ 7.000 a R$ 9.000"), que não é valor exato.
+     */
+    static boolean qualified(String source, BigDecimal amount) {
+        return qualified(source, amountPattern(amount));
+    }
+
+    private static boolean qualified(String source, Pattern amount) {
+        var mention = amount.matcher(source);
+        while (mention.find()) {
+            var before = plain(source.substring(Math.max(0, mention.start() - 40), mention.start()));
+            var after = plain(source.substring(mention.end(), Math.min(source.length(), mention.end() + 20)));
+            if (BOUND_BEFORE.matcher(before).find() || RANGE_AFTER.matcher(after).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String plain(String value) {
+        return Normalizer.normalize(value, Normalizer.Form.NFD)
+            .replaceAll("\\p{M}", "")
+            .toLowerCase(Locale.ROOT);
     }
 
     /** Exige que o valor apareça no texto original, aceitando separadores de milhar. */
@@ -192,7 +228,7 @@ final class JobExtractionContract {
         for (int end = integer.length(); end > 0; end -= 3) {
             groups.addFirst(integer.substring(Math.max(0, end - 3), end));
         }
-        var pattern = "(?<![\\d.,])" + String.join("[.\\s\\u00A0]?", groups);
+        var pattern = "(?<![\\d.,])" + String.join("[.,\\s\\u00A0]?", groups);
         var fraction = amount.scale() > 0
             ? amount.remainder(BigDecimal.ONE).movePointRight(2).abs().intValue()
             : 0;

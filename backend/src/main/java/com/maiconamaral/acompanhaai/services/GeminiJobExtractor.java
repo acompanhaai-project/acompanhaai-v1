@@ -13,7 +13,7 @@ class GeminiJobExtractor extends HttpJobExtractor {
     private final URI endpoint;
     private final String apiKey;
     private final String model;
-    private final int thinkingBudget;
+    private final String thinkingLevel;
 
     GeminiJobExtractor(
         JsonMapper json,
@@ -22,7 +22,7 @@ class GeminiJobExtractor extends HttpJobExtractor {
         String baseUrl,
         String model,
         String apiKey,
-        int thinkingBudget
+        String thinkingLevel
     ) {
         super(json, clock, limits);
         if (apiKey == null || apiKey.isBlank()) {
@@ -31,7 +31,7 @@ class GeminiJobExtractor extends HttpJobExtractor {
         this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/v1beta/models/" + model + ":generateContent");
         this.apiKey = apiKey.strip();
         this.model = model;
-        this.thinkingBudget = thinkingBudget;
+        this.thinkingLevel = thinkingLevel == null ? "" : thinkingLevel.strip();
     }
 
     @Override
@@ -61,8 +61,8 @@ class GeminiJobExtractor extends HttpJobExtractor {
         generation.put("maxOutputTokens", maxOutput);
         generation.put("responseMimeType", "application/json");
         generation.put("responseSchema", JobExtractionContract.geminiSchema());
-        if (thinkingBudget >= 0) {
-            generation.put("thinkingConfig", Map.of("thinkingBudget", thinkingBudget));
+        if (!thinkingLevel.isEmpty()) {
+            generation.put("thinkingConfig", Map.of("thinkingLevel", thinkingLevel));
         }
         return Map.of(
             "systemInstruction", Map.of("parts", List.of(Map.of("text", JobExtractionContract.INSTRUCTIONS))),
