@@ -6,14 +6,13 @@ spring:
     url: jdbc:h2:mem:acompanhaai-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     username: sa
     password: ""
-    hikari:
-      maximum-pool-size: 4
-      minimum-idle: 1
   flyway:
     locations: classpath:db/migration
 app:
   import-worker:
     scheduling-enabled: false
+  extraction:
+    provider: none
   password-reset:
     limits:
       per-ip: 1000

@@ -12,12 +12,21 @@ public interface ImportTaskProcessor {
     sealed interface Outcome permits Ready, NeedsInput, Failed, Retry {
     }
 
-    record Ready(String collectedText, Map<String, Object> proposal) implements Outcome {
+    record Ready(
+        String collectedText,
+        Map<String, Object> proposal,
+        String extractorProvider,
+        String extractorModel
+    ) implements Outcome {
         public Ready {
             proposal = Map.copyOf(proposal);
             if (proposal.isEmpty()) {
                 throw new IllegalArgumentException("A proposta deve conter pelo menos um campo.");
             }
+        }
+
+        public Ready(String collectedText, Map<String, Object> proposal) {
+            this(collectedText, proposal, null, null);
         }
     }
 

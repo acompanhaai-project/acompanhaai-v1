@@ -7,3 +7,7 @@ spring.datasource.password=SENHA_EXCLUSIVA_DA_APLICACAO
 # Esse segundo arquivo e importado somente pelo perfil postgres-local.
 # Sobrescreva a URL somente se usar outra instancia:
 # spring.datasource.url=jdbc:postgresql://localhost:5433/acompanhaai
+# Extracao com IA (opcional): none, gemini ou ollama.
+# app.extraction.provider=gemini
+# app.extraction.gemini.api-key=
+# app.extraction.ollama.model=llama3.2

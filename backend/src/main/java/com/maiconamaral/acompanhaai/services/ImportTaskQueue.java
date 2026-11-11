@@ -93,6 +93,8 @@ public class ImportTaskQueue {
                 task.setStatus(ImportStatus.READY_FOR_REVIEW);
                 task.setCollectedText(ready.collectedText());
                 task.setExtractedData(ready.proposal());
+                task.setExtractorProvider(ready.extractorProvider());
+                task.setExtractorModel(ready.extractorModel());
                 task.setResultSchemaVersion(1);
             }
             case ImportTaskProcessor.NeedsInput needsInput -> {

@@ -40,7 +40,21 @@ app:
   import-collector:
     timeout: 20s
     max-bytes: 2097152
-  import-limits:
-    per-user-hourly: 30
-    per-user-active: 5
-    global-active: 200
+  extraction:
+    # none, gemini ou ollama. A chave do Gemini fica fora do Git (GEMINI_API_KEY).
+    provider: ${EXTRACTION_PROVIDER:none}
+    timeout: 30s
+    max-input-chars: 20000
+    gemini:
+      base-url: https://generativelanguage.googleapis.com
+      model: gemini-2.5-flash-lite
+      api-key: ${GEMINI_API_KEY:}
+      thinking-budget: 0
+    ollama:
+      base-url: http://localhost:11434
+      model: llama3.2
+  import:
+    limits:
+      per-user-hourly: 30
+      per-user-active: 5
+      global-active: 200
