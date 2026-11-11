@@ -343,6 +343,10 @@ describe('Importação de vagas', () => {
         salaryCurrency: 'BRL',
         salaryPeriod: 'MONTH',
         description: 'Atuar com Spring.',
+        evidence: {
+          title: { source: 'STRUCTURED_DATA' },
+          workMode: { source: 'TEXT', excerpt: 'Trabalho 100% remoto' },
+        },
       },
     });
     const saved = { id: 40, job: { id: 30 } };
@@ -368,6 +372,13 @@ describe('Importação de vagas', () => {
         'Habilidades comportamentais Não encontradas',
       ]);
       expect(text()).toContain('Se ficar vazio, a vaga é salva com o link importado.');
+      const origins = Array.from(root.querySelectorAll('.evidence')).map((node) =>
+        node.textContent?.trim(),
+      );
+      expect(origins).toEqual([
+        'Origem: dados estruturados da página.',
+        'Trecho da vaga: “Trabalho 100% remoto”',
+      ]);
     });
 
     it('salva como interesse com as correções e abre a candidatura', async () => {

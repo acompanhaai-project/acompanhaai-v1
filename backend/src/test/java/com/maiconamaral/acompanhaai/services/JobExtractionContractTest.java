@@ -15,8 +15,15 @@ import tools.jackson.databind.json.JsonMapper;
 class JobExtractionContractTest {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
-    private static final String SOURCE =
-        "Pessoa desenvolvedora Java na Empresa Exemplo. Salário de R$ 8.500,00 por mês. Remoto.";
+    private static final String SOURCE = """
+        Pessoa desenvolvedora Java na Empresa Exemplo.
+        Requisitos: Java, Spring e Spring Boot. Valorizamos Comunicação.
+        Salário de R$ 8.500,00 por mês. Trabalho 100%   remoto.
+        """;
+
+    private static Map<String, String> fromText(String excerpt) {
+        return Map.of("source", "TEXT", "excerpt", excerpt);
+    }
 
     private Map<String, Object> validate(String response, String source) {
         return JobExtractionContract.validate(JSON.readTree(response), source);
@@ -34,7 +41,13 @@ class JobExtractionContractTest {
               "salaryCurrency": "brl",
               "salaryPeriod": "month",
               "hardSkills": ["Java", " java ", "Spring", "", "Spring Boot"],
-              "softSkills": []
+              "softSkills": [],
+              "evidence": {
+                "title": null,
+                "companyName": "na empresa   exemplo",
+                "workMode": "Trabalho 100% remoto",
+                "salary": null
+              }
             }
             """, SOURCE);
 
@@ -45,7 +58,18 @@ class JobExtractionContractTest {
             Map.entry("salary", new BigDecimal("8500")),
             Map.entry("salaryCurrency", "BRL"),
             Map.entry("salaryPeriod", "MONTH"),
-            Map.entry("hardSkills", List.of("Java", "Spring", "Spring Boot"))
+            Map.entry("hardSkills", List.of("Java", "Spring", "Spring Boot")),
+            Map.entry("evidence", Map.of(
+                "title", fromText(
+                    "Pessoa desenvolvedora Java na Empresa Exemplo. Requisitos: Java, Spring e Spring Boot.…"
+                ),
+                "companyName", fromText("na Empresa Exemplo"),
+                "workMode", fromText("Trabalho 100% remoto"),
+                "salary", fromText(
+                    "…e Spring Boot. Valorizamos Comunicação. " +
+                    "Salário de R$ 8.500,00 por mês. Trabalho 100% remoto."
+                )
+            ))
         );
     }
 
@@ -63,6 +87,44 @@ class JobExtractionContractTest {
             """.formatted("a".repeat(256)), SOURCE);
 
         assertThat(proposal).containsExactly(Map.entry("softSkills", List.of("Comunicação")));
+    }
+
+    @Test
+    void dropsValuesThatAreNotSupportedByTheText() {
+        var proposal = validate("""
+            {
+              "title": "Pessoa desenvolvedora Java",
+              "companyName": "Empresa Inventada",
+              "location": "São Paulo, SP",
+              "workMode": "HYBRID",
+              "hardSkills": ["Java", "Kotlin", "Spring"],
+              "softSkills": ["Liderança"],
+              "evidence": {
+                "companyName": "Contratante: Empresa Inventada",
+                "location": null,
+                "workMode": "modelo híbrido"
+              }
+            }
+            """, SOURCE);
+
+        assertThat(proposal).containsOnlyKeys("title", "hardSkills", "evidence");
+        assertThat(proposal.get("hardSkills")).isEqualTo(List.of("Java", "Spring"));
+        assertThat(proposal.get("evidence"))
+            .asInstanceOf(InstanceOfAssertFactories.MAP)
+            .containsOnlyKeys("title");
+    }
+
+    @Test
+    void requiresEvidenceForTheWorkModeAndMatchesSkillsAsWholeWords() {
+        var proposal = validate("""
+            {
+              "workMode": "REMOTE",
+              "hardSkills": ["Spring", "Spri", "C#", "Node.js"],
+              "evidence": {"workMode": null}
+            }
+            """, "Stack: Spring, C# e Node.js. Remoto.");
+
+        assertThat(proposal).containsExactly(Map.entry("hardSkills", List.of("Spring", "C#", "Node.js")));
     }
 
     @ParameterizedTest
@@ -108,7 +170,13 @@ class JobExtractionContractTest {
         }
         many.append(",\"").append("x".repeat(151)).append("\"]");
 
-        var proposal = validate("{\"hardSkills\": " + many + "}", SOURCE);
+        var source = new StringBuilder();
+        for (int index = 0; index < 60; index++) {
+            source.append("Skill ").append(index).append(", ");
+        }
+        source.append("x".repeat(151));
+
+        var proposal = validate("{\"hardSkills\": " + many + "}", source.toString());
 
         assertThat(proposal.get("hardSkills"))
             .asInstanceOf(InstanceOfAssertFactories.LIST)

@@ -100,7 +100,14 @@ class JobImportProcessorTest {
 
         assertThat(importUrl()).isEqualTo(new Ready(
             "",
-            Map.of("title", "Pessoa desenvolvedora Java", "companyName", "Empresa Exemplo")
+            Map.of(
+                "title", "Pessoa desenvolvedora Java",
+                "companyName", "Empresa Exemplo",
+                "evidence", Map.of(
+                    "title", Map.of("source", "STRUCTURED_DATA"),
+                    "companyName", Map.of("source", "STRUCTURED_DATA")
+                )
+            )
         ));
     }
 
@@ -208,7 +215,14 @@ class JobImportProcessorTest {
             </script>
             <p>Vaga presencial em Recife, PE.</p>
             """;
-        var processor = withExtractor(Map.of("title", "Título do modelo", "location", "Recife, PE"));
+        var processor = withExtractor(Map.of(
+            "title", "Título do modelo",
+            "location", "Recife, PE",
+            "evidence", Map.of(
+                "title", Map.of("source", "TEXT", "excerpt", "Título do modelo"),
+                "location", Map.of("source", "TEXT", "excerpt", "em Recife, PE")
+            )
+        ));
 
         var outcome = (Ready) processor.process(
             ImportInputType.URL,
@@ -219,7 +233,12 @@ class JobImportProcessorTest {
         assertThat(outcome.proposal()).isEqualTo(Map.of(
             "title", "Título publicado",
             "companyName", "Empresa Exemplo",
-            "location", "Recife, PE"
+            "location", "Recife, PE",
+            "evidence", Map.of(
+                "title", Map.of("source", "STRUCTURED_DATA"),
+                "companyName", Map.of("source", "STRUCTURED_DATA"),
+                "location", Map.of("source", "TEXT", "excerpt", "em Recife, PE")
+            )
         ));
         assertThat(outcome.extractorProvider()).isEqualTo("teste");
     }

@@ -175,6 +175,14 @@ estruturados da página e a descrição.
   proposta. Campos inválidos são descartados individualmente.
 - O salário só entra com valor único, moeda BRL, período explícito e com o
   mesmo valor escrito no texto da vaga.
+- Cada campo extraído precisa de evidência no texto. Título, empresa e
+  localização ficam quando o modelo devolve um trecho que existe no texto ou
+  quando o próprio valor aparece nele. Modalidade exige trecho conferido.
+  Habilidades só ficam quando aparecem no texto como palavra inteira.
+- A proposta traz `evidence` com a origem de título, empresa, localização,
+  modalidade e salário: `STRUCTURED_DATA` para o `JobPosting` da página ou
+  `TEXT` com o trecho conferido, de até 300 caracteres. A tela de revisão
+  mostra essa origem abaixo de cada campo.
 - Dados estruturados publicados pela página têm prioridade sobre a extração,
   e a descrição proposta continua sendo o texto coletado.
 - Falhas de tempo, cota (429), indisponibilidade, recusa ou resposta inválida

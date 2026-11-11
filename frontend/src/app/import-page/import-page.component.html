@@ -124,6 +124,9 @@
                 }
               </span>
               <input formControlName="title" maxlength="255" required />
+              @if (evidenceFor('title'); as origin) {
+                <small class="evidence">{{ origin }}</small>
+              }
             </label>
             <label>
               <span>
@@ -133,6 +136,9 @@
                 }
               </span>
               <input formControlName="companyName" maxlength="255" />
+              @if (evidenceFor('companyName'); as origin) {
+                <small class="evidence">{{ origin }}</small>
+              }
             </label>
             <label>
               <span>
@@ -142,6 +148,9 @@
                 }
               </span>
               <input formControlName="location" maxlength="255" />
+              @if (evidenceFor('location'); as origin) {
+                <small class="evidence">{{ origin }}</small>
+              }
             </label>
             <label>
               <span>
@@ -156,6 +165,9 @@
                   <option [ngValue]="mode">{{ workModes[mode] }}</option>
                 }
               </select>
+              @if (evidenceFor('workMode'); as origin) {
+                <small class="evidence">{{ origin }}</small>
+              }
             </label>
             <label>
               Link da vaga
@@ -185,6 +197,9 @@
                 max="9999999999999.99"
                 step="0.01"
               />
+              @if (evidenceFor('salary'); as origin) {
+                <small class="evidence">{{ origin }}</small>
+              }
             </label>
             <label>
               Período do salário
