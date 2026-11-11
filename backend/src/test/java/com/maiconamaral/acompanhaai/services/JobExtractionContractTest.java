@@ -153,6 +153,8 @@ class JobExtractionContractTest {
             "R$ 1.250.000 por ano|1250000|true",
             "R$ 32,50 por hora|32.5|true",
             "R$ 32,00 por hora|32.5|false",
+            "BRL 12,000 per month|12000|true",
+            "R$ 1,50 por hora|150|false",
             "R$ 85.000 por ano|8500|false",
             "R$ 18.500 por mês|8500|false",
             "Faixa de 7.000 a 9.000|8000|false"
@@ -160,6 +162,36 @@ class JobExtractionContractTest {
     )
     void requiresTheAmountToAppearInTheText(String source, String amount, boolean expected) {
         assertThat(JobExtractionContract.mentions(source, new BigDecimal(amount))).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        delimiter = '|',
+        value = {
+            "Salário de R$ 8.500,00 por mês.|8500|false",
+            "Salário a partir de R$ 7.000 por mês, conforme experiência.|7000|true",
+            "Salário mínimo de R$ 7.000 mensais.|7000|true",
+            "Remuneração de até R$ 9.000 por mês.|9000|true",
+            "Faixa de R$ 7.000 a R$ 9.000 por mês.|7000|true",
+            "Faixa de R$ 7.000 a R$ 9.000 por mês.|9000|true",
+            "Entre R$ 7.000 e R$ 9.000 mensais.|9000|true",
+            "Salary starting at BRL 7,000 per month.|7000|true",
+            "Salary: up to BRL 9,000 per month.|9000|true",
+            "R$ 7.000 - 9.000 por mês.|7000|true",
+            "Vale-refeição de R$ 30 por dia e salário de R$ 8.500 por mês.|8500|false"
+        }
+    )
+    void recognizesFloorsCeilingsAndRanges(String source, String amount, boolean expected) {
+        assertThat(JobExtractionContract.qualified(source, new BigDecimal(amount))).isEqualTo(expected);
+    }
+
+    @Test
+    void leavesOutASalaryFloor() {
+        var proposal = validate("""
+            {"salary": 7000, "salaryCurrency": "BRL", "salaryPeriod": "MONTH"}
+            """, "Salário a partir de R$ 7.000 por mês, conforme experiência.");
+
+        assertThat(proposal).doesNotContainKeys("salary", "salaryCurrency", "salaryPeriod");
     }
 
     @Test

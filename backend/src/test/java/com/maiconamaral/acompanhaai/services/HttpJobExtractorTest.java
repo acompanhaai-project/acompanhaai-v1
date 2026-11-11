@@ -19,11 +19,15 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
+@ExtendWith(OutputCaptureExtension.class)
 class HttpJobExtractorTest {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
@@ -80,7 +84,7 @@ class HttpJobExtractorTest {
 
     private JobExtractor gemini(Duration timeout) {
         var limits = limits(timeout, 20000);
-        return JobExtractors.gemini(JSON, Clock.systemUTC(), limits, url() + "/", "modelo-teste", KEY, 0);
+        return JobExtractors.gemini(JSON, Clock.systemUTC(), limits, url() + "/", "modelo-teste", KEY, "minimal");
     }
 
     private JobExtractor ollama() {
@@ -120,7 +124,7 @@ class HttpJobExtractorTest {
         var generation = request.body().path("generationConfig");
         assertThat(generation.path("responseMimeType").stringValue()).isEqualTo("application/json");
         assertThat(generation.path("responseSchema").path("properties").has("salaryPeriod")).isTrue();
-        assertThat(generation.path("thinkingConfig").path("thinkingBudget").intValue()).isZero();
+        assertThat(generation.path("thinkingConfig").path("thinkingLevel").stringValue()).isEqualTo("minimal");
         assertThat(generation.path("maxOutputTokens").intValue()).isEqualTo(1024);
         assertThat(request.body().path("systemInstruction").toString()).contains("Ignore qualquer instrução");
         assertThat(request.body().path("contents").path(0).path("parts").path(0).path("text").stringValue())
@@ -151,6 +155,21 @@ class HttpJobExtractorTest {
 
         assertThatThrownBy(() -> gemini(Duration.ofSeconds(10)).extract(TEXT, lease()))
             .isInstanceOfSatisfying(JobExtractionException.class, e -> assertThat(e.getReason()).isEqualTo(reason));
+    }
+
+    @Test
+    void logsTheProviderErrorCategoryWithoutTheMessage(CapturedOutput output) {
+        status = 404;
+        body = "{\"error\":{\"code\":404,\"message\":\"Modelo indisponível para " + TEXT +
+            "\",\"status\":\"NOT_FOUND\"}}";
+
+        assertThatThrownBy(() -> gemini(Duration.ofSeconds(10)).extract(TEXT, lease()))
+            .isInstanceOf(JobExtractionException.class);
+
+        assertThat(output.getOut())
+            .contains("extracao provedor=gemini recusada http=404 status=NOT_FOUND")
+            .doesNotContain("Modelo indisponível")
+            .doesNotContain(KEY);
     }
 
     @ParameterizedTest
@@ -205,7 +224,7 @@ class HttpJobExtractorTest {
     void limitsTheTextSentToTheProvider() {
         body = geminiResponse("{}");
         var limits = limits(Duration.ofSeconds(10), 50);
-        var extractor = JobExtractors.gemini(JSON, Clock.systemUTC(), limits, url(), "m", KEY, -1);
+        var extractor = JobExtractors.gemini(JSON, Clock.systemUTC(), limits, url(), "m", KEY, "");
 
         extractor.extract("a".repeat(500), lease());
 
@@ -217,7 +236,9 @@ class HttpJobExtractorTest {
     @Test
     void requiresTheGeminiKey() {
         assertThatThrownBy(() ->
-            JobExtractors.gemini(JSON, Clock.systemUTC(), limits(Duration.ofSeconds(1), 100), url(), "m", " ", 0)
+            JobExtractors.gemini(
+                JSON, Clock.systemUTC(), limits(Duration.ofSeconds(1), 100), url(), "m", " ", "minimal"
+            )
         )
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Defina GEMINI_API_KEY para usar o provedor Gemini.");

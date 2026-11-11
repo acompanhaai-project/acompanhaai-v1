@@ -17,9 +17,9 @@ public final class JobExtractors {
         String baseUrl,
         String model,
         String apiKey,
-        int thinkingBudget
+        String thinkingLevel
     ) {
-        return new GeminiJobExtractor(json, clock, limits.http(), baseUrl, model, apiKey, thinkingBudget);
+        return new GeminiJobExtractor(json, clock, limits.http(), baseUrl, model, apiKey, thinkingLevel);
     }
 
     public static JobExtractor ollama(JsonMapper json, Clock clock, Limits limits, String baseUrl, String model) {

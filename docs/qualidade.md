@@ -17,7 +17,7 @@ Esta estratégia não representa um relatório de testes executados.
 | Unidade                   | Sem suíte dedicada identificada nesta revisão     | Regras isoladas quando trouxerem valor                    |
 | Navegador                 | Frontend ainda não implementado                   | Selenium/Java, sessão, jornadas e acessibilidade          |
 | Desempenho/operação       | Sem execução comprovada nesta entrega             | Carga, restore, rollback e smoke                          |
-| IA                        | Integração ainda não implementada                 | Conjunto de avaliação e falhas controladas                |
+| IA                        | Extração por adaptador, evidência e conjunto v1   | Avaliação real sob demanda e simulação de falhas (KAN-59) |
 
 O baseline histórico registrado no planejamento é de 26 testes de integração
 e 90 requisições/246 asserções na fixture v1. Esses números não comprovam
