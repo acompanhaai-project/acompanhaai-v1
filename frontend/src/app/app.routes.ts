@@ -32,6 +32,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'candidaturas/importar',
+    canActivate: [requireSession],
+    data: { requiresAuth: true },
+    loadComponent: () =>
+      import('./import-page/import-page.component').then((m) => m.ImportPageComponent),
+  },
+  {
+    path: 'candidaturas/importar/:id',
+    canActivate: [requireSession],
+    data: { requiresAuth: true },
+    loadComponent: () =>
+      import('./import-page/import-page.component').then((m) => m.ImportPageComponent),
+  },
+  {
     path: 'candidaturas/:id',
     canActivate: [requireSession],
     data: { requiresAuth: true },

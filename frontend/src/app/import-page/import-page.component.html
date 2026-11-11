@@ -1,0 +1,210 @@
+<main class="page" aria-labelledby="import-title">
+  <a routerLink="/candidaturas">Voltar para candidaturas</a>
+
+  <header>
+    <h1 id="import-title" tabindex="-1">Importar vaga</h1>
+    <p>Cole o link ou a descrição da vaga. Os dados encontrados ficam disponíveis para revisão.</p>
+  </header>
+
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+  @if (error() || fieldErrors().length) {
+    <div class="error" role="alert">
+      @if (error()) {
+        <p>{{ error() }}</p>
+      }
+      @if (fieldErrors().length) {
+        <ul>
+          @for (field of fieldErrors(); track $index) {
+            <li>{{ field.message }}</li>
+          }
+        </ul>
+      }
+      @if (overloaded()) {
+        <a routerLink="/candidaturas/nova">Cadastrar manualmente</a>
+      }
+      @if (watchFailed()) {
+        <button type="button" (click)="keepWatching()">Tentar novamente</button>
+      }
+    </div>
+  }
+
+  @switch (phase()) {
+    @case ('form') {
+      <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+        <fieldset [disabled]="busy()">
+          <legend>Como você quer importar?</legend>
+          <div class="choices">
+            <label class="choice">
+              <input type="radio" formControlName="inputType" value="URL" />
+              Link da vaga
+            </label>
+            <label class="choice">
+              <input type="radio" formControlName="inputType" value="TEXT" />
+              Descrição colada
+            </label>
+          </div>
+
+          @if (form.controls.inputType.value === 'URL') {
+            <label>
+              Link da vaga
+              <input
+                formControlName="url"
+                type="url"
+                inputmode="url"
+                maxlength="2048"
+                placeholder="https://"
+                autocomplete="off"
+              />
+            </label>
+          } @else {
+            <label>
+              Descrição da vaga
+              <textarea formControlName="text" rows="10" maxlength="30000"></textarea>
+            </label>
+          }
+        </fieldset>
+        <div class="actions">
+          <button type="submit" class="primary" [disabled]="busy()">
+            {{ busy() ? 'Enviando…' : 'Importar' }}
+          </button>
+          <a routerLink="/candidaturas/nova">Prefiro cadastrar manualmente</a>
+        </div>
+      </form>
+    }
+
+    @case ('loading') {
+      <p role="status">Carregando importação…</p>
+    }
+
+    @case ('active') {
+      <section class="panel" aria-labelledby="active-title">
+        <h2 id="active-title">
+          {{ task()?.status === 'PENDING' ? 'Na fila de importação' : 'Lendo a vaga…' }}
+        </h2>
+        <p role="status">
+          @if (paused()) {
+            A importação está demorando mais que o esperado.
+          } @else {
+            Esta página é atualizada automaticamente. Você pode continuar navegando e voltar depois
+            pelo mesmo endereço.
+          }
+        </p>
+        @if (!paused() && !watchFailed()) {
+          <div class="progress" aria-hidden="true"><span></span></div>
+        }
+        <div class="actions">
+          @if (paused()) {
+            <button type="button" class="primary" (click)="keepWatching()">
+              Continuar acompanhando
+            </button>
+          }
+          <button type="button" (click)="cancel()" [disabled]="busy()">Cancelar importação</button>
+          <a routerLink="/candidaturas">Ir para candidaturas</a>
+        </div>
+      </section>
+    }
+
+    @case ('ready') {
+      @if (task()?.result; as result) {
+        <section class="panel" aria-labelledby="ready-title">
+          <h2 id="ready-title">Dados encontrados</h2>
+          <p role="status">Confira as informações antes de salvar a vaga.</p>
+          <dl class="summary">
+            <div>
+              <dt>Título</dt>
+              <dd>{{ result.title || 'Não encontrado' }}</dd>
+            </div>
+            <div>
+              <dt>Empresa</dt>
+              <dd>{{ result.companyName || 'Não encontrada' }}</dd>
+            </div>
+            @if (result.location) {
+              <div>
+                <dt>Localização</dt>
+                <dd>{{ result.location }}</dd>
+              </div>
+            }
+            @if (result.workMode) {
+              <div>
+                <dt>Modalidade</dt>
+                <dd>{{ workModes[result.workMode] }}</dd>
+              </div>
+            }
+            @if (result.salary && result.salaryPeriod) {
+              <div>
+                <dt>Salário</dt>
+                <dd>
+                  R$ {{ result.salary | number: '1.2-2' : 'pt' }} por
+                  {{ periods[result.salaryPeriod] }}
+                </dd>
+              </div>
+            }
+            @if (result.description) {
+              <div class="wide">
+                <dt>Descrição</dt>
+                <dd class="description">{{ excerpt(result.description) }}</dd>
+              </div>
+            }
+          </dl>
+          <div class="actions">
+            <button type="button" (click)="cancel()" [disabled]="busy()">
+              Descartar importação
+            </button>
+          </div>
+        </section>
+      }
+    }
+
+    @case ('attention') {
+      <section class="panel" aria-labelledby="attention-title">
+        <h2 id="attention-title">{{ failureTitle() }}</h2>
+        <p role="status">
+          {{ task()?.failure?.message ?? 'Não foi possível extrair os dados da vaga.' }}
+        </p>
+        <form [formGroup]="fallback" (ngSubmit)="submitFallback()">
+          <label>
+            Cole a descrição da vaga para continuar
+            <textarea formControlName="text" rows="10" maxlength="30000"></textarea>
+          </label>
+          <div class="actions">
+            <button type="submit" class="primary" [disabled]="busy()">
+              {{ busy() ? 'Enviando…' : 'Importar descrição' }}
+            </button>
+            <a routerLink="/candidaturas/nova">Cadastrar manualmente</a>
+            <a routerLink="/candidaturas/importar">Nova importação</a>
+          </div>
+        </form>
+      </section>
+    }
+
+    @case ('completed') {
+      <section class="panel" aria-labelledby="completed-title">
+        <h2 id="completed-title">Vaga salva</h2>
+        <p role="status">Esta importação já foi confirmada e a vaga está nas suas candidaturas.</p>
+        <div class="actions">
+          <a routerLink="/candidaturas">Ver candidaturas</a>
+          <a routerLink="/candidaturas/importar">Nova importação</a>
+        </div>
+      </section>
+    }
+
+    @case ('missing') {
+      <section class="panel" aria-labelledby="missing-title">
+        <h2 id="missing-title">Importação indisponível</h2>
+        <p role="status">
+          {{
+            expired()
+              ? 'O prazo desta importação terminou.'
+              : 'A importação não foi encontrada ou já expirou.'
+          }}
+        </p>
+        <div class="actions">
+          <a routerLink="/candidaturas/importar">Nova importação</a>
+          <a routerLink="/candidaturas">Ver candidaturas</a>
+        </div>
+      </section>
+    }
+  }
+</main>
