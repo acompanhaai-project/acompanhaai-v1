@@ -1,5 +1,3 @@
-import { DecimalPipe, registerLocaleData } from '@angular/common';
-import localePt from '@angular/common/locales/pt';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,8 +21,15 @@ import {
   switchMap,
   timer,
 } from 'rxjs';
+import { ApplicationInput, Job } from '../applications-board/application.models';
 import { ApiError, ApiFieldError } from '../core/http/api-error';
-import { ACTIVE_STATUSES, ImportInput, ImportInputType, ImportTask } from './import.models';
+import {
+  ACTIVE_STATUSES,
+  ImportInput,
+  ImportInputType,
+  ImportProposal,
+  ImportTask,
+} from './import.models';
 import { ImportsApi } from './imports-api';
 
 const WORK_MODES = { REMOTE: 'Remoto', HYBRID: 'Híbrido', ONSITE: 'Presencial' } as const;
@@ -41,11 +46,29 @@ export const POLL_DELAYS_MS = [1000, 2000, 4000, 8000, 10000] as const;
 /** Após esse tempo, o acompanhamento pausa até uma nova ação explícita. */
 export const MAX_WATCH_MS = 3 * 60 * 1000;
 
-registerLocaleData(localePt);
-
 const BLOCKED = new Set(['SOURCE_REQUIRES_LOGIN', 'SOURCE_BLOCKED', 'SOURCE_REQUIRES_JAVASCRIPT']);
 
 type Phase = 'form' | 'loading' | 'active' | 'ready' | 'attention' | 'completed' | 'missing';
+
+type Decision = 'SAVED' | 'APPLIED';
+
+function optional(value: string): string | null {
+  return value.trim() || null;
+}
+
+function skills(value: string): string[] {
+  return value
+    .split('\n')
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+}
+
+function today(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
 
 function delayFor(attempt: number): number {
   return POLL_DELAYS_MS[Math.min(attempt, POLL_DELAYS_MS.length - 1)];
@@ -58,7 +81,7 @@ function positiveId(value: string | null): number | null {
 
 @Component({
   selector: 'app-import-page',
-  imports: [RouterLink, ReactiveFormsModule, DecimalPipe],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './import-page.component.html',
   styleUrl: './import-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,7 +94,13 @@ export class ImportPageComponent {
   private readonly resume = new Subject<void>();
 
   protected readonly workModes = WORK_MODES;
+  protected readonly workModeOptions = Object.keys(WORK_MODES) as NonNullable<Job['workMode']>[];
   protected readonly periods = SALARY_PERIODS;
+  protected readonly periodOptions = Object.keys(SALARY_PERIODS) as NonNullable<
+    Job['salaryPeriod']
+  >[];
+  protected readonly missingFields = signal<ReadonlySet<string>>(new Set());
+  private reviewedTask: number | null = null;
   protected readonly task = signal<ImportTask | null>(null);
   protected readonly taskId = signal<number | null>(null);
   protected readonly loading = signal(false);
@@ -89,6 +118,25 @@ export class ImportPageComponent {
     inputType: new FormControl<ImportInputType>('URL', { nonNullable: true }),
     url: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(2048)] }),
     text: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(30000)] }),
+  });
+
+  protected readonly review = new FormGroup({
+    title: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern(/\S/), Validators.maxLength(255)],
+    }),
+    companyName: new FormControl('', { nonNullable: true }),
+    sourceUrl: new FormControl('', { nonNullable: true }),
+    description: new FormControl('', { nonNullable: true }),
+    location: new FormControl('', { nonNullable: true }),
+    workMode: new FormControl<Job['workMode']>(null),
+    salary: new FormControl<number | null>(null),
+    salaryPeriod: new FormControl<Job['salaryPeriod']>(null),
+    hardSkills: new FormControl('', { nonNullable: true }),
+    softSkills: new FormControl('', { nonNullable: true }),
+    decision: new FormControl<Decision>('SAVED', { nonNullable: true }),
+    appliedOn: new FormControl(today(), { nonNullable: true }),
+    notes: new FormControl('', { nonNullable: true }),
   });
 
   protected readonly fallback = new FormGroup({
@@ -155,7 +203,121 @@ export class ImportPageComponent {
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((task) => this.task.set(task));
+      .subscribe((task) => {
+        this.task.set(task);
+        if (task.status === 'READY_FOR_REVIEW' && task.result && this.reviewedTask !== task.id) {
+          this.fillReview(task.id, task.result);
+        }
+      });
+  }
+
+  protected save(): void {
+    const id = this.taskId();
+    if (id === null || id < 1 || this.busy()) {
+      return;
+    }
+    this.clearErrors();
+    const value = this.review.getRawValue();
+    if (this.review.invalid) {
+      this.review.markAllAsTouched();
+      this.error.set(
+        this.review.controls.title.invalid
+          ? 'Preencha o título da vaga com até 255 caracteres.'
+          : 'Confira os campos do formulário e tente novamente.',
+      );
+      return;
+    }
+    if (value.salary !== null && !value.salaryPeriod) {
+      this.error.set('Selecione o período do salário.');
+      return;
+    }
+
+    const input: ApplicationInput = {
+      job: {
+        title: value.title.trim(),
+        companyName: optional(value.companyName),
+        sourceUrl: optional(value.sourceUrl),
+        description: optional(value.description),
+        location: optional(value.location),
+        workMode: value.workMode,
+        salary: value.salary,
+        salaryCurrency: value.salary === null ? null : 'BRL',
+        salaryPeriod: value.salary === null ? null : value.salaryPeriod,
+        hardSkills: skills(value.hardSkills),
+        softSkills: skills(value.softSkills),
+      },
+      status: value.decision,
+      appliedOn: value.decision === 'SAVED' ? null : optional(value.appliedOn),
+      notes: optional(value.notes),
+    };
+
+    this.busy.set(true);
+    this.api
+      .confirm(id, input)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (application) => {
+          this.busy.set(false);
+          void this.router.navigate(['/candidaturas', application.id], { replaceUrl: true });
+        },
+        error: (error: unknown) => {
+          this.busy.set(false);
+          if (error instanceof ApiError && error.status === 404) {
+            this.missing.set(true);
+            return;
+          }
+          if (error instanceof ApiError && error.code === 'JOB_URL_ALREADY_EXISTS') {
+            this.error.set(
+              'Você já cadastrou uma vaga com esse link. Altere o link ou abra a candidatura existente nas suas candidaturas.',
+            );
+            return;
+          }
+          this.showCreateError(error);
+          if (error instanceof ApiError && error.code === 'IMPORT_NOT_READY') {
+            this.resume.next();
+          }
+        },
+      });
+  }
+
+  protected isMissing(field: string): boolean {
+    return this.missingFields().has(field);
+  }
+
+  private fillReview(id: number, result: ImportProposal): void {
+    this.reviewedTask = id;
+    this.review.reset({
+      title: result.title ?? '',
+      companyName: result.companyName ?? '',
+      sourceUrl: result.sourceUrl ?? '',
+      description: result.description ?? '',
+      location: result.location ?? '',
+      workMode: result.workMode ?? null,
+      salary: result.salary ?? null,
+      salaryPeriod: result.salaryPeriod ?? null,
+      hardSkills: (result.hardSkills ?? []).join('\n'),
+      softSkills: (result.softSkills ?? []).join('\n'),
+      decision: 'SAVED',
+      appliedOn: today(),
+      notes: '',
+    });
+    const checked = [
+      'title',
+      'companyName',
+      'location',
+      'workMode',
+      'salary',
+      'hardSkills',
+      'softSkills',
+    ] as const;
+    this.missingFields.set(
+      new Set(
+        checked.filter((field) => {
+          const value = result[field];
+          return value === undefined || value === null || (Array.isArray(value) && !value.length);
+        }),
+      ),
+    );
   }
 
   protected submit(): void {
@@ -216,13 +378,6 @@ export class ImportPageComponent {
           this.resume.next();
         },
       });
-  }
-
-  protected excerpt(text: string | undefined): string {
-    if (!text) {
-      return '';
-    }
-    return text.length > 600 ? `${text.slice(0, 600).trimEnd()}…` : text;
   }
 
   private start(input: ImportInput): void {

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SessionState } from '../core/auth/session-state';
 import { EXPECTED_SESSION_REVISION } from '../core/http/api-interceptor';
+import { Application, ApplicationInput } from '../applications-board/application.models';
 import { ImportInput, ImportTask } from './import.models';
 
 const IMPORTS = '/api/import-tasks';
@@ -18,6 +19,12 @@ export class ImportsApi {
 
   get(id: number): Observable<ImportTask> {
     return this.http.get<ImportTask>(`${IMPORTS}/${id}`);
+  }
+
+  confirm(id: number, input: ApplicationInput): Observable<Application> {
+    return this.http.post<Application>(`${IMPORTS}/${id}/confirm`, input, {
+      context: this.writeContext(),
+    });
   }
 
   cancel(id: number): Observable<void> {

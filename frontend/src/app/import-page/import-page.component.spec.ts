@@ -88,6 +88,10 @@ describe('Importação de vagas', () => {
     await Promise.resolve();
   }
 
+  function field<T extends HTMLElement = HTMLInputElement>(name: string): T {
+    return root.querySelector<T>(`[formcontrolname=${name}]`)!;
+  }
+
   function poll(response: ImportTask): void {
     backend.expectOne({ method: 'GET', url: `${endpoint}/7` }).flush(response);
     fixture.detectChanges();
@@ -196,10 +200,8 @@ describe('Importação de vagas', () => {
       }),
     );
 
-    expect(text()).toContain('Dados encontrados');
-    expect(text()).toContain('Pessoa desenvolvedora Java');
-    expect(text()).toContain('Remoto');
-    expect(text()).toContain('R$ 8.500,00 por mês');
+    expect(text()).toContain('Revise os dados da vaga');
+    expect(field('title').value).toBe('Pessoa desenvolvedora Java');
     vi.advanceTimersByTime(60_000);
     backend.expectNone(`${endpoint}/7`);
   });
@@ -329,5 +331,126 @@ describe('Importação de vagas', () => {
     open('abc');
 
     expect(text()).toContain('Importação indisponível');
+  });
+  describe('revisão', () => {
+    const ready = task({
+      status: 'READY_FOR_REVIEW',
+      result: {
+        title: 'Pessoa desenvolvedora Java',
+        companyName: 'Empresa Exemplo',
+        workMode: 'REMOTE',
+        salary: 8500,
+        salaryCurrency: 'BRL',
+        salaryPeriod: 'MONTH',
+        description: 'Atuar com Spring.',
+      },
+    });
+    const saved = { id: 40, job: { id: 30 } };
+
+    function confirmRequest() {
+      return backend.expectOne({ method: 'POST', url: `${endpoint}/7/confirm` });
+    }
+
+    it('preenche os campos encontrados e indica os ausentes', () => {
+      open('7');
+      poll(ready);
+
+      expect(field('title').value).toBe('Pessoa desenvolvedora Java');
+      expect(field('companyName').value).toBe('Empresa Exemplo');
+      expect(field('salary').value).toBe('8500');
+      expect(field<HTMLTextAreaElement>('description').value).toBe('Atuar com Spring.');
+      const missing = Array.from(root.querySelectorAll('.missing')).map((tag) =>
+        tag.parentElement?.textContent?.replace(/\s+/g, ' ').trim(),
+      );
+      expect(missing).toEqual([
+        'Localização Não encontrada',
+        'Habilidades técnicas Não encontradas',
+        'Habilidades comportamentais Não encontradas',
+      ]);
+      expect(text()).toContain('Se ficar vazio, a vaga é salva com o link importado.');
+    });
+
+    it('salva como interesse com as correções e abre a candidatura', async () => {
+      open('7');
+      poll(ready);
+      type('[formcontrolname=companyName]', '  Empresa Corrigida ');
+      type('[formcontrolname=hardSkills]', 'Java\n\n Spring ');
+
+      submit();
+      submit();
+      await csrf();
+      const request = confirmRequest();
+      expect(request.request.body).toEqual({
+        job: {
+          title: 'Pessoa desenvolvedora Java',
+          companyName: 'Empresa Corrigida',
+          sourceUrl: null,
+          description: 'Atuar com Spring.',
+          location: null,
+          workMode: 'REMOTE',
+          salary: 8500,
+          salaryCurrency: 'BRL',
+          salaryPeriod: 'MONTH',
+          hardSkills: ['Java', 'Spring'],
+          softSkills: [],
+        },
+        status: 'SAVED',
+        appliedOn: null,
+        notes: null,
+      });
+      request.flush(saved, { status: 201, statusText: 'Created' });
+
+      expect(navigate).toHaveBeenCalledWith(['/candidaturas', 40], { replaceUrl: true });
+    });
+
+    it('registra a inscrição com a data escolhida', async () => {
+      open('7');
+      poll(ready);
+      root.querySelector<HTMLInputElement>('input[value=APPLIED]')!.click();
+      fixture.detectChanges();
+      type('[formcontrolname=appliedOn]', '2026-11-10');
+
+      submit();
+      await csrf();
+      const request = confirmRequest();
+      expect(request.request.body).toMatchObject({ status: 'APPLIED', appliedOn: '2026-11-10' });
+      request.flush(saved, { status: 200, statusText: 'OK' });
+      expect(navigate).toHaveBeenCalledWith(['/candidaturas', 40], { replaceUrl: true });
+    });
+
+    it('mantém as correções quando o link já foi cadastrado', async () => {
+      open('7');
+      poll(ready);
+      type('[formcontrolname=title]', 'Título corrigido');
+
+      submit();
+      await csrf();
+      confirmRequest().flush(
+        { status: 409, code: 'JOB_URL_ALREADY_EXISTS', detail: 'Duplicada.' },
+        { status: 409, statusText: 'Conflict' },
+      );
+      fixture.detectChanges();
+
+      expect(text()).toContain('Você já cadastrou uma vaga com esse link.');
+      expect(field('title').value).toBe('Título corrigido');
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('exige título e período do salário antes de enviar', () => {
+      open('7');
+      poll(ready);
+      type('[formcontrolname=title]', '   ');
+      submit();
+      expect(text()).toContain('Preencha o título da vaga');
+
+      type('[formcontrolname=title]', 'Analista');
+      const period = field<HTMLSelectElement>('salaryPeriod');
+      period.value = period.options[0].value;
+      period.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      submit();
+      expect(text()).toContain('Selecione o período do salário.');
+      backend.expectNone(`${endpoint}/7/confirm`);
+    });
   });
 });
