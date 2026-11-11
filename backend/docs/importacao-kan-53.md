@@ -146,6 +146,47 @@ extração com IA serão tratadas na tarefa responsável.
 - Entrada TEXT vira a descrição proposta após normalizar espaços e remover
   caracteres de controle, com limite de 30000 caracteres.
 
+## Extração com IA
+
+A extração completa a proposta quando há um provedor configurado. Ela é
+opcional: sem provedor, ou em caso de falha, a tarefa segue com os dados
+estruturados da página e a descrição.
+
+| Propriedade | Padrão | Efeito |
+| --- | --- | --- |
+| `app.extraction.provider` | `none` | `none`, `gemini` ou `ollama`. Também lê `EXTRACTION_PROVIDER`. |
+| `app.extraction.timeout` | `30s` | Tempo máximo da chamada, limitado pela posse da tarefa. |
+| `app.extraction.max-input-chars` | `20000` | Texto máximo enviado ao provedor. |
+| `app.extraction.gemini.model` | `gemini-2.5-flash-lite` | Modelo do Gemini. |
+| `app.extraction.gemini.api-key` | `GEMINI_API_KEY` | Chave do Gemini, obrigatória com esse provedor. |
+| `app.extraction.gemini.thinking-budget` | `0` | Orçamento de raciocínio; negativo omite o parâmetro. |
+| `app.extraction.ollama.base-url` | `http://localhost:11434` | Servidor local do Ollama. |
+| `app.extraction.ollama.model` | `llama3.2` | Modelo local. |
+
+- Somente a descrição da vaga é enviada, delimitada como conteúdo a analisar.
+  Currículo, anotações e dados da conta nunca fazem parte da chamada.
+- A resposta é pedida em JSON com esquema e validada pelas mesmas regras da
+  proposta. Campos inválidos são descartados individualmente.
+- O salário só entra com valor único, moeda BRL, período explícito e com o
+  mesmo valor escrito no texto da vaga.
+- Dados estruturados publicados pela página têm prioridade sobre a extração,
+  e a descrição proposta continua sendo o texto coletado.
+- Falhas de tempo, cota (429), indisponibilidade, recusa ou resposta inválida
+  não falham a tarefa. O log registra `extracao provedor falha duracaoMs`,
+  sem texto, resposta ou chave.
+- Provedor e modelo usados ficam registrados na tarefa.
+
+Para usar o Gemini localmente, defina em `application-local.properties`, que
+é ignorado pelo Git:
+
+```properties
+app.extraction.provider=gemini
+app.extraction.gemini.api-key=SUA_CHAVE
+```
+
+Para o Ollama, instale um modelo (`ollama pull llama3.2`) e use
+`app.extraction.provider=ollama`.
+
 ## Limites e observabilidade
 
 | Propriedade | Padrão | Efeito |

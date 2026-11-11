@@ -14,6 +14,8 @@ spring:
 app:
   import-worker:
     scheduling-enabled: false
+  extraction:
+    provider: none
   password-reset:
     limits:
       per-ip: 1000

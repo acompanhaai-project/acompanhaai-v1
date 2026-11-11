@@ -19,7 +19,7 @@ Fluxo de uma requisição:
 Frontend → Resource → Service → Repository → PostgreSQL
 
 O backend possui autenticação, perfil, CRUD manual de candidaturas e
-importação assíncrona com coleta de páginas. A extração com IA está planejada.
+importação assíncrona com coleta de páginas e extração opcional por IA.
 
 ## Decisão 1 — Backend monolítico em camadas
 
@@ -126,7 +126,8 @@ retorna após enfileirar a tarefa. A coleta e a extração acontecem separadamen
 
 A entidade, a persistência, o controle da fila e a coleta de páginas já existem.
 As rotas de criação, consulta, confirmação e cancelamento também estão disponíveis.
-A extração com IA será integrada nas próximas tarefas.
+A extração com IA usa um adaptador configurável (Gemini ou Ollama), desligado
+por padrão. O conjunto de avaliação e o tratamento de cota do provedor seguem nas próximas tarefas.
 As transições, a retenção e o contrato HTTP estão na
 [KAN-53](../backend/docs/importacao-kan-53.md).
 

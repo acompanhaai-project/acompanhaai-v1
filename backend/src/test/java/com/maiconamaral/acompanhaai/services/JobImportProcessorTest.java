@@ -17,7 +17,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +58,7 @@ class JobImportProcessorTest {
             ImportPageCollectorTest.TEST_NETWORK,
             true
         );
-        processor = new JobImportProcessor(collector);
+        processor = new JobImportProcessor(collector, Optional.empty());
     }
 
     @AfterEach
@@ -150,5 +152,89 @@ class JobImportProcessorTest {
 
     private static Instant lease() {
         return Instant.now().plusSeconds(120);
+    }
+
+    private record FakeExtractor(Map<String, Object> result, JobExtractionException failure) implements JobExtractor {
+        @Override
+        public String provider() {
+            return "teste";
+        }
+
+        @Override
+        public String model() {
+            return "modelo-teste";
+        }
+
+        @Override
+        public Map<String, Object> extract(String text, Instant deadline) {
+            if (failure != null) {
+                throw failure;
+            }
+            return result;
+        }
+    }
+
+    private JobImportProcessor withExtractor(Map<String, Object> result) {
+        return new JobImportProcessor(collector, Optional.of(new FakeExtractor(result, null)));
+    }
+
+    @Test
+    void completesThePastedDescriptionWithTheExtraction() {
+        var processor = withExtractor(Map.of("title", "Pessoa desenvolvedora Java", "hardSkills", List.of("Java")));
+
+        var outcome = processor.process(ImportInputType.TEXT, DESCRIPTION, lease());
+
+        assertThat(outcome).isEqualTo(new Ready(
+            null,
+            Map.of(
+                "description", DESCRIPTION,
+                "title", "Pessoa desenvolvedora Java",
+                "hardSkills", List.of("Java")
+            ),
+            "teste",
+            "modelo-teste"
+        ));
+    }
+
+    @Test
+    void keepsTheStructuredDataPublishedByThePage() {
+        page = """
+            <script type="application/ld+json">
+            {
+              "@type": "JobPosting",
+              "title": "Título publicado",
+              "hiringOrganization": { "name": "Empresa Exemplo" }
+            }
+            </script>
+            <p>Vaga presencial em Recife, PE.</p>
+            """;
+        var processor = withExtractor(Map.of("title", "Título do modelo", "location", "Recife, PE"));
+
+        var outcome = (Ready) processor.process(
+            ImportInputType.URL,
+            "http://vagas.example.test:" + server.getAddress().getPort() + "/vaga",
+            lease()
+        );
+
+        assertThat(outcome.proposal()).isEqualTo(Map.of(
+            "title", "Título publicado",
+            "companyName", "Empresa Exemplo",
+            "location", "Recife, PE"
+        ));
+        assertThat(outcome.extractorProvider()).isEqualTo("teste");
+    }
+
+    @Test
+    void keepsTheProposalWhenTheProviderFails() {
+        var processor = new JobImportProcessor(
+            collector,
+            Optional.of(
+                new FakeExtractor(null, new JobExtractionException(JobExtractionException.Reason.RATE_LIMITED))
+            )
+        );
+
+        var outcome = processor.process(ImportInputType.TEXT, DESCRIPTION, lease());
+
+        assertThat(outcome).isEqualTo(new Ready(null, Map.of("description", DESCRIPTION)));
     }
 }
