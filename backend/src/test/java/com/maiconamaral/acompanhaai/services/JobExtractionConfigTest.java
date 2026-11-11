@@ -33,6 +33,7 @@ class JobExtractionConfigTest {
             .withPropertyValues("app.extraction.provider=ollama", "app.extraction.ollama.model=qwen2.5")
             .run(context -> {
                 assertThat(context.getBean(JobExtractor.class).provider()).isEqualTo("ollama");
+                assertThat(context.getBean(JobExtractor.class)).isInstanceOf(GuardedJobExtractor.class);
                 assertThat(context.getBean(JobExtractor.class).model()).isEqualTo("qwen2.5");
             });
         runner

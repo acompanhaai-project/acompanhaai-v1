@@ -2,7 +2,6 @@ package com.maiconamaral.acompanhaai.services;
 
 import java.net.URI;
 import java.time.Clock;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import tools.jackson.databind.JsonNode;
@@ -13,8 +12,8 @@ class OllamaJobExtractor extends HttpJobExtractor {
     private final URI endpoint;
     private final String model;
 
-    OllamaJobExtractor(JsonMapper json, Clock clock, Duration timeout, int maxInput, String baseUrl, String model) {
-        super(json, clock, timeout, maxInput);
+    OllamaJobExtractor(JsonMapper json, Clock clock, ExtractionLimits limits, String baseUrl, String model) {
+        super(json, clock, limits);
         this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/api/chat");
         this.model = model;
     }
@@ -45,7 +44,7 @@ class OllamaJobExtractor extends HttpJobExtractor {
             "model", model,
             "stream", false,
             "format", JobExtractionContract.jsonSchema(),
-            "options", Map.of("temperature", 0),
+            "options", Map.of("temperature", 0, "num_predict", maxOutput),
             "messages", List.of(
                 Map.of("role", "system", "content", JobExtractionContract.INSTRUCTIONS),
                 Map.of("role", "user", "content", JobExtractionContract.userMessage(text))
