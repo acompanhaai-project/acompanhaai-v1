@@ -157,6 +157,12 @@ estruturados da página e a descrição.
 | `app.extraction.provider` | `none` | `none`, `gemini` ou `ollama`. Também lê `EXTRACTION_PROVIDER`. |
 | `app.extraction.timeout` | `30s` | Tempo máximo da chamada, limitado pela posse da tarefa. |
 | `app.extraction.max-input-chars` | `20000` | Texto máximo enviado ao provedor. |
+| `app.extraction.max-output-tokens` | `1024` | Tokens máximos de resposta (`maxOutputTokens` / `num_predict`). |
+| `app.extraction.max-attempts` | `2` | Tentativas por tarefa em 429, timeout ou indisponibilidade. |
+| `app.extraction.retry-delay` | `2s` | Espera antes da segunda tentativa; dobra a cada nova tentativa. |
+| `app.extraction.daily-limit` | `200` | Chamadas ao provedor por dia (UTC) nesta instância; `0` desativa. |
+| `app.extraction.failure-threshold` | `3` | Falhas transitórias seguidas que pausam o provedor. |
+| `app.extraction.cooldown` | `5m` | Duração da pausa após falhas seguidas. |
 | `app.extraction.gemini.model` | `gemini-2.5-flash-lite` | Modelo do Gemini. |
 | `app.extraction.gemini.api-key` | `GEMINI_API_KEY` | Chave do Gemini, obrigatória com esse provedor. |
 | `app.extraction.gemini.thinking-budget` | `0` | Orçamento de raciocínio; negativo omite o parâmetro. |
@@ -174,6 +180,26 @@ estruturados da página e a descrição.
 - Falhas de tempo, cota (429), indisponibilidade, recusa ou resposta inválida
   não falham a tarefa. O log registra `extracao provedor falha duracaoMs`,
   sem texto, resposta ou chave.
+
+### Falhas, cota e custo
+
+- 429, timeout e indisponibilidade recebem nova tentativa com espera
+  progressiva, somente se ainda houver tempo na posse da tarefa. Recusa (4xx)
+  e resposta inválida não são repetidas.
+- Cada chamada, inclusive as novas tentativas, consome o limite diário. Ao
+  atingi-lo, a extração é pulada com `BUDGET_EXHAUSTED` até a virada do dia
+  em UTC. O contador fica em memória e reinicia com a aplicação.
+- Após `failure-threshold` falhas transitórias seguidas, o provedor é pausado
+  por `cooldown` e as tarefas seguem sem IA com `SUSPENDED`. Um sucesso zera
+  a contagem.
+- A cota por conta da importação (`app.import-limits.*`) também limita as
+  chamadas: cada tarefa faz no máximo `max-attempts` chamadas.
+- Texto de entrada e resposta são limitados por `max-input-chars` e
+  `max-output-tokens`.
+- Para desligar a IA, use `app.extraction.provider=none` ou
+  `EXTRACTION_PROVIDER=none`. A importação e o cadastro manual continuam
+  disponíveis com qualquer falha do provedor.
+- Novas tentativas e pausas também são registradas no log, sem conteúdo.
 - Provedor e modelo usados ficam registrados na tarefa.
 
 Para usar o Gemini localmente, defina em `application-local.properties`, que

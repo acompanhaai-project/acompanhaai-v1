@@ -2,7 +2,6 @@ package com.maiconamaral.acompanhaai.services;
 
 import java.net.URI;
 import java.time.Clock;
-import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +18,13 @@ class GeminiJobExtractor extends HttpJobExtractor {
     GeminiJobExtractor(
         JsonMapper json,
         Clock clock,
-        Duration timeout,
-        int maxInput,
+        ExtractionLimits limits,
         String baseUrl,
         String model,
         String apiKey,
         int thinkingBudget
     ) {
-        super(json, clock, timeout, maxInput);
+        super(json, clock, limits);
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("Defina GEMINI_API_KEY para usar o provedor Gemini.");
         }
@@ -60,6 +58,7 @@ class GeminiJobExtractor extends HttpJobExtractor {
     Object body(String text) {
         var generation = new LinkedHashMap<String, Object>();
         generation.put("temperature", 0);
+        generation.put("maxOutputTokens", maxOutput);
         generation.put("responseMimeType", "application/json");
         generation.put("responseSchema", JobExtractionContract.geminiSchema());
         if (thinkingBudget >= 0) {

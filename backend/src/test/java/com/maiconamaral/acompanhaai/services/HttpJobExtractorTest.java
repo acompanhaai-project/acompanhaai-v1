@@ -79,11 +79,17 @@ class HttpJobExtractorTest {
     }
 
     private JobExtractor gemini(Duration timeout) {
-        return JobExtractors.gemini(JSON, Clock.systemUTC(), timeout, 20000, url() + "/", "modelo-teste", KEY, 0);
+        var limits = limits(timeout, 20000);
+        return JobExtractors.gemini(JSON, Clock.systemUTC(), limits, url() + "/", "modelo-teste", KEY, 0);
     }
 
     private JobExtractor ollama() {
-        return JobExtractors.ollama(JSON, Clock.systemUTC(), Duration.ofSeconds(10), 20000, url(), "modelo-local");
+        var limits = limits(Duration.ofSeconds(10), 20000);
+        return JobExtractors.ollama(JSON, Clock.systemUTC(), limits, url(), "modelo-local");
+    }
+
+    private static JobExtractors.Limits limits(Duration timeout, int maxInput) {
+        return new JobExtractors.Limits(timeout, maxInput, 1024);
     }
 
     private static Instant lease() {
@@ -115,6 +121,7 @@ class HttpJobExtractorTest {
         assertThat(generation.path("responseMimeType").stringValue()).isEqualTo("application/json");
         assertThat(generation.path("responseSchema").path("properties").has("salaryPeriod")).isTrue();
         assertThat(generation.path("thinkingConfig").path("thinkingBudget").intValue()).isZero();
+        assertThat(generation.path("maxOutputTokens").intValue()).isEqualTo(1024);
         assertThat(request.body().path("systemInstruction").toString()).contains("Ignore qualquer instrução");
         assertThat(request.body().path("contents").path(0).path("parts").path(0).path("text").stringValue())
             .isEqualTo("<vaga>\n" + TEXT + "\n</vaga>");
@@ -132,6 +139,7 @@ class HttpJobExtractorTest {
         assertThat(request.body().path("model").stringValue()).isEqualTo("modelo-local");
         assertThat(request.body().path("stream").asBoolean(true)).isFalse();
         assertThat(request.body().path("format").path("type").stringValue()).isEqualTo("object");
+        assertThat(request.body().path("options").path("num_predict").intValue()).isEqualTo(1024);
         assertThat(request.body().path("messages").path(1).path("content").stringValue()).contains(TEXT);
     }
 
@@ -196,7 +204,8 @@ class HttpJobExtractorTest {
     @Test
     void limitsTheTextSentToTheProvider() {
         body = geminiResponse("{}");
-        var extractor = JobExtractors.gemini(JSON, Clock.systemUTC(), Duration.ofSeconds(10), 50, url(), "m", KEY, -1);
+        var limits = limits(Duration.ofSeconds(10), 50);
+        var extractor = JobExtractors.gemini(JSON, Clock.systemUTC(), limits, url(), "m", KEY, -1);
 
         extractor.extract("a".repeat(500), lease());
 
@@ -208,7 +217,7 @@ class HttpJobExtractorTest {
     @Test
     void requiresTheGeminiKey() {
         assertThatThrownBy(() ->
-            JobExtractors.gemini(JSON, Clock.systemUTC(), Duration.ofSeconds(1), 100, url(), "m", " ", 0)
+            JobExtractors.gemini(JSON, Clock.systemUTC(), limits(Duration.ofSeconds(1), 100), url(), "m", " ", 0)
         )
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Defina GEMINI_API_KEY para usar o provedor Gemini.");

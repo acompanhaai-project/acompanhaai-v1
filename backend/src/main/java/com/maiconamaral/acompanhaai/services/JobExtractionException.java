@@ -7,7 +7,9 @@ public class JobExtractionException extends RuntimeException {
         RATE_LIMITED,
         UNAVAILABLE,
         REJECTED,
-        INVALID_RESPONSE
+        INVALID_RESPONSE,
+        SUSPENDED,
+        BUDGET_EXHAUSTED
     }
 
     private final Reason reason;

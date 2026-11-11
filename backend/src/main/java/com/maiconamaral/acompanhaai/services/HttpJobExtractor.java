@@ -17,6 +17,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 abstract class HttpJobExtractor implements JobExtractor {
 
+    record ExtractionLimits(Duration timeout, int maxInputChars, int maxOutputTokens) {}
+
     private static final Duration MARGIN = Duration.ofSeconds(5);
     private static final Duration MINIMUM = Duration.ofSeconds(2);
 
@@ -25,12 +27,14 @@ abstract class HttpJobExtractor implements JobExtractor {
     private final Clock clock;
     private final Duration timeout;
     private final int maxInput;
+    final int maxOutput;
 
-    HttpJobExtractor(JsonMapper json, Clock clock, Duration timeout, int maxInput) {
+    HttpJobExtractor(JsonMapper json, Clock clock, ExtractionLimits limits) {
         this.json = json;
         this.clock = clock;
-        this.timeout = timeout;
-        this.maxInput = maxInput;
+        this.timeout = limits.timeout();
+        this.maxInput = limits.maxInputChars();
+        this.maxOutput = limits.maxOutputTokens();
         this.client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .followRedirects(HttpClient.Redirect.NEVER)

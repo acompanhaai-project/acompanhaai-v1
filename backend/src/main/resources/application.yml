@@ -45,6 +45,13 @@ app:
     provider: ${EXTRACTION_PROVIDER:none}
     timeout: 30s
     max-input-chars: 20000
+    max-output-tokens: 1024
+    max-attempts: 2
+    retry-delay: 2s
+    # Chamadas ao provedor por dia (UTC) nesta instância; 0 desativa o limite.
+    daily-limit: 200
+    failure-threshold: 3
+    cooldown: 5m
     gemini:
       base-url: https://generativelanguage.googleapis.com
       model: gemini-2.5-flash-lite
