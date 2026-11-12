@@ -1,8 +1,9 @@
-# Jornadas de acesso e perfil no navegador — KAN-40
+# Jornadas no navegador — KAN-40 e KAN-45
 
 Suíte Selenium WebDriver/Java com JUnit, API Spring Boot real, Angular real e
-SMTP capturado pelo GreenMail. A suíte cobre o acesso da KAN-36 e o perfil da
-KAN-37 com requisições reais.
+SMTP capturado pelo GreenMail. A suíte cobre o acesso da KAN-36, o perfil da
+KAN-37, o quadro e o cadastro de candidaturas e o fluxo manual completo da
+KAN-45 com requisições reais.
 
 ## Executar no Windows com PostgreSQL descartável
 
@@ -47,10 +48,23 @@ somente `*BrowserIT`. Sem `-Pbrowser-qa`, a suíte normal não inicia navegador
 nem compila esses fontes. O Selenium tem versão fixada no perfil, incluindo
 seus módulos gerenciados pelo parent do Spring Boot.
 
+## Executar no CI
+
+O job `backend-browser-qa` do Backend CI roda a suíte em todo PR, com Chrome,
+Angular, API e PostgreSQL 18 exclusivos do job. A página do job traz o resumo
+por cenário (`summary.py`), e o artefato `testes-navegador-<commit>` guarda os
+relatórios JUnit, as capturas e a versão do ambiente por sete dias.
+
+Falha relevante nesse job vira Bug no Jira, conforme [o fluxo de
+Bugs](../../docs/bugs.md): cenário, viewport e tema, passos, resultado esperado e
+obtido, commit e link da execução, com a captura do artefato. Não anexar logs
+completos, cookies ou dados de sessão.
+
 ## Cenários
 
-Cada método roda em quatro combinações: viewport de 1440 e 390 pixels,
-tema claro e escuro. O navegador usa viewport emulada, sem simular aparelho físico
+Os métodos da KAN-40 rodam em quatro combinações: viewport de 1440 e 390 pixels,
+tema claro e escuro. O fluxo manual roda em 1440px com tema claro e 390px com
+tema escuro. O navegador usa viewport emulada, sem simular aparelho físico
 ou comportamento específico de Safari/Android. As esperas são condicionais.
 
 | Método | Verificações |
@@ -58,6 +72,7 @@ ou comportamento específico de Safari/Android. As esperas são condicionais.
 | `accountLifecycle` | Cadastro exclusivo, duplicidade e foco, credenciais inválidas, limpeza da senha, destino preservado, cookie HttpOnly, ausência de tokens/identidade em storage, restauração após recarga, logout em outra aba, recuperação SMTP, cooldown visível, redefinição, revogação da sessão anterior, senha antiga rejeitada, senha nova aceita e token de uso único |
 | `keyboardAndFieldErrors` | Primeiro campo inválido, Tab entre campos, e-mail inválido e `aria-invalid`, confirmação divergente e mensagem associada, Enter para avançar no login, foco na senha, Space no botão de mostrar senha, erro na recuperação e link sem token |
 | `profileLifecycle` | Retorno ao perfil após login, edição e persistência de nome/e-mail, foco no seletor de foto, prévia e cancelamento, envio PNG e substituição JPEG, limites de 2 MiB e 4 milhões de pixels, remoção e avatar padrão, senha atual incorreta e troca com novo login, confirmação de exclusão com e-mail, cancelamento com Escape e restauração de foco |
+| `manualFlowAcrossAccounts` | Duas contas exclusivas; criação pela interface, edição e persistência, conflito 409 com outra aba (rascunho preservado e recarga), falha de rede simulada com dados preservados e novo envio, pesquisa e etapa no quadro, movimentação para fora do filtro, histórico na tela e na API, filtros mantidos ao voltar dos detalhes, outra conta sem acesso pelo quadro, pela pesquisa, pela URL e pela API (404), exclusão da candidatura e das duas contas ao final |
 
 As jornadas também conferem ausência de rolagem horizontal. O tema é
 selecionado pelo controle da interface e pela preferência de mídia emulada.

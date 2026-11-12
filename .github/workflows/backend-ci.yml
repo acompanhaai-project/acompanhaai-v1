@@ -285,3 +285,68 @@ jobs:
             backend/target/surefire-reports/*.txt
           if-no-files-found: warn
           retention-days: 7
+
+  browser-qa:
+    name: backend-browser-qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: acompanhaai_browser_qa
+          POSTGRES_USER: acompanhaai_browser_qa
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U acompanhaai_browser_qa -d acompanhaai_browser_qa"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACOMPANHAAI_QA_DB_PASSWORD: ""
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Configurar Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar dependências do frontend
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+      - name: Permitir execução do Maven Wrapper
+        run: chmod +x mvnw
+      - name: Executar jornadas no navegador com PostgreSQL
+        run: |
+          export ACOMPANHAAI_QA_CHROME_BINARY="$(command -v google-chrome)"
+          ./mvnw --batch-mode --no-transfer-progress -Pbrowser-qa test \
+            "-Dqa.database.url=jdbc:postgresql://127.0.0.1:5432/acompanhaai_browser_qa" \
+            "-Dqa.database.user=acompanhaai_browser_qa"
+      - name: Resumir jornadas no relatório do job
+        if: always()
+        run: python3 ../qa/browser/summary.py target/surefire-reports >> "$GITHUB_STEP_SUMMARY"
+      - name: Publicar relatórios e capturas das jornadas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testes-navegador-${{ github.sha }}
+          path: |
+            backend/target/surefire-reports/*BrowserIT.xml
+            backend/target/surefire-reports/*BrowserIT.txt
+            backend/target/browser-qa/*.png
+            backend/target/browser-qa/environment.txt
+          if-no-files-found: warn
+          retention-days: 7
