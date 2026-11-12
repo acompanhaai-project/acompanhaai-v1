@@ -337,6 +337,7 @@ class AccessJourneysBrowserIT {
         WebElement destination = visible(card + " select");
         destination.sendKeys(Keys.HOME, Keys.ARROW_DOWN, Keys.ARROW_DOWN, Keys.ARROW_DOWN);
         assertEquals("INTERVIEW", destination.getDomProperty("value"));
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(card + " .move")));
         destination.sendKeys(Keys.TAB);
         WebElement move = browser.switchTo().activeElement();
         assertEquals("Mover", move.getText());
@@ -568,7 +569,7 @@ class AccessJourneysBrowserIT {
         assertTrue(browser.getCurrentUrl().contains("busca=" + marker));
         assertEquals("applied", laneOf(id));
         new Select(visible("#application-" + id + " select")).selectByValue("INTERVIEW");
-        visible("#application-" + id + " .move").click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#application-" + id + " .move"))).click();
         message(".announcement", "Ela não aparece com o filtro de etapa atual.");
         message(".board-message", "Nenhuma candidatura encontrada com esses filtros.");
         new Select(visible("#filter-status")).selectByValue("INTERVIEW");
