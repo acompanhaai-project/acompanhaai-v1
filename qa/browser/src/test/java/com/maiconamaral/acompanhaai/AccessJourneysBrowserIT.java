@@ -686,7 +686,7 @@ class AccessJourneysBrowserIT {
         selectPhoto(png);
         visible("img[alt='Prévia da nova foto']");
         button("Cancelar prévia").click();
-        assertEquals("PE", visible(".avatar").getText());
+        wait.until(ExpectedConditions.textToBe(By.cssSelector(".avatar"), "PE"));
 
         selectPhoto(png);
         button("Salvar foto").click();
@@ -717,7 +717,7 @@ class AccessJourneysBrowserIT {
         waitForSavedPhoto(32);
         button("Remover foto").click();
         message(".photo [role='status']", "Foto removida.");
-        assertEquals("PE", visible(".avatar").getText());
+        wait.until(ExpectedConditions.textToBe(By.cssSelector(".avatar"), "PE"));
     }
 
     private void changeProfilePassword(String email) {
