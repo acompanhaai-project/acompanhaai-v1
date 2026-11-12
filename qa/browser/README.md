@@ -74,7 +74,10 @@ ou comportamento específico de Safari/Android. As esperas são condicionais.
 | `profileLifecycle` | Retorno ao perfil após login, edição e persistência de nome/e-mail, foco no seletor de foto, prévia e cancelamento, envio PNG e substituição JPEG, limites de 2 MiB e 4 milhões de pixels, remoção e avatar padrão, senha atual incorreta e troca com novo login, confirmação de exclusão com e-mail, cancelamento com Escape e restauração de foco |
 | `manualFlowAcrossAccounts` | Duas contas exclusivas; criação pela interface, edição e persistência, conflito 409 com outra aba (rascunho preservado e recarga), falha de rede simulada com dados preservados e novo envio, pesquisa e etapa no quadro, movimentação para fora do filtro, histórico na tela e na API, filtros mantidos ao voltar dos detalhes, outra conta sem acesso pelo quadro, pela pesquisa, pela URL e pela API (404), exclusão da candidatura e das duas contas ao final |
 
-As jornadas também conferem ausência de rolagem horizontal. O tema é
+As jornadas também conferem ausência de rolagem horizontal. O quadro passa
+pelo axe-core (dependência de desenvolvimento do frontend) nas quatro
+combinações, inclusive com conflito exibido no card, com as regras WCAG 2.2 A
+e AA e contraste calculado no navegador. O tema é
 selecionado pelo controle da interface e pela preferência de mídia emulada.
 Somente screenshots de estados sem senhas preenchidas são produzidos.
 

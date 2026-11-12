@@ -3,8 +3,10 @@
     <a routerLink="/conta" class="back">Voltar para a conta</a>
     <h1 id="board-title" tabindex="-1">Minhas candidaturas</h1>
     <p>Acompanhe cada vaga e atualize a etapa quando houver novidade.</p>
-    <a class="back" routerLink="/candidaturas/nova">Nova candidatura</a>
-    <a class="back" routerLink="/candidaturas/importar">Importar vaga</a>
+    <nav class="actions" aria-label="Adicionar candidatura">
+      <a class="back" routerLink="/candidaturas/nova">Nova candidatura</a>
+      <a class="back" routerLink="/candidaturas/importar">Importar vaga</a>
+    </nav>
     @if (hasPage()) {
       <p class="count">Mostrando {{ loaded() }} de {{ total() }} candidaturas</p>
     }
@@ -77,12 +79,14 @@
               [attr.aria-labelledby]="'lane-' + lane.id"
             >
               <header class="lane-heading">
-                <h3 [id]="'lane-' + lane.id">{{ lane.label }}</h3>
-                <span
-                  class="lane-count"
-                  [attr.aria-label]="lane.applications.length + ' exibidas'"
-                  >{{ lane.applications.length }}</span
-                >
+                <h3 [id]="'lane-' + lane.id">
+                  {{ lane.label }}
+                  <span class="sr-only">
+                    ({{ lane.applications.length }}
+                    {{ lane.applications.length === 1 ? 'candidatura' : 'candidaturas' }})
+                  </span>
+                </h3>
+                <span class="lane-count" aria-hidden="true">{{ lane.applications.length }}</span>
               </header>
 
               @for (application of lane.applications; track application.id) {
@@ -112,7 +116,7 @@
                     #destination
                     [id]="'move-to-' + application.id"
                     [disabled]="!!card?.busy"
-                    [attr.aria-label]="'Mover ' + application.job.title + ' para outra etapa'"
+                    [attr.aria-label]="'Mover para outra etapa: ' + application.job.title"
                     (change)="choose(application.id, destination.value)"
                   >
                     <option value="" [selected]="!card?.destination">Escolha uma etapa</option>
@@ -133,7 +137,11 @@
                     type="button"
                     class="move"
                     [disabled]="!card?.destination || !!card?.busy || !!card?.needsRefresh"
-                    [attr.aria-describedby]="clearsDate ? 'date-hint-' + application.id : null"
+                    [attr.aria-describedby]="
+                      'application-title-' +
+                      application.id +
+                      (clearsDate ? ' date-hint-' + application.id : '')
+                    "
                     (click)="move(application)"
                   >
                     {{ card?.busy === 'move' ? 'Movendo…' : 'Mover' }}

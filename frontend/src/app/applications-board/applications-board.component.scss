@@ -10,6 +10,22 @@
   margin-bottom: 26px;
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 4px 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .back {
   color: var(--accent);
   font-weight: 700;

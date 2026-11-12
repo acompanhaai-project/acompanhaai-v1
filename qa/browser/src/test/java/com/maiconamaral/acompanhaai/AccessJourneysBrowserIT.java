@@ -67,6 +67,7 @@ class AccessJourneysBrowserIT {
     private int apiPort;
 
     private WebDriver browser;
+    private String axeSource;
     private WebDriverWait wait;
     private String desiredTheme;
 
@@ -330,6 +331,7 @@ class AccessJourneysBrowserIT {
         message("[data-lane='finished']", "Rejeitada");
         message("[data-lane='finished']", "Desistência");
         assertNoOverflow();
+        assertAccessible("quadro " + width + "px " + theme);
         screenshot("board-" + width + "-" + theme + ".png");
 
         String resource = "/api/applications/" + id;
@@ -352,6 +354,7 @@ class AccessJourneysBrowserIT {
         ), 200);
         move.sendKeys(Keys.ENTER);
         message(card + " [role='alert']", "O registro foi alterado.");
+        assertAccessible("conflito no quadro " + width + "px " + theme);
         assertEquals("applied", laneOf(id));
         assertEquals("INTERVIEW", destination.getDomProperty("value"));
         assertFalse(visible(card + " .move").isEnabled());
@@ -620,6 +623,28 @@ class AccessJourneysBrowserIT {
         browserApi("DELETE", "/api/users/me", null, 204);
         switchAccount(other);
         browserApi("DELETE", "/api/users/me", null, 204);
+    }
+
+    /** Executa o axe-core da dependência do frontend e falha com as regras violadas. */
+    private void assertAccessible(String context) throws Exception {
+        if (axeSource == null) {
+            axeSource = Files.readString(
+                BrowserEnvironment.ROOT.resolve("frontend/node_modules/axe-core/axe.min.js")
+            );
+        }
+        script(axeSource);
+        Object violations = ((JavascriptExecutor) browser).executeAsyncScript("""
+            const done = arguments[arguments.length - 1];
+            axe.run(document, {
+                runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+            }).then(
+                result => done(result.violations.map(v =>
+                    v.id + ': ' + v.nodes.map(n => n.target.join(' ')).slice(0, 3).join(', ')
+                )),
+                error => done(['axe: ' + error.message])
+            );
+            """);
+        assertEquals(List.of(), violations, "Violações de acessibilidade em " + context);
     }
 
     private void switchAccount(String email) {

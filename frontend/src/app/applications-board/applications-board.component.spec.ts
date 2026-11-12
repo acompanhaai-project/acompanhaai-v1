@@ -1,5 +1,6 @@
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import axe from 'axe-core';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { appConfig } from '../app.config';
 import { SessionState } from '../core/auth/session-state';
@@ -330,6 +331,42 @@ describe('Quadro de candidaturas', () => {
     expect(root.querySelector('.announcement')?.textContent).toContain(
       'Ela não aparece com o filtro de etapa atual.',
     );
+  });
+  it('nomeia controles e colunas para leitores de tela', () => {
+    page([application(1, 'APPLIED'), application(2, 'APPLIED'), application(3, 'INTERVIEW')]);
+
+    const applied = root.querySelector<HTMLElement>('[data-lane="applied"]')!;
+    expect(applied.querySelector('h3')?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Candidatura realizada (2 candidaturas)',
+    );
+    expect(applied.querySelector('.lane-count')?.getAttribute('aria-hidden')).toBe('true');
+    expect(
+      root.querySelector('[data-lane="interview"] h3')?.textContent?.replace(/\s+/g, ' ').trim(),
+    ).toBe('Entrevista (1 candidatura)');
+
+    const select = root.querySelector<HTMLSelectElement>('#move-to-1')!;
+    const label = root.querySelector(`label[for="move-to-1"]`)!.textContent!.trim();
+    expect(select.getAttribute('aria-label')).toContain(label);
+    expect(select.getAttribute('aria-label')).toContain(application(1, 'APPLIED').job.title);
+    expect(button('Mover', card(1)).getAttribute('aria-describedby')).toBe('application-title-1');
+
+    const actions = root.querySelector('nav.actions')!;
+    expect(actions.getAttribute('aria-label')).toBe('Adicionar candidatura');
+    expect(
+      Array.from(actions.querySelectorAll('a')).map((link) => link.textContent?.trim()),
+    ).toEqual(['Nova candidatura', 'Importar vaga']);
+  });
+
+  it('não tem violações estruturais de acessibilidade no quadro', async () => {
+    page([application(1, 'SAVED'), application(2, 'APPLIED'), application(3, 'REJECTED')]);
+    choose(1, 'INTERVIEW');
+
+    const result = await axe.run(root, {
+      runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
+      rules: { 'color-contrast': { enabled: false } },
+    });
+
+    expect(result.violations.map((violation) => violation.id)).toEqual([]);
   });
 });
 
