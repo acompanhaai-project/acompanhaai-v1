@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { appConfig } from '../app.config';
+import { ApplicationListQuery } from '../applications-board/application-list-query';
 import { Application } from '../applications-board/application.models';
 import { SessionState } from '../core/auth/session-state';
 import { ApplicationPageComponent } from './application-page.component';
@@ -207,6 +208,17 @@ describe('Cadastro e detalhes de candidaturas', () => {
       status: 204,
       statusText: 'No Content',
     });
-    expect(navigate).toHaveBeenCalledWith(['/candidaturas']);
+    expect(navigate).toHaveBeenCalledWith(['/candidaturas'], { queryParams: {} });
+  });
+
+  it('volta ao quadro com os filtros usados na lista', () => {
+    open();
+    details();
+    TestBed.inject(ApplicationListQuery).remember({ status: 'INTERVIEW', q: 'java' });
+    fixture.detectChanges();
+    const back = Array.from(root.querySelectorAll<HTMLAnchorElement>('a')).find(
+      (link) => link.textContent?.trim() === 'Voltar para candidaturas',
+    )!;
+    expect(back.getAttribute('href')).toBe('/candidaturas?etapa=INTERVIEW&busca=java');
   });
 });

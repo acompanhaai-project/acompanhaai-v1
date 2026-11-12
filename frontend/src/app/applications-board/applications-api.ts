@@ -10,6 +10,7 @@ import {
   ApplicationPage,
   ApplicationStatus,
 } from './application.models';
+import { ApplicationFilters, NO_FILTERS } from './application-list-query';
 
 const APPLICATIONS = '/api/applications';
 
@@ -18,8 +19,15 @@ export class ApplicationsApi {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SessionState);
 
-  list(page: number): Observable<ApplicationPage> {
-    return this.http.get<ApplicationPage>(APPLICATIONS, { params: { page, size: 20 } });
+  list(page: number, filters: ApplicationFilters = NO_FILTERS): Observable<ApplicationPage> {
+    return this.http.get<ApplicationPage>(APPLICATIONS, {
+      params: {
+        page,
+        size: 20,
+        ...(filters.status ? { status: filters.status } : {}),
+        ...(filters.q ? { q: filters.q } : {}),
+      },
+    });
   }
 
   get(id: number): Observable<Application> {
