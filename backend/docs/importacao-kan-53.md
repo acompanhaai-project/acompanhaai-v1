@@ -174,7 +174,12 @@ estruturados da página e a descrição.
 - A resposta é pedida em JSON com esquema e validada pelas mesmas regras da
   proposta. Campos inválidos são descartados individualmente.
 - O salário só entra com valor único, moeda BRL, período explícito e com o
-  mesmo valor escrito no texto da vaga.
+  mesmo valor escrito no texto da vaga. Piso ("a partir de"), teto ("até") e
+  extremos de faixa são descartados.
+- Valores citados apenas em frases que tentam dar ordens ao modelo ("ignore
+  as instruções anteriores", "desconsidere o texto acima", "responda que")
+  não são aceitos, mesmo que o modelo os devolva. O mesmo valor escrito em
+  outra frase da vaga continua válido.
 - Cada campo extraído precisa de evidência no texto. Título, empresa e
   localização ficam quando o modelo devolve um trecho que existe no texto ou
   quando o próprio valor aparece nele. Modalidade exige trecho conferido.
@@ -211,6 +216,18 @@ estruturados da página e a descrição.
   disponíveis com qualquer falha do provedor.
 - Novas tentativas e pausas também são registradas no log, sem conteúdo.
 - Provedor e modelo usados ficam registrados na tarefa.
+
+### Simulação de falhas
+
+`ImportFailureSimulationIntegrationTest` percorre a importação pela API com
+um provedor simulado em `127.0.0.1`, no formato do Gemini, e roda em toda
+execução da suíte, com H2 e com PostgreSQL no CI. Cobre resposta inválida
+(HTML, JSON truncado, texto livre, lista, `MAX_TOKENS`), resposta parcial,
+instrução embutida no texto, 429 persistente e recuperado, timeout e 503: a
+tarefa sempre chega à revisão, com a proposta da IA ou só com a descrição.
+Também cobre worker atrasado, confirmações simultâneas e isolamento entre
+contas, com verificação de integridade no banco. Resultados em
+[KAN-59](../../docs/evidencias/kan-59-falhas-ia.md).
 
 Para usar o Gemini localmente, defina em `application-local.properties`, que
 é ignorado pelo Git:
