@@ -127,6 +127,10 @@ extração com IA serão tratadas na tarefa responsável.
   IPv6 local e formas com IPv4 embutido geram `FAILED` com `SOURCE_NOT_ALLOWED`.
 - Redirecionamentos são seguidos manualmente, até 5, e cada destino passa
   pela mesma validação. Redirecionamento para login gera `SOURCE_REQUIRES_LOGIN`.
+- Casos hostis (literais e IPv6 mapeado, DNS com resposta mista ou trocada
+  entre redirecionamentos, esquemas e portas indevidos, conteúdo ativo,
+  JSON-LD malicioso e marcação patológica) estão em
+  [KAN-51](../../docs/evidencias/kan-51-ssrf-coletor.md).
 - Limites: 5 s para conectar, 10 s sem dados, 20 s no total
   (`app.import-collector.timeout`), terminando 5 s antes do fim da posse;
   2 MiB de corpo após descompressão (`app.import-collector.max-bytes`);
