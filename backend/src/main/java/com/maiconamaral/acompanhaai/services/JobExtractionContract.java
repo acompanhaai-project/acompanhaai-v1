@@ -47,6 +47,11 @@ final class JobExtractionContract {
         "(?:(?<!\\p{L})(?:a partir de|minimo de|minimo|min\\.|acima de|desde|ate|entre|from|starting at|" +
             "up to|at least|over|upwards of|between)|\\d\\s*(?:a|ate|e|-|\u2013|to|and))" + CURRENCY + "$"
     );
+    /** Frases que tentam dar ordens ao modelo; valores citados nelas não são aceitos. */
+    private static final Pattern INSTRUCTION = Pattern.compile(
+        "(?<!\\p{L})(?:ignor(?:e|a|ar|em)|desconsider(?:e|ar|em)|disregard|instrucoes anteriores|" +
+            "previous instructions|responda que|answer that|system message|mensagem do sistema)(?!\\p{L})"
+    );
     private static final Pattern RANGE_AFTER = Pattern.compile(
         "^\\s*(?:mensais|mensal|por mes|/mes|ao mes)?\\s*(?:a|ate|-|\u2013|to)" + CURRENCY + "\\d"
     );
@@ -131,14 +136,21 @@ final class JobExtractionContract {
             if (excerpt == null) {
                 excerpt = text.around(value);
             }
-            if (excerpt != null) {
+            boolean trusted = text.mentions(value) ? text.mentionedOutsideInstructions(value)
+                : excerpt != null && !text.instructs(excerpt);
+            if (excerpt != null && trusted) {
                 proposal.put(field, value);
                 evidence.put(field, fromText(excerpt));
             }
         }
         var workMode = upper(response.path("workMode"));
         var workModeExcerpt = text.verify(claimed.path("workMode"));
-        if (workMode != null && WORK_MODES.contains(workMode) && workModeExcerpt != null) {
+        if (
+            workMode != null &&
+            WORK_MODES.contains(workMode) &&
+            workModeExcerpt != null &&
+            !text.instructs(workModeExcerpt)
+        ) {
             proposal.put("workMode", workMode);
             evidence.put("workMode", fromText(workModeExcerpt));
         }
@@ -181,8 +193,16 @@ final class JobExtractionContract {
         ) {
             return null;
         }
-        var mention = amountPattern(amount).matcher(text.display);
-        if (!mention.find() || qualified(text.display, amountPattern(amount))) {
+        var pattern = amountPattern(amount);
+        if (qualified(text.display, pattern)) {
+            return null;
+        }
+        var mention = pattern.matcher(text.display);
+        boolean found = false;
+        while (!found && mention.find()) {
+            found = !text.instructs(mention.start(), mention.end());
+        }
+        if (!found) {
             return null;
         }
         proposal.put("salary", amount.scale() < 0 ? amount.setScale(0) : amount);
@@ -248,7 +268,7 @@ final class JobExtractionContract {
             var skill = text(item, MAX_SKILL);
             if (
                 skill != null &&
-                text.mentions(skill) &&
+                text.mentionedOutsideInstructions(skill) &&
                 seen.add(skill.toLowerCase(Locale.ROOT)) &&
                 unique.size() < MAX_SKILLS
             ) {
@@ -312,9 +332,49 @@ final class JobExtractionContract {
         }
 
         boolean mentions(String value) {
+            return word(value).matcher(lower).find();
+        }
+
+        /** Exige ao menos uma menção do valor fora de frases que dão ordens ao modelo. */
+        boolean mentionedOutsideInstructions(String value) {
+            var mention = word(value).matcher(lower);
+            while (mention.find()) {
+                if (!instructs(mention.start(), mention.end())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /** Indica se o trecho está em uma frase que tenta instruir o modelo. */
+        boolean instructs(String excerpt) {
+            var core = excerpt.replace("…", "").strip();
+            int start = lower.indexOf(fold(core));
+            return start >= 0 && instructs(start, start + core.length());
+        }
+
+        boolean instructs(int start, int end) {
+            int from = start;
+            while (from > 0 && !boundary(from - 1)) {
+                from--;
+            }
+            int to = end;
+            while (to < display.length() && !boundary(to)) {
+                to++;
+            }
+            return INSTRUCTION.matcher(plain(display.substring(from, to))).find();
+        }
+
+        private boolean boundary(int index) {
+            char c = display.charAt(index);
+            return (c == '.' || c == '!' || c == '?' || c == ';') &&
+                (index + 1 >= display.length() || display.charAt(index + 1) == ' ');
+        }
+
+        private Pattern word(String value) {
             return Pattern.compile(
                 "(?<![\\p{L}\\p{N}])" + Pattern.quote(fold(value)) + "(?![\\p{L}\\p{N}])"
-            ).matcher(lower).find();
+            );
         }
 
         String window(int start, int end) {

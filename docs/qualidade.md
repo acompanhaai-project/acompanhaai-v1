@@ -9,15 +9,15 @@ Esta estratégia não representa um relatório de testes executados.
 
 ## Cobertura atual e evolução
 
-| Camada                    | Base existente                                    | Evolução planejada                                        |
-| ------------------------- | ------------------------------------------------- | --------------------------------------------------------- |
-| Integração Spring/MockMvc | Conta, autenticação, perfil, fotos e candidaturas | Novos campos, recuperação e importação                    |
-| Persistência              | Testes de mapeamento em H2 e migrações            | PostgreSQL, concorrência e atualizações preservando dados |
-| API                       | Fixture Postman v1 congelada                      | Regressão v2 para o novo contrato                         |
-| Unidade                   | Sem suíte dedicada identificada nesta revisão     | Regras isoladas quando trouxerem valor                    |
-| Navegador                 | Frontend ainda não implementado                   | Selenium/Java, sessão, jornadas e acessibilidade          |
-| Desempenho/operação       | Sem execução comprovada nesta entrega             | Carga, restore, rollback e smoke                          |
-| IA                        | Extração por adaptador, evidência e conjunto v1   | Avaliação real sob demanda e simulação de falhas (KAN-59) |
+| Camada                    | Base existente                                                    | Evolução planejada                                        |
+| ------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------- |
+| Integração Spring/MockMvc | Conta, autenticação, perfil, fotos e candidaturas                 | Novos campos, recuperação e importação                    |
+| Persistência              | Testes de mapeamento em H2 e migrações                            | PostgreSQL, concorrência e atualizações preservando dados |
+| API                       | Fixture Postman v1 congelada                                      | Regressão v2 para o novo contrato                         |
+| Unidade                   | Sem suíte dedicada identificada nesta revisão                     | Regras isoladas quando trouxerem valor                    |
+| Navegador                 | Frontend ainda não implementado                                   | Selenium/Java, sessão, jornadas e acessibilidade          |
+| Desempenho/operação       | Sem execução comprovada nesta entrega                             | Carga, restore, rollback e smoke                          |
+| IA                        | Extração por adaptador, evidência, conjunto v1 e falhas simuladas | Avaliação real sob demanda a cada troca de modelo         |
 
 O baseline histórico registrado no planejamento é de 26 testes de integração
 e 90 requisições/246 asserções na fixture v1. Esses números não comprovam
@@ -99,6 +99,8 @@ histórico. Executar pelo roteiro `scripts/test-postman-v2.ps1`, que cria e ence
 PostgreSQL/API exclusivos, confirma limpeza por IDs e preservação de sentinela.
 O roteiro não repete a suíte Java. O [CI da KAN-34](../backend/docs/ci-postgresql-kan-34.md)
 executa a coleção no job próprio e mantém as suítes Java nos jobs existentes.
+As falhas simuladas da importação com IA estão em
+[KAN-59](evidencias/kan-59-falhas-ia.md).
 
 | Domínio           | Cenários                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------ |
@@ -110,7 +112,7 @@ executa a coleção no job próprio e mantém as suítes Java nos jobs existente
 | Histórico         | Evento inicial, troca de etapa atômica e edição simples sem novo evento                    |
 | Concorrência      | Versão antiga, duplicidade e testes PostgreSQL dedicados                                   |
 | Migrações         | Banco vazio e atualização com dados preservados                                            |
-| Importação futura | Coleta indisponível, cota, timeout, propriedade, confirmação repetida e conteúdo malicioso |
+| Importação        | Coleta indisponível, cota, timeout, propriedade, confirmação repetida e conteúdo malicioso |
 
 ## Modelo de evidência
 
