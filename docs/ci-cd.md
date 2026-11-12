@@ -17,17 +17,17 @@ remota dos novos jobs deve ser conferida no PR antes do aceite.
 
 Fonte da configuração: `.github/workflows/backend-ci.yml`.
 
-| Item      | Configuração implementada                                               |
-| --------- | ----------------------------------------------------------------------- |
-| Provedor  | GitHub Actions                                                          |
-| Gatilhos  | PR para `main`, push em `main` e execução manual                        |
-| Runtime   | Amazon Corretto JDK 25 em `ubuntu-latest`                               |
-| Build     | Maven Wrapper versionado                                                |
-| Permissão | `contents: read`; checkout sem persistir credenciais                    |
-| Bancos    | H2 em memória e três serviços PostgreSQL 18 efêmeros, em jobs separados |
-| Limite    | 15 minutos por job; política de migrações limitada a 5 minutos          |
-| Retenção  | Relatórios e JAR mantidos por 7 dias                                    |
-| Resultado | Build/testes, relatórios e JAR identificados pelo commit                |
+| Item      | Configuração implementada                                                 |
+| --------- | ------------------------------------------------------------------------- |
+| Provedor  | GitHub Actions                                                            |
+| Gatilhos  | PR para `main`, push em `main` e execução manual                          |
+| Runtime   | Amazon Corretto JDK 25 em `ubuntu-latest`                                 |
+| Build     | Maven Wrapper versionado                                                  |
+| Permissão | `contents: read`; checkout sem persistir credenciais                      |
+| Bancos    | H2 em memória e quatro serviços PostgreSQL 18 efêmeros, em jobs separados |
+| Limite    | 15 minutos por job; navegador 30 minutos; política de migrações 5 minutos |
+| Retenção  | Relatórios, capturas e JAR mantidos por 7 dias                            |
+| Resultado | Build/testes, relatórios e JAR identificados pelo commit                  |
 
 Os três jobs Java fazem checkout, configuram Java com cache Maven, habilitam
 a execução de `mvnw` no Linux e executam:
@@ -39,13 +39,14 @@ a execução de `mvnw` no Linux e executam:
 O workflow acrescenta as propriedades de conexão específicas de cada banco.
 A fase verify compila, executa os testes e empacota a aplicação.
 
-| Job                       | Check publicado                   | Validação e artefatos                                                                                            |
-| ------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `build-test`              | `backend-build-test`              | Suíte em H2; relatórios `testes-${{ github.sha }}` e JAR `backend-${{ github.sha }}`                             |
-| `postgres-test`           | `backend-postgres-test`           | Suíte em PostgreSQL 18, incluindo migrações e testes específicos; relatórios `testes-postgres-${{ github.sha }}` |
-| `database-role-isolation` | `backend-database-role-isolation` | Provisionamento, migrações e runtime restrito; relatórios `testes-permissoes-${{ github.sha }}`                  |
-| `migration-policy`        | `backend-migration-policy`        | Rejeita alteração/exclusão/renomeação de migrações existentes; `politica-migracoes-${{ github.sha }}`            |
-| `postman-v2`              | `backend-postman-v2`              | API real, PostgreSQL próprio e coleção v2; resumos `testes-postman-v2-${{ github.sha }}`                         |
+| Job                       | Check publicado                   | Validação e artefatos                                                                                                                         |
+| ------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build-test`              | `backend-build-test`              | Suíte em H2; relatórios `testes-${{ github.sha }}` e JAR `backend-${{ github.sha }}`                                                          |
+| `postgres-test`           | `backend-postgres-test`           | Suíte em PostgreSQL 18, incluindo migrações e testes específicos; relatórios `testes-postgres-${{ github.sha }}`                              |
+| `database-role-isolation` | `backend-database-role-isolation` | Provisionamento, migrações e runtime restrito; relatórios `testes-permissoes-${{ github.sha }}`                                               |
+| `migration-policy`        | `backend-migration-policy`        | Rejeita alteração/exclusão/renomeação de migrações existentes; `politica-migracoes-${{ github.sha }}`                                         |
+| `postman-v2`              | `backend-postman-v2`              | API real, PostgreSQL próprio e coleção v2; resumos `testes-postman-v2-${{ github.sha }}`                                                      |
+| `browser-qa`              | `backend-browser-qa`              | Jornadas Selenium no Chrome com Angular, API e PostgreSQL 18 reais; resumo no job, relatórios e capturas `testes-navegador-${{ github.sha }}` |
 
 O H2 usa banco em memória com modo de compatibilidade PostgreSQL. Isso não
 substitui a validação no PostgreSQL real. O outro job inicia um serviço
@@ -56,7 +57,7 @@ Os relatórios Surefire XML e texto são enviados com `if: always()`, inclusive
 quando testes falham, desde que tenham sido gerados. O JAR
 `target/acompanhaai-0.0.1-SNAPSHOT.jar` é publicado somente após sucesso do job H2.
 Como os jobs são independentes, a existência desse JAR não comprova aprovação
-dos demais jobs: conferir os cinco checks antes de aprovar uma release.
+dos demais jobs: conferir os seis checks antes de aprovar uma release.
 
 O job de isolamento usa serviço PostgreSQL próprio, com autenticação trust
 exclusivamente de teste e porta publicada no loopback do runner. A primeira
@@ -83,6 +84,13 @@ Newman ou logs completos da API. Não usa POSTMAN_API_KEY nem publica recursos
 em um workspace compartilhado. Ver [regressão KAN-33](../backend/docs/regressao-api-v2-kan-33.md)
 e [matriz KAN-34](../backend/docs/ci-postgresql-kan-34.md).
 
+O job de navegador instala o frontend com `npm ci`, sobe a API e o Angular
+pela própria suíte e usa o Chrome do runner, com driver resolvido pelo Selenium
+Manager. O PostgreSQL 18 é exclusivo do job, com autenticação trust somente de
+teste. O resumo por cenário vai para a página do job; o artefato traz os
+relatórios JUnit, as capturas sem senha e a versão do ambiente, sem o log do
+Angular nem a saída completa da API. Detalhes no [executor de QA](../qa/browser/README.md).
+
 Não copiar segredos locais ou dados de desenvolvimento para o runner.
 Antes de compartilhar relatórios de falhas, revisar seu conteúdo: eles podem
 incluir requisições e dados fictícios usados nos testes.
@@ -92,7 +100,7 @@ ausência de dados sensíveis em qualquer mensagem de erro futura.
 
 ## Consultar execuções e artefatos
 
-1. No GitHub, abrir o PR e consultar os cinco checks em Checks ou abrir
+1. No GitHub, abrir o PR e consultar os seis checks em Checks ou abrir
    Actions → Backend CI e selecionar a execução do commit desejado.
 2. Abrir o job para consultar etapas, erros e resultado do Maven.
 3. Na página da execução, consultar Artifacts para baixar relatórios e JAR.

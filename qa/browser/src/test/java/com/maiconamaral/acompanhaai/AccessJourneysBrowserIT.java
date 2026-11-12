@@ -485,6 +485,149 @@ class AccessJourneysBrowserIT {
         browserApi("GET", resource, null, 404);
     }
 
+    @ParameterizedTest(name = "Fluxo manual entre contas: {0}px, tema {1}")
+    @CsvSource({ "1440, light", "390, dark" })
+    void manualFlowAcrossAccounts(int width, String theme) throws Exception {
+        openBrowser(width, theme);
+        String marker = UUID.randomUUID().toString().substring(0, 8);
+        String owner = "qa.fluxo." + UUID.randomUUID() + "@example.test";
+        String other = "qa.fluxo.outra." + UUID.randomUUID() + "@example.test";
+        String title = "Vaga E2E " + marker;
+        register(owner);
+        visit("/cadastro");
+        register(other);
+
+        visit("/candidaturas/nova");
+        visible("#email");
+        signIn(owner, INITIAL_PASSWORD);
+        heading("Nova candidatura");
+        fillApplicationField("title", title);
+        fillApplicationField("companyName", "Empresa E2E");
+        fillApplicationField("location", "Recife");
+        fillApplicationField("description", "Fluxo manual completo");
+        fillApplicationField("hardSkills", "Java");
+        button("Salvar candidatura").click();
+        heading(title);
+        String detail = path();
+        assertTrue(detail.matches("/candidaturas/[1-9]\\d*"));
+        long id = Long.parseLong(detail.substring(detail.lastIndexOf('/') + 1));
+        String resource = "/api/applications/" + id;
+        message("ol li", "Candidatura realizada");
+
+        button("Editar candidatura").click();
+        heading("Editar candidatura");
+        fillApplicationField("location", "Recife, PE");
+        fillApplicationField("notes", "Primeira edição");
+        button("Salvar candidatura").click();
+        message("main [role='status']", "Candidatura atualizada.");
+        message(".panel dl", "Recife, PE");
+        message(".panel dl", "Primeira edição");
+
+        button("Editar candidatura").click();
+        heading("Editar candidatura");
+        fillApplicationField("notes", "Rascunho que perde a corrida");
+        Map<?, ?> current = (Map<?, ?>) browserApi("GET", resource, null, 200);
+        Map<String, Object> concurrent = new LinkedHashMap<>();
+        concurrent.put("job", current.get("job"));
+        concurrent.put("status", current.get("status"));
+        concurrent.put("appliedOn", current.get("appliedOn"));
+        concurrent.put("notes", "Alterada em outra aba");
+        concurrent.put("version", current.get("version"));
+        browserApi("PUT", resource, concurrent, 200);
+        button("Salvar candidatura").click();
+        message("main [role='alert']", "A candidatura mudou desde que você a abriu.");
+        assertEquals("Rascunho que perde a corrida", applicationField("notes").getDomProperty("value"));
+        button("Descartar rascunho e recarregar").click();
+        message(".panel dl", "Alterada em outra aba");
+
+        ChromiumDriver chromium = (ChromiumDriver) browser;
+        button("Editar candidatura").click();
+        heading("Editar candidatura");
+        fillApplicationField("notes", "Salva depois da queda de rede");
+        chromium.executeCdpCommand("Network.enable", Map.of());
+        chromium.executeCdpCommand("Network.setBlockedURLs", Map.of("urls", List.of("*/api/applications/*")));
+        try {
+            button("Salvar candidatura").click();
+            message("main [role='alert']", "Não foi possível receber uma resposta do servidor.");
+            assertEquals("Salva depois da queda de rede", applicationField("notes").getDomProperty("value"));
+        } finally {
+            chromium.executeCdpCommand("Network.setBlockedURLs", Map.of("urls", List.of()));
+        }
+        button("Salvar candidatura").click();
+        message("main [role='status']", "Candidatura atualizada.");
+        message(".panel dl", "Salva depois da queda de rede");
+        assertNoOverflow();
+
+        browser.findElement(By.linkText("Voltar para candidaturas")).click();
+        heading("Minhas candidaturas");
+        type("filter-q", marker);
+        visible("#filter-q").sendKeys(Keys.ENTER);
+        message(".announcement", "1 candidatura encontrada.");
+        new Select(visible("#filter-status")).selectByValue("APPLIED");
+        wait.until(driver -> driver.getCurrentUrl().contains("etapa=APPLIED"));
+        assertTrue(browser.getCurrentUrl().contains("busca=" + marker));
+        assertEquals("applied", laneOf(id));
+        new Select(visible("#application-" + id + " select")).selectByValue("INTERVIEW");
+        visible("#application-" + id + " .move").click();
+        message(".announcement", "Ela não aparece com o filtro de etapa atual.");
+        message(".board-message", "Nenhuma candidatura encontrada com esses filtros.");
+        new Select(visible("#filter-status")).selectByValue("INTERVIEW");
+        wait.until(ExpectedConditions.elementToBeClickable(By.linkText(title))).click();
+        heading(title);
+        message("ol li:nth-child(2)", "Candidatura realizada → Entrevista");
+        assertEquals(2, browser.findElements(By.cssSelector("ol li")).size());
+        browser.findElement(By.linkText("Voltar para candidaturas")).click();
+        heading("Minhas candidaturas");
+        wait.until(driver -> driver.getCurrentUrl().contains("etapa=INTERVIEW"));
+        assertEquals(marker, visible("#filter-q").getDomProperty("value"));
+        assertEquals("INTERVIEW", visible("#filter-status").getDomProperty("value"));
+        assertEquals("interview", laneOf(id));
+        assertNoOverflow();
+        screenshot("manual-flow-" + width + "-" + theme + ".png");
+
+        List<?> history = (List<?>) browserApi("GET", resource + "/history", null, 200);
+        assertEquals(List.of("APPLIED", "INTERVIEW"), history.stream()
+            .map(entry -> ((Map<?, ?>) entry).get("toStatus"))
+            .toList());
+
+        switchAccount(other);
+        visit("/candidaturas");
+        heading("Minhas candidaturas");
+        message(".board-message", "Você ainda não tem candidaturas cadastradas.");
+        type("filter-q", marker);
+        visible("#filter-q").sendKeys(Keys.ENTER);
+        message(".board-message", "Nenhuma candidatura encontrada com esses filtros.");
+        visit(detail);
+        visible("main [role='alert']");
+        assertTrue(browser.findElements(By.xpath("//h1[normalize-space(.)='" + title + "']")).isEmpty());
+        assertTrue(browser.findElements(By.xpath("//button[normalize-space(.)='Editar candidatura']")).isEmpty());
+        browserApi("GET", resource, null, 404);
+        browserApi("GET", resource + "/history", null, 404);
+        browserApi("PUT", resource, concurrent, 404);
+        browserApi("DELETE", resource, null, 404);
+
+        switchAccount(owner);
+        visit(detail);
+        heading(title);
+        message(".panel dl", "Salva depois da queda de rede");
+        button("Excluir candidatura").click();
+        button("Confirmar exclusão").click();
+        heading("Minhas candidaturas");
+        message(".board-message", "Você ainda não tem candidaturas cadastradas.");
+        browserApi("GET", resource, null, 404);
+
+        browserApi("DELETE", "/api/users/me", null, 204);
+        switchAccount(other);
+        browserApi("DELETE", "/api/users/me", null, 204);
+    }
+
+    private void switchAccount(String email) {
+        browser.manage().deleteAllCookies();
+        visit("/entrar");
+        signIn(email, INITIAL_PASSWORD);
+        heading("Acesso confirmado");
+    }
+
     private WebElement applicationField(String name) {
         return visible("[formcontrolname='" + name + "']");
     }
@@ -515,18 +658,22 @@ class AccessJourneysBrowserIT {
         Map<?, ?> result = (Map<?, ?>) ((JavascriptExecutor) browser).executeAsyncScript("""
             const [method, route, body, done] = arguments;
             (async () => {
-                const options = { method };
-                if (body !== null) {
+                const options = { method, headers: {} };
+                if (method !== 'GET') {
                     const csrf = await fetch('/api/auth/csrf');
                     if (!csrf.ok) {
                         return { status: csrf.status };
                     }
                     const { headerName, token } = await csrf.json();
-                    options.headers = { 'Content-Type': 'application/json', [headerName]: token };
+                    options.headers[headerName] = token;
+                }
+                if (body !== null) {
+                    options.headers['Content-Type'] = 'application/json';
                     options.body = JSON.stringify(body);
                 }
                 const response = await fetch(route, options);
-                return { status: response.status, body: response.ok ? await response.json() : null };
+                const json = response.ok && response.status !== 204;
+                return { status: response.status, body: json ? await response.json() : null };
             })().then(done, () => done({ status: 0 }));
             """, method, route, body);
         assertEquals(status, ((Number) result.get("status")).intValue(), method + " " + route);
