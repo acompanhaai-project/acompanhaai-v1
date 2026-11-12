@@ -142,6 +142,7 @@ label {
   font-weight: 700;
 }
 
+input,
 select,
 button {
   min-height: 44px;
@@ -189,7 +190,7 @@ button {
   margin-bottom: 20px;
 }
 
-:is(a, select, button, article, h1):focus-visible {
+:is(a, input, select, button, article, h1):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -208,5 +209,27 @@ button {
   .lanes,
   .lanes.secondary {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  align-items: flex-end;
+  margin-bottom: 24px;
+
+  .field {
+    flex: 1 1 180px;
+    max-width: 260px;
+  }
+
+  .query {
+    flex-basis: 260px;
+    max-width: 420px;
+  }
+
+  input {
+    width: 100%;
   }
 }

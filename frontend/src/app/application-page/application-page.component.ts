@@ -14,6 +14,7 @@ import {
   STATUS_LABELS,
 } from '../applications-board/application.models';
 import { ApplicationsApi } from '../applications-board/applications-api';
+import { ApplicationListQuery } from '../applications-board/application-list-query';
 import { ApiError, ApiFieldError } from '../core/http/api-error';
 
 const WORK_MODES = { REMOTE: 'Remoto', HYBRID: 'Híbrido', ONSITE: 'Presencial' };
@@ -43,6 +44,8 @@ export class ApplicationPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(ApplicationsApi);
+  private readonly listQuery = inject(ApplicationListQuery);
+  readonly listParams = this.listQuery.params;
   private readonly destroyRef = inject(DestroyRef);
   private readonly reload = new Subject<void>();
 
@@ -282,7 +285,7 @@ export class ApplicationPageComponent {
       .subscribe({
         next: () => {
           if (this.record() === application) {
-            void this.router.navigate(['/candidaturas']);
+            void this.router.navigate(['/candidaturas'], { queryParams: this.listParams() });
           }
         },
         error: (error: unknown) => {

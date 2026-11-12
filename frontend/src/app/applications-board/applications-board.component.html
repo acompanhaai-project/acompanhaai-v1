@@ -11,6 +11,42 @@
     <p class="announcement" role="status">{{ announcement() }}</p>
   </header>
 
+  <form
+    class="filters"
+    role="search"
+    aria-label="Filtrar candidaturas"
+    (submit)="$event.preventDefault(); search(query.value)"
+  >
+    <div class="field query">
+      <label for="filter-q">Pesquisar por título ou empresa</label>
+      <input
+        #query
+        id="filter-q"
+        type="search"
+        autocomplete="off"
+        [maxLength]="maxQueryLength"
+        [value]="filters().q"
+      />
+    </div>
+    <button type="submit">Pesquisar</button>
+    <div class="field">
+      <label for="filter-status">Etapa</label>
+      <select #stage id="filter-status" (change)="filterByStatus(stage.value)">
+        <option value="" [selected]="!filters().status">Todas as etapas</option>
+        @for (status of destinations; track status) {
+          <option [value]="status" [selected]="filters().status === status">
+            {{ labels[status] }}
+          </option>
+        }
+      </select>
+    </div>
+    @if (filtered()) {
+      <button type="button" class="clear" (click)="query.value = ''; clearFilters()">
+        Limpar filtros
+      </button>
+    }
+  </form>
+
   @if (!hasPage()) {
     @if (loading()) {
       <p class="board-message" role="status">Carregando candidaturas…</p>
@@ -22,9 +58,15 @@
     }
   } @else {
     @if (total() === 0) {
-      <p class="board-message">Você ainda não tem candidaturas cadastradas.</p>
+      @if (filtered()) {
+        <p class="board-message">
+          Nenhuma candidatura encontrada com esses filtros. Ajuste a pesquisa ou limpe os filtros.
+        </p>
+      } @else {
+        <p class="board-message">Você ainda não tem candidaturas cadastradas.</p>
+      }
     }
-    @for (group of groups(); track group.id) {
+    @for (group of total() === 0 && filtered() ? [] : groups(); track group.id) {
       <section class="stage-group" [attr.aria-labelledby]="'group-' + group.id">
         <h2 [id]="'group-' + group.id">{{ group.title }}</h2>
         <div class="lanes" [class.secondary]="group.id === 'other'">

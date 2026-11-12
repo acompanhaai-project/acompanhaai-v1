@@ -1,8 +1,10 @@
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { appConfig } from '../app.config';
 import { SessionState } from '../core/auth/session-state';
 import { Application, ApplicationStatus } from './application.models';
+import { ApplicationListQuery } from './application-list-query';
 import { ApplicationsBoardComponent } from './applications-board.component';
 
 const job = {
@@ -36,6 +38,7 @@ describe('Quadro de candidaturas', () => {
   let fixture: ComponentFixture<ApplicationsBoardComponent>;
   let root: HTMLElement;
   let backend: HttpTestingController;
+  let navigate: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -49,6 +52,7 @@ describe('Quadro de candidaturas', () => {
       photoUrl: null,
     });
     backend = TestBed.inject(HttpTestingController);
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(ApplicationsBoardComponent);
     root = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
@@ -184,5 +188,209 @@ describe('Quadro de candidaturas', () => {
     button('Tentar novamente').click();
     page([], 0, 0, 0);
     expect(root.textContent).toContain('Você ainda não tem candidaturas cadastradas.');
+  });
+
+  function list(query: string): ReturnType<HttpTestingController['expectOne']> {
+    return backend.expectOne({ method: 'GET', url: `/api/applications?page=0&size=20${query}` });
+  }
+
+  function respond(
+    request: ReturnType<HttpTestingController['expectOne']>,
+    content: Application[],
+    total = content.length,
+  ): void {
+    request.flush({ content, page: 0, size: 20, totalElements: total, totalPages: total ? 1 : 0 });
+    fixture.detectChanges();
+  }
+
+  function search(text: string): void {
+    const input = root.querySelector<HTMLInputElement>('#filter-q')!;
+    input.value = text;
+    root.querySelector<HTMLFormElement>('form.filters')!.requestSubmit();
+    fixture.detectChanges();
+  }
+
+  function stage(value: string): void {
+    const select = root.querySelector<HTMLSelectElement>('#filter-status')!;
+    select.value = value;
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  }
+
+  it('combina pesquisa e etapa na consulta e guarda os filtros na URL', () => {
+    page([application(1, 'APPLIED'), application(2, 'INTERVIEW')]);
+
+    search('  java  ');
+    respond(list('&q=java'), [application(1, 'APPLIED'), application(2, 'INTERVIEW')]);
+    expect(navigate).toHaveBeenLastCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { busca: 'java' },
+      replaceUrl: true,
+    });
+    expect(root.querySelector('.announcement')?.textContent).toBe('2 candidaturas encontradas.');
+
+    stage('INTERVIEW');
+    respond(list('&status=INTERVIEW&q=java'), [application(2, 'INTERVIEW')]);
+    expect(navigate).toHaveBeenLastCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { etapa: 'INTERVIEW', busca: 'java' },
+      replaceUrl: true,
+    });
+    expect(
+      Array.from(root.querySelectorAll<HTMLElement>('.lane')).map((lane) => lane.dataset['lane']),
+    ).toEqual(['interview']);
+    expect(root.querySelectorAll('article')).toHaveLength(1);
+    expect(root.querySelector('.count')?.textContent).toContain('Mostrando 1 de 1');
+    expect(TestBed.inject(ApplicationListQuery).params()).toEqual({
+      etapa: 'INTERVIEW',
+      busca: 'java',
+    });
+  });
+
+  it('pagina dentro do filtro e descarta a resposta de um filtro anterior', () => {
+    page([application(1, 'APPLIED')], 0, 30, 2);
+
+    stage('SAVED');
+    const outdated = list('&status=SAVED');
+    search('kotlin');
+    expect(outdated.cancelled).toBe(true);
+    list('&status=SAVED&q=kotlin').flush({
+      content: [application(5, 'SAVED')],
+      page: 0,
+      size: 20,
+      totalElements: 21,
+      totalPages: 2,
+    });
+    fixture.detectChanges();
+    expect(root.querySelectorAll('article')).toHaveLength(1);
+
+    button('Carregar mais candidaturas').click();
+    backend
+      .expectOne({ method: 'GET', url: '/api/applications?page=1&size=20&status=SAVED&q=kotlin' })
+      .flush({
+        content: [application(6, 'SAVED')],
+        page: 1,
+        size: 20,
+        totalElements: 21,
+        totalPages: 2,
+      });
+    fixture.detectChanges();
+    expect(root.querySelectorAll('article')).toHaveLength(2);
+  });
+
+  it('distingue lista vazia de nenhum resultado e limpa os filtros', () => {
+    page([application(1, 'APPLIED')]);
+    expect(button('Limpar filtros')).toBeUndefined();
+
+    search('inexistente');
+    respond(list('&q=inexistente'), []);
+    expect(root.textContent).toContain('Nenhuma candidatura encontrada com esses filtros.');
+    expect(root.textContent).not.toContain('Você ainda não tem candidaturas cadastradas.');
+    expect(root.querySelectorAll('.lane')).toHaveLength(0);
+    expect(root.querySelector('.announcement')?.textContent).toBe('0 candidaturas encontradas.');
+
+    button('Limpar filtros').click();
+    fixture.detectChanges();
+    respond(list(''), [application(1, 'APPLIED')]);
+    expect(root.querySelector<HTMLInputElement>('#filter-q')?.value).toBe('');
+    expect(root.querySelector<HTMLSelectElement>('#filter-status')?.value).toBe('');
+    expect(root.querySelectorAll('article')).toHaveLength(1);
+    expect(navigate).toHaveBeenLastCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: {},
+      replaceUrl: true,
+    });
+  });
+
+  it('não repete a consulta quando os filtros não mudam', () => {
+    page([application(1, 'APPLIED')]);
+    search('   ');
+    stage('');
+    backend.expectNone((request) => request.url === '/api/applications');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('tira da lista filtrada a candidatura movida para outra etapa', async () => {
+    page([application(1, 'APPLIED')]);
+    stage('APPLIED');
+    respond(list('&status=APPLIED'), [application(1, 'APPLIED'), application(2, 'APPLIED')]);
+
+    choose(1, 'INTERVIEW');
+    button('Mover', card(1)).click();
+    await Promise.resolve();
+    backend.expectOne('/api/auth/csrf').flush({ headerName: 'X-CSRF-TOKEN', token: 'test-token' });
+    backend
+      .expectOne({ method: 'PUT', url: '/api/applications/1' })
+      .flush({ ...application(1, 'INTERVIEW'), version: 4 });
+    fixture.detectChanges();
+
+    expect(card(1)).toBeNull();
+    expect(root.querySelectorAll('article')).toHaveLength(1);
+    expect(root.querySelector('.count')?.textContent).toContain('Mostrando 1 de 1');
+    expect(root.querySelector('.announcement')?.textContent).toContain(
+      'Ela não aparece com o filtro de etapa atual.',
+    );
+  });
+});
+
+describe('Quadro de candidaturas com filtros na URL', () => {
+  it('restaura etapa e pesquisa ao voltar dos detalhes e ignora valores inválidos', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        ...appConfig.providers,
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParamMap: convertToParamMap({ etapa: 'OFFER', busca: ' Exemplo ' }) },
+          },
+        },
+      ],
+    });
+    TestBed.inject(SessionState).authenticate({
+      id: 1,
+      name: 'Pessoa Teste',
+      email: 'conta@example.test',
+      createdAt: '',
+      photoUrl: null,
+    });
+    const backend = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(ApplicationsBoardComponent);
+    const root = fixture.nativeElement as HTMLElement;
+    fixture.detectChanges();
+
+    backend
+      .expectOne('/api/applications?page=0&size=20&status=OFFER&q=Exemplo')
+      .flush({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 });
+    fixture.detectChanges();
+    expect(root.querySelector<HTMLInputElement>('#filter-q')?.value).toBe('Exemplo');
+    expect(root.querySelector<HTMLSelectElement>('#filter-status')?.value).toBe('OFFER');
+    expect(root.textContent).toContain('Nenhuma candidatura encontrada com esses filtros.');
+    backend.verify();
+  });
+
+  it('descarta etapa desconhecida vinda da URL', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        ...appConfig.providers,
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: convertToParamMap({ etapa: 'DROP TABLE' }) } },
+        },
+      ],
+    });
+    TestBed.inject(SessionState).authenticate({
+      id: 1,
+      name: 'Pessoa Teste',
+      email: 'conta@example.test',
+      createdAt: '',
+      photoUrl: null,
+    });
+    const backend = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(ApplicationsBoardComponent);
+    fixture.detectChanges();
+    backend.expectOne('/api/applications?page=0&size=20');
+    backend.verify();
   });
 });

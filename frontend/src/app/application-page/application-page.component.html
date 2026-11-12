@@ -1,5 +1,5 @@
 <main class="page" aria-labelledby="application-title">
-  <a routerLink="/candidaturas">Voltar para candidaturas</a>
+  <a routerLink="/candidaturas" [queryParams]="listParams()">Voltar para candidaturas</a>
 
   <header>
     <h1 id="application-title">
@@ -145,7 +145,7 @@
           {{ busy() ? 'Salvando…' : 'Salvar candidatura' }}
         </button>
         @if (isNew) {
-          <a routerLink="/candidaturas">Cancelar</a>
+          <a routerLink="/candidaturas" [queryParams]="listParams()">Cancelar</a>
         } @else {
           <button type="button" (click)="cancelEdit()" [disabled]="busy()">
             {{ conflict() ? 'Descartar rascunho e recarregar' : 'Cancelar edição' }}
