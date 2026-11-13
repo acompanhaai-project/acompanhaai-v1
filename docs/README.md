@@ -28,6 +28,7 @@ evidências de execução: registrar resultados somente após executar cada rote
 | [Importação de vagas — KAN-53](../backend/docs/importacao-kan-53.md)        | Estados, retenção e contrato OpenAPI da importação           | Rotas, coleta e confirmação implementadas; IA pendente                                        |
 | [Integração frontend](integracao-frontend.md)                              | Sessão, CSRF, erros e candidaturas KAN-35                   | Contrato revisado; aceite conjunto frontend/QA pendente                                      |
 | [Operação](operacao.md)                                                    | Release, backup, restore, rollback e incidentes             | Procedimento planejado; infraestrutura não provisionada                                      |
+| [Retenção de dados](retencao-dados.md)                                     | Prazos, exclusão da conta, logs e limpezas KAN-65           | Limpezas e testes implementados; aceite pendente                                             |
 | [Release e retrospectiva](releases.md)                                     | Uso atual, notas de versão e encerramento KAN-77            | Base documental; release 1.0 ainda não publicada                                             |
 | [Plano de entrega](delivery/README.md)                                     | Sprints, DoR, DoD e rotina                                  | Planejamento; datas dependem do planning                                                     |
 

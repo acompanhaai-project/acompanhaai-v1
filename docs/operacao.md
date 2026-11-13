@@ -103,6 +103,12 @@ Em incidente: registrar início/versão/sintoma, conter impacto, avaliar retorno
 comunicar o responsável, verificar recuperação e abrir análise posterior.
 Evitar alterações diretas sem evidência ou migração versionada.
 
+## Retenção de dados
+
+Prazos, exclusão da conta, logs e rotinas de limpeza estão em
+[Retenção e exclusão de dados](retencao-dados.md). Após restaurar um backup,
+executar as limpezas para remover dados que já tinham vencido.
+
 ## IA em produção
 
 Antes de habilitar Gemini, rever modelo, cotas, termos e política de dados.
