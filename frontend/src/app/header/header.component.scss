@@ -36,6 +36,11 @@
   &:hover {
     background: var(--hover);
   }
+
+  &.active {
+    font-weight: 700;
+    color: var(--accent);
+  }
 }
 
 .theme {
@@ -50,7 +55,18 @@
 }
 
 @media (max-width: 760px) {
+  .header {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+
+  .logo {
+    width: 100%;
+    font-size: 24px;
+  }
+
   .link {
-    display: none;
+    padding: 8px 10px;
+    font-size: 14px;
   }
 }

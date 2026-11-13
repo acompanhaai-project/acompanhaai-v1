@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { requireSession, restoreSessionOnLogin } from './core/auth/session-guards';
+import { identifySession, requireSession, restoreSessionOnLogin } from './core/auth/session-guards';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'entrar' },
@@ -89,6 +89,11 @@ export const routes: Routes = [
       import('./redefinir-senha-page/redefinir-senha-page.component').then(
         (m) => m.RedefinirSenhaPageComponent,
       ),
+  },
+  {
+    path: 'ajuda',
+    canActivate: [identifySession],
+    loadComponent: () => import('./help-page/help-page.component').then((m) => m.HelpPageComponent),
   },
   { path: '**', redirectTo: 'entrar' },
 ];

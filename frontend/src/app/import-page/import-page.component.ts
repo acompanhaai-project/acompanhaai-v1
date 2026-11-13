@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -85,7 +85,7 @@ function positiveId(value: string | null): number | null {
 
 @Component({
   selector: 'app-import-page',
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, NgTemplateOutlet],
   templateUrl: './import-page.component.html',
   styleUrl: './import-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -113,6 +113,7 @@ export class ImportPageComponent {
   protected readonly paused = signal(false);
   protected readonly expired = signal(false);
   protected readonly busy = signal(false);
+  protected readonly confirmingDiscard = signal(false);
   protected readonly error = signal('');
   protected readonly watchFailed = signal(false);
   protected readonly overloaded = signal(false);
@@ -203,9 +204,12 @@ export class ImportPageComponent {
     return 'Não foi possível processar a importação';
   });
 
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
+
   constructor() {
-    const document = inject(DOCUMENT);
-    const injector = inject(Injector);
+    const document = this.document;
+    const injector = this.injector;
     let shown: Phase | null = null;
     effect(() => {
       const phase = this.phase();
@@ -417,6 +421,17 @@ export class ImportPageComponent {
     this.resume.next();
   }
 
+  protected confirmDiscard(): void {
+    this.confirmingDiscard.set(true);
+    afterNextRender(() => this.document.getElementById('discard-title')?.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  protected keepImport(): void {
+    this.confirmingDiscard.set(false);
+  }
+
   protected cancel(): void {
     const id = this.taskId();
     if (id === null || id < 1 || this.busy()) {
@@ -504,6 +519,7 @@ export class ImportPageComponent {
     this.expired.set(false);
     this.paused.set(false);
     this.busy.set(false);
+    this.confirmingDiscard.set(false);
     this.watchFailed.set(false);
     this.clearErrors();
     const state = this.router.currentNavigation()?.extras.state;

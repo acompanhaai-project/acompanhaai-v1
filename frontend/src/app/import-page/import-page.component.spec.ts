@@ -293,6 +293,18 @@ describe('Importação de vagas', () => {
     poll(task({ status: 'PROCESSING' }));
 
     button('Cancelar importação').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(text()).toContain('Descartar esta importação?');
+    expect(document.activeElement?.id).toBe('discard-title');
+    backend.expectNone(`${endpoint}/7`);
+    button('Manter importação').click();
+    fixture.detectChanges();
+    expect(text()).not.toContain('Descartar esta importação?');
+
+    button('Cancelar importação').click();
+    fixture.detectChanges();
+    button('Confirmar descarte').click();
     await csrf();
     backend.expectOne({ method: 'DELETE', url: `${endpoint}/7` }).flush(null, {
       status: 204,
@@ -537,6 +549,36 @@ describe('Importação de vagas', () => {
       expect(field('title').value).toBe(`Analista ${hostile}`);
       expect(root.querySelector('#title-evidence')?.textContent).toContain(hostile);
       expect(field<HTMLTextAreaElement>('description').value).toContain('<script>');
+    });
+
+    it('explica que a sugestão exige revisão e que salvar não é se inscrever', () => {
+      open('7');
+      poll(ready);
+
+      expect(text()).toContain(
+        'foram sugeridos automaticamente a partir da vaga e podem conter erros',
+      );
+      expect(text()).toContain('Salvar não envia candidatura para a empresa.');
+    });
+
+    it('pede confirmação antes de descartar a revisão', async () => {
+      open('7');
+      poll(ready);
+
+      button('Descartar importação').click();
+      fixture.detectChanges();
+      backend.expectNone(`${endpoint}/7`);
+      expect(root.querySelector('[role=group][aria-labelledby=discard-title]')).not.toBeNull();
+      button('Confirmar descarte').click();
+      await csrf();
+      backend.expectOne({ method: 'DELETE', url: `${endpoint}/7` }).flush(null, {
+        status: 204,
+        statusText: 'No Content',
+      });
+      expect(navigate).toHaveBeenCalledWith(['/candidaturas/importar'], {
+        replaceUrl: true,
+        state: { notice: 'Importação cancelada.' },
+      });
     });
 
     it('exige título e período do salário antes de enviar', () => {

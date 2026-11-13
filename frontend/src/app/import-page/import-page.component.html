@@ -101,9 +101,14 @@
               Continuar acompanhando
             </button>
           }
-          <button type="button" (click)="cancel()" [disabled]="busy()">Cancelar importação</button>
+          <button type="button" (click)="confirmDiscard()" [disabled]="busy()">
+            Cancelar importação
+          </button>
           <a routerLink="/candidaturas">Ir para candidaturas</a>
         </div>
+        @if (confirmingDiscard()) {
+          <ng-container *ngTemplateOutlet="discard" />
+        }
       </section>
     }
 
@@ -111,6 +116,7 @@
       <form class="panel" [formGroup]="review" (ngSubmit)="save()" aria-labelledby="ready-title">
         <h2 id="ready-title" tabindex="-1">Revise os dados da vaga</h2>
         <p role="status">
+          Os dados abaixo foram sugeridos automaticamente a partir da vaga e podem conter erros.
           Confira e complete as informações. Nada é salvo até você escolher uma das opções abaixo.
         </p>
 
@@ -274,6 +280,10 @@
 
         <fieldset class="decision" [disabled]="busy()">
           <legend>Como quer salvar?</legend>
+          <p class="hint" id="decision-hint">
+            Salvar não envia candidatura para a empresa. Escolha "Registrar inscrição" só se você já
+            se candidatou pelo site ou canal da vaga.
+          </p>
           <div class="choices">
             <label class="choice">
               <input type="radio" formControlName="decision" value="SAVED" />
@@ -302,8 +312,13 @@
           <button type="submit" class="primary" [disabled]="busy()">
             {{ busy() ? 'Salvando…' : 'Salvar vaga' }}
           </button>
-          <button type="button" (click)="cancel()" [disabled]="busy()">Descartar importação</button>
+          <button type="button" (click)="confirmDiscard()" [disabled]="busy()">
+            Descartar importação
+          </button>
         </div>
+        @if (confirmingDiscard()) {
+          <ng-container *ngTemplateOutlet="discard" />
+        }
       </form>
     }
 
@@ -358,3 +373,16 @@
     }
   }
 </main>
+
+<ng-template #discard>
+  <div class="confirmation" role="group" aria-labelledby="discard-title">
+    <h3 id="discard-title" tabindex="-1">Descartar esta importação?</h3>
+    <p>Os dados sugeridos para esta vaga serão apagados. Suas candidaturas não são afetadas.</p>
+    <div class="actions">
+      <button type="button" (click)="keepImport()" [disabled]="busy()">Manter importação</button>
+      <button type="button" class="danger" (click)="cancel()" [disabled]="busy()">
+        {{ busy() ? 'Descartando…' : 'Confirmar descarte' }}
+      </button>
+    </div>
+  </div>
+</ng-template>

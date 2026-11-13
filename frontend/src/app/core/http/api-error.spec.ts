@@ -5,7 +5,6 @@ describe('Normalização dos erros HTTP', () => {
   it.each([
     [401, { error: 'Autenticação necessária.' }, 'authentication'],
     [401, { detail: 'Credenciais inválidas.' }, 'authentication'],
-    [403, { error: 'Acesso negado ou token CSRF inválido.' }, 'forbidden'],
     [409, { detail: 'Conflito de versão.' }, 'conflict'],
     [422, { detail: 'Dados inválidos.' }, 'validation'],
   ])('interpreta o status %i com os dois formatos da API', (status, body, kind) => {
@@ -13,6 +12,19 @@ describe('Normalização dos erros HTTP', () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error.kind).toBe(kind);
     expect(error.message).toBe('detail' in body ? body.detail : body.error);
+  });
+
+  it('não mostra detalhes internos de autorização ao usuário', () => {
+    const error = toApiError(
+      new HttpErrorResponse({
+        status: 403,
+        error: { error: 'Acesso negado ou token CSRF inválido.' },
+      }),
+    );
+    expect(error.kind).toBe('forbidden');
+    expect(error.message).toBe(
+      'Não foi possível autorizar a operação. Confira sua sessão antes de tentar novamente.',
+    );
   });
 
   it('preserva o código de duplicidade para orientar a correção', () => {

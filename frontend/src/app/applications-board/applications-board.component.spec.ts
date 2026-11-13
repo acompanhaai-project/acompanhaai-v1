@@ -189,6 +189,16 @@ describe('Quadro de candidaturas', () => {
     button('Tentar novamente').click();
     page([], 0, 0, 0);
     expect(root.textContent).toContain('Você ainda não tem candidaturas cadastradas.');
+    expect(root.textContent).toContain('Salvar uma vaga aqui não envia candidatura para a empresa');
+    expect(root.querySelectorAll('.lane')).toHaveLength(0);
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('.first-use a')).map(
+      (link) => [link.textContent?.trim(), link.getAttribute('href')],
+    );
+    expect(links).toEqual([
+      ['Importar pelo link ou descrição', '/candidaturas/importar'],
+      ['Cadastrar manualmente', '/candidaturas/nova'],
+      ['Como funciona', '/ajuda'],
+    ]);
   });
 
   function list(query: string): ReturnType<HttpTestingController['expectOne']> {

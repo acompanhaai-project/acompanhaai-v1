@@ -65,10 +65,21 @@
           Nenhuma candidatura encontrada com esses filtros. Ajuste a pesquisa ou limpe os filtros.
         </p>
       } @else {
-        <p class="board-message">Você ainda não tem candidaturas cadastradas.</p>
+        <section class="board-message first-use" aria-labelledby="first-use-title">
+          <h2 id="first-use-title">Você ainda não tem candidaturas cadastradas.</h2>
+          <p>
+            Comece pela vaga que mais interessa a você. Salvar uma vaga aqui não envia candidatura
+            para a empresa: ela só fica registrada para você acompanhar.
+          </p>
+          <p class="actions">
+            <a class="back" routerLink="/candidaturas/importar">Importar pelo link ou descrição</a>
+            <a class="back" routerLink="/candidaturas/nova">Cadastrar manualmente</a>
+            <a class="back" routerLink="/ajuda">Como funciona</a>
+          </p>
+        </section>
       }
     }
-    @for (group of total() === 0 && filtered() ? [] : groups(); track group.id) {
+    @for (group of total() === 0 ? [] : groups(); track group.id) {
       <section class="stage-group" [attr.aria-labelledby]="'group-' + group.id">
         <h2 [id]="'group-' + group.id">{{ group.title }}</h2>
         <div class="lanes" [class.secondary]="group.id === 'other'">
