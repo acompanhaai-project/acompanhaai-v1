@@ -71,7 +71,8 @@ imediatamente uma tarefa própria vigente, exceto em `COMPLETED`.
 A exclusão da conta remove suas tarefas via FK. O worker deve descartar
 o resultado se a linha ou a conta tiver sido removida.
 
-URL original, descrição, texto coletado e proposta ficam fora dos logs.
+URL original, descrição, texto coletado e proposta ficam fora dos logs. A política
+consolidada de retenção está em [KAN-65](../../docs/retencao-dados.md).
 A consulta retorna somente os campos públicos do contrato. Consultar
 ou cancelar tarefa alheia, vencida ou inexistente retorna o mesmo `404`.
 
