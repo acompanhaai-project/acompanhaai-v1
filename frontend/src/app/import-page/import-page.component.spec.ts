@@ -363,16 +363,16 @@ describe('Importação de vagas', () => {
       expect(field('companyName').value).toBe('Empresa Exemplo');
       expect(field('salary').value).toBe('8500');
       expect(field<HTMLTextAreaElement>('description').value).toBe('Atuar com Spring.');
-      const missing = Array.from(root.querySelectorAll('.missing')).map((tag) =>
-        tag.parentElement?.textContent?.replace(/\s+/g, ' ').trim(),
+      const missing = Array.from(root.querySelectorAll('.missing')).map(
+        (tag) => `${tag.previousElementSibling?.textContent?.trim()}: ${tag.textContent?.trim()}`,
       );
       expect(missing).toEqual([
-        'Localização Não encontrada',
-        'Habilidades técnicas Não encontradas',
-        'Habilidades comportamentais Não encontradas',
+        'Localização: Não encontrada na vaga',
+        'Habilidades técnicas: Não encontradas na vaga',
+        'Habilidades comportamentais: Não encontradas na vaga',
       ]);
       expect(text()).toContain('Se ficar vazio, a vaga é salva com o link importado.');
-      const origins = Array.from(root.querySelectorAll('.evidence')).map((node) =>
+      const origins = Array.from(root.querySelectorAll('.evidence:not(.field-hint)')).map((node) =>
         node.textContent?.trim(),
       );
       expect(origins).toEqual([
@@ -445,6 +445,98 @@ describe('Importação de vagas', () => {
       expect(text()).toContain('Você já cadastrou uma vaga com esse link.');
       expect(field('title').value).toBe('Título corrigido');
       expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('separa nome, ausência e evidência para leitores de tela', () => {
+      open('7');
+      poll(ready);
+
+      const location = field('location');
+      expect(location.getAttribute('aria-labelledby')).toBe('location-label');
+      expect(root.querySelector('#location-label')?.textContent?.trim()).toBe('Localização');
+      expect(location.getAttribute('aria-describedby')).toBe('location-missing');
+      const mode = field<HTMLSelectElement>('workMode');
+      expect(mode.getAttribute('aria-describedby')).toBe('workMode-evidence');
+      expect(root.querySelector('#workMode-evidence')?.textContent).toContain(
+        'Trabalho 100% remoto',
+      );
+      expect(field('title').getAttribute('aria-describedby')).toBe('title-evidence');
+      expect(field('companyName').getAttribute('aria-describedby')).toBeNull();
+      expect(field<HTMLTextAreaElement>('hardSkills').getAttribute('aria-describedby')).toBe(
+        'skill-hint hardSkills-missing',
+      );
+      expect(field('salary').getAttribute('aria-describedby')).toBe('salary-hint');
+      expect(field('sourceUrl').getAttribute('aria-describedby')).toBe('link-hint');
+    });
+
+    it('anuncia os estados e leva o foco ao título de cada etapa', async () => {
+      open('7');
+      const announcer = root.querySelector('p.sr-only[role=status]')!;
+      expect(announcer.textContent?.trim()).toBe('');
+
+      poll(task({ status: 'PENDING' }));
+      await fixture.whenStable();
+      expect(announcer.textContent?.trim()).toBe('Importação na fila.');
+      expect(document.activeElement?.id).toBe('active-title');
+      fixture.destroy();
+      TestBed.resetTestingModule();
+
+      open('7');
+      poll(ready);
+      await fixture.whenStable();
+      expect(root.querySelector('p.sr-only[role=status]')?.textContent?.trim()).toBe(
+        'Dados prontos para revisão.',
+      );
+      expect(document.activeElement?.id).toBe('ready-title');
+    });
+
+    it('não confunde salário ausente com zero', async () => {
+      open('7');
+      poll(
+        task({ status: 'READY_FOR_REVIEW', result: { title: 'Analista', description: 'Texto' } }),
+      );
+
+      expect(field('salary').value).toBe('');
+      expect(root.querySelector('#salary-missing')?.textContent?.trim()).toBe(
+        'Não encontrado na vaga',
+      );
+      type('[formcontrolname=salary]', '0');
+      const period = field<HTMLSelectElement>('salaryPeriod');
+      period.value = period.options[1].value;
+      period.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      submit();
+      expect(text()).toContain('Informe um salário maior que zero ou deixe o campo em branco.');
+      backend.expectNone(`${endpoint}/7/confirm`);
+
+      type('[formcontrolname=salary]', '');
+      submit();
+      await csrf();
+      const request = confirmRequest();
+      expect(request.request.body.job).toEqual(
+        expect.objectContaining({ salary: null, salaryCurrency: null, salaryPeriod: null }),
+      );
+      request.flush(saved, { status: 201, statusText: 'Created' });
+    });
+
+    it('mostra o texto da página como texto, sem interpretar marcação', () => {
+      const hostile = '<img src=x onerror="window.alert(1)">';
+      open('7');
+      poll(
+        task({
+          status: 'READY_FOR_REVIEW',
+          result: {
+            title: `Analista ${hostile}`,
+            description: `<script>window.alert(2)</script> Descrição`,
+            evidence: { title: { source: 'TEXT', excerpt: `Analista ${hostile}` } },
+          },
+        }),
+      );
+
+      expect(root.querySelector('form img, form script')).toBeNull();
+      expect(field('title').value).toBe(`Analista ${hostile}`);
+      expect(root.querySelector('#title-evidence')?.textContent).toContain(hostile);
+      expect(field<HTMLTextAreaElement>('description').value).toContain('<script>');
     });
 
     it('exige título e período do salário antes de enviar', () => {

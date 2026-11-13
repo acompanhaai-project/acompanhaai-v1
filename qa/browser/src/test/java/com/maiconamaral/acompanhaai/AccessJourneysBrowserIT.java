@@ -677,6 +677,7 @@ class AccessJourneysBrowserIT {
         String review = path();
         assertTrue(review.matches("/candidaturas/importar/[1-9]\\d*"));
         long task = Long.parseLong(review.substring(review.lastIndexOf('/') + 1));
+        wait.until(driver -> "ready-title".equals(driver.switchTo().activeElement().getAttribute("id")));
         assertReviewFilledBy(title);
         message("small.evidence", "Trecho da vaga:");
         assertNoOverflow();
@@ -764,7 +765,7 @@ class AccessJourneysBrowserIT {
         message("#ready-title", "Revise os dados da vaga");
         assertEquals("", reviewField("title").getDomProperty("value"));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-            "//label[.//input[@formcontrolname='title']]//span[@class='missing' and normalize-space(.)='Não encontrado']"
+            "//label[.//input[@formcontrolname='title']]//span[@class='missing' and normalize-space(.)='Não encontrado na vaga']"
         )));
         assertTrue(reviewField("description").getDomProperty("value").contains("analista de testes"));
         assertEquals(calls + 2, ImportSimulation.extractions(), "duas tentativas no provedor indisponível");

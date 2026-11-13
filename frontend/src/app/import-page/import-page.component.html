@@ -6,6 +6,7 @@
     <p>Cole o link ou a descrição da vaga. Os dados encontrados ficam disponíveis para revisão.</p>
   </header>
 
+  <p class="sr-only" role="status" aria-live="polite">{{ announcement() }}</p>
   @if (notice()) {
     <p class="notice" role="status">{{ notice() }}</p>
   }
@@ -80,7 +81,7 @@
 
     @case ('active') {
       <section class="panel" aria-labelledby="active-title">
-        <h2 id="active-title">
+        <h2 id="active-title" tabindex="-1">
           {{ task()?.status === 'PENDING' ? 'Na fila de importação' : 'Lendo a vaga…' }}
         </h2>
         <p role="status">
@@ -108,7 +109,7 @@
 
     @case ('ready') {
       <form class="panel" [formGroup]="review" (ngSubmit)="save()" aria-labelledby="ready-title">
-        <h2 id="ready-title">Revise os dados da vaga</h2>
+        <h2 id="ready-title" tabindex="-1">Revise os dados da vaga</h2>
         <p role="status">
           Confira e complete as informações. Nada é salvo até você escolher uma das opções abaixo.
         </p>
@@ -118,55 +119,75 @@
           <div class="grid">
             <label class="wide">
               <span>
-                Título
+                <span id="title-label">Título</span>
                 @if (isMissing('title')) {
-                  <span class="missing">Não encontrado</span>
+                  <span class="missing" id="title-missing">Não encontrado na vaga</span>
                 }
               </span>
-              <input formControlName="title" maxlength="255" required />
+              <input
+                formControlName="title"
+                aria-labelledby="title-label"
+                [attr.aria-describedby]="describedBy('title')"
+                maxlength="255"
+                required
+              />
               @if (evidenceFor('title'); as origin) {
-                <small class="evidence">{{ origin }}</small>
+                <small class="evidence" id="title-evidence">{{ origin }}</small>
               }
             </label>
             <label>
               <span>
-                Empresa
+                <span id="companyName-label">Empresa</span>
                 @if (isMissing('companyName')) {
-                  <span class="missing">Não encontrada</span>
+                  <span class="missing" id="companyName-missing">Não encontrada na vaga</span>
                 }
               </span>
-              <input formControlName="companyName" maxlength="255" />
+              <input
+                formControlName="companyName"
+                aria-labelledby="companyName-label"
+                [attr.aria-describedby]="describedBy('companyName')"
+                maxlength="255"
+              />
               @if (evidenceFor('companyName'); as origin) {
-                <small class="evidence">{{ origin }}</small>
+                <small class="evidence" id="companyName-evidence">{{ origin }}</small>
               }
             </label>
             <label>
               <span>
-                Localização
+                <span id="location-label">Localização</span>
                 @if (isMissing('location')) {
-                  <span class="missing">Não encontrada</span>
+                  <span class="missing" id="location-missing">Não encontrada na vaga</span>
                 }
               </span>
-              <input formControlName="location" maxlength="255" />
+              <input
+                formControlName="location"
+                aria-labelledby="location-label"
+                [attr.aria-describedby]="describedBy('location')"
+                maxlength="255"
+              />
               @if (evidenceFor('location'); as origin) {
-                <small class="evidence">{{ origin }}</small>
+                <small class="evidence" id="location-evidence">{{ origin }}</small>
               }
             </label>
             <label>
               <span>
-                Modelo de trabalho
+                <span id="workMode-label">Modelo de trabalho</span>
                 @if (isMissing('workMode')) {
-                  <span class="missing">Não encontrado</span>
+                  <span class="missing" id="workMode-missing">Não encontrado na vaga</span>
                 }
               </span>
-              <select formControlName="workMode">
+              <select
+                formControlName="workMode"
+                aria-labelledby="workMode-label"
+                [attr.aria-describedby]="describedBy('workMode')"
+              >
                 <option [ngValue]="null">Não informado</option>
                 @for (mode of workModeOptions; track mode) {
                   <option [ngValue]="mode">{{ workModes[mode] }}</option>
                 }
               </select>
               @if (evidenceFor('workMode'); as origin) {
-                <small class="evidence">{{ origin }}</small>
+                <small class="evidence" id="workMode-evidence">{{ origin }}</small>
               }
             </label>
             <label>
@@ -175,7 +196,7 @@
                 formControlName="sourceUrl"
                 type="url"
                 maxlength="2048"
-                aria-describedby="link-hint"
+                [attr.aria-describedby]="task()?.inputType === 'URL' ? 'link-hint' : null"
               />
             </label>
             @if (task()?.inputType === 'URL') {
@@ -185,20 +206,25 @@
             }
             <label>
               <span>
-                Salário (R$)
+                <span id="salary-label">Salário (R$)</span>
                 @if (isMissing('salary')) {
-                  <span class="missing">Não encontrado</span>
+                  <span class="missing" id="salary-missing">Não encontrado na vaga</span>
                 }
               </span>
               <input
                 formControlName="salary"
+                aria-labelledby="salary-label"
+                [attr.aria-describedby]="describedBy('salary', 'salary-hint')"
                 type="number"
                 min="0.01"
                 max="9999999999999.99"
                 step="0.01"
               />
+              <small class="evidence field-hint" id="salary-hint"
+                >Deixe em branco se a vaga não informa o salário.</small
+              >
               @if (evidenceFor('salary'); as origin) {
-                <small class="evidence">{{ origin }}</small>
+                <small class="evidence" id="salary-evidence">{{ origin }}</small>
               }
             </label>
             <label>
@@ -212,28 +238,30 @@
             </label>
             <label>
               <span>
-                Habilidades técnicas
+                <span id="hardSkills-label">Habilidades técnicas</span>
                 @if (isMissing('hardSkills')) {
-                  <span class="missing">Não encontradas</span>
+                  <span class="missing" id="hardSkills-missing">Não encontradas na vaga</span>
                 }
               </span>
               <textarea
                 formControlName="hardSkills"
+                aria-labelledby="hardSkills-label"
+                [attr.aria-describedby]="describedBy('hardSkills', 'skill-hint')"
                 rows="3"
-                aria-describedby="skill-hint"
               ></textarea>
             </label>
             <label>
               <span>
-                Habilidades comportamentais
+                <span id="softSkills-label">Habilidades comportamentais</span>
                 @if (isMissing('softSkills')) {
-                  <span class="missing">Não encontradas</span>
+                  <span class="missing" id="softSkills-missing">Não encontradas na vaga</span>
                 }
               </span>
               <textarea
                 formControlName="softSkills"
+                aria-labelledby="softSkills-label"
+                [attr.aria-describedby]="describedBy('softSkills', 'skill-hint')"
                 rows="3"
-                aria-describedby="skill-hint"
               ></textarea>
             </label>
             <p id="skill-hint" class="wide hint">Uma habilidade por linha, até 50 por campo.</p>
@@ -281,7 +309,7 @@
 
     @case ('attention') {
       <section class="panel" aria-labelledby="attention-title">
-        <h2 id="attention-title">{{ failureTitle() }}</h2>
+        <h2 id="attention-title" tabindex="-1">{{ failureTitle() }}</h2>
         <p role="status">
           {{ task()?.failure?.message ?? 'Não foi possível extrair os dados da vaga.' }}
         </p>
@@ -303,7 +331,7 @@
 
     @case ('completed') {
       <section class="panel" aria-labelledby="completed-title">
-        <h2 id="completed-title">Vaga salva</h2>
+        <h2 id="completed-title" tabindex="-1">Vaga salva</h2>
         <p role="status">Esta importação já foi confirmada e a vaga está nas suas candidaturas.</p>
         <div class="actions">
           <a routerLink="/candidaturas">Ver candidaturas</a>
@@ -314,7 +342,7 @@
 
     @case ('missing') {
       <section class="panel" aria-labelledby="missing-title">
-        <h2 id="missing-title">Importação indisponível</h2>
+        <h2 id="missing-title" tabindex="-1">Importação indisponível</h2>
         <p role="status">
           {{
             expired()
