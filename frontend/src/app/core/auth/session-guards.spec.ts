@@ -117,6 +117,20 @@ describe('Rotas privadas e restauração da sessão', () => {
     expect(state.authenticated()).toBe(true);
   });
 
+  it('abre a ajuda com ou sem sessão, identificando quem já entrou', async () => {
+    let navigation = harness.navigateByUrl('/ajuda');
+    (await me()).flush(user);
+    await navigation;
+    expect(router.url).toBe('/ajuda');
+    expect(state.authenticated()).toBe(true);
+
+    state.markAnonymous();
+    navigation = harness.navigateByUrl('/ajuda?secao=etapas');
+    await navigation;
+    expect(router.url).toBe('/ajuda?secao=etapas');
+    backend.expectNone('/api/users/me');
+  });
+
   it('mantém o login público após 401 sem persistir identidade ou credenciais', async () => {
     const navigation = harness.navigateByUrl('/entrar');
     (await me()).flush({}, { status: 401, statusText: 'Unauthorized' });

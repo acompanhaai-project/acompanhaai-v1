@@ -42,3 +42,16 @@ export const restoreSessionOnLogin: CanActivateFn = (route) => {
     catchError(() => of(true)),
   );
 };
+
+/** Página pública: identifica a sessão, se existir, sem exigir login. */
+export const identifySession: CanActivateFn = () => {
+  const access = inject(SessionAccess);
+  const state = inject(SessionState);
+  if (state.authenticated() || state.status() === 'anonymous' || access.error()) {
+    return true;
+  }
+  return access.check().pipe(
+    map(() => true),
+    catchError(() => of(true)),
+  );
+};

@@ -1,0 +1,95 @@
+<main class="help" aria-labelledby="help-title">
+  <header>
+    <h1 id="help-title" tabindex="-1">Como usar o Acompanha Aí</h1>
+    <p>
+      Organize as vagas que interessam a você e acompanhe cada candidatura até o resultado, em um só
+      lugar.
+    </p>
+  </header>
+
+  <section aria-labelledby="first-steps">
+    <h2 id="first-steps">Primeiros passos</h2>
+    <ol>
+      <li>
+        <strong>Adicione uma vaga.</strong> Importe pelo link ou pela descrição, ou cadastre à mão.
+      </li>
+      <li>
+        <strong>Revise os dados</strong> e escolha se é só interesse ou se você já se inscreveu.
+      </li>
+      <li><strong>Atualize a etapa</strong> no quadro sempre que houver novidade no processo.</li>
+    </ol>
+    <p class="actions">
+      @if (authenticated()) {
+        <a routerLink="/candidaturas/importar">Importar uma vaga</a>
+        <a routerLink="/candidaturas/nova">Cadastrar manualmente</a>
+        <a routerLink="/candidaturas">Ir para minhas candidaturas</a>
+      } @else {
+        <a routerLink="/cadastro">Criar conta</a>
+        <a routerLink="/entrar">Entrar</a>
+      }
+    </p>
+  </section>
+
+  <section aria-labelledby="saving">
+    <h2 id="saving">Salvar uma vaga não é se inscrever</h2>
+    <p>
+      O Acompanha Aí não envia candidaturas para as empresas. Ele só registra o que você faz. Para
+      se candidatar, use o site ou o canal indicado na vaga e depois atualize a etapa aqui.
+    </p>
+    <ul>
+      <li><strong>Salvar como interesse</strong>: guarda a vaga na etapa "Salva".</li>
+      <li>
+        <strong>Registrar inscrição</strong>: use quando você já se candidatou; a vaga entra em
+        "Candidatura realizada" com a data informada.
+      </li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="importing">
+    <h2 id="importing">Importar uma vaga</h2>
+    <p>
+      Cole o link da vaga e o Acompanha Aí tenta ler a página e preencher título, empresa, local,
+      modelo de trabalho, salário e habilidades.
+    </p>
+    <ul>
+      <li>
+        <strong>Os dados são sugestões e podem conter erros.</strong> Cada campo mostra o trecho da
+        vaga de onde a informação saiu. Revise tudo antes de salvar; nada é gravado sem a sua
+        confirmação.
+      </li>
+      <li>
+        Campos marcados com "Não encontrado na vaga" ficam em branco para você completar, se quiser.
+        Salário em branco significa que a vaga não informa o valor.
+      </li>
+      <li>
+        <strong>Alguns sites não permitem a leitura</strong>, por exemplo os que exigem login. Nesse
+        caso, copie a descrição da vaga e escolha "Descrição colada".
+      </li>
+      <li>
+        A importação pode levar alguns segundos. Você pode sair da página e voltar depois pelo mesmo
+        endereço; importações não confirmadas são apagadas automaticamente em até um dia.
+      </li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="stages">
+    <h2 id="stages">O que significa cada etapa</h2>
+    <dl>
+      @for (stage of stages; track stage.status) {
+        <div>
+          <dt>{{ labels[stage.status] }}</dt>
+          <dd>{{ stage.meaning }}</dd>
+        </div>
+      }
+    </dl>
+  </section>
+
+  <section aria-labelledby="removing">
+    <h2 id="removing">Excluir dados</h2>
+    <p>
+      Excluir uma candidatura remove também o histórico de etapas, e isso não pode ser desfeito.
+      Descartar uma importação apaga só os dados sugeridos, sem afetar suas candidaturas. Antes de
+      cada exclusão, o Acompanha Aí pede confirmação.
+    </p>
+  </section>
+</main>

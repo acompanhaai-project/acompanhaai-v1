@@ -68,7 +68,7 @@ export function toApiError(cause: unknown): ApiError {
   ];
   const detail = typeof body['detail'] === 'string' ? body['detail'] : body['error'];
   const message =
-    status >= 400 && status < 500 && typeof detail === 'string' && detail.trim()
+    status >= 400 && status < 500 && status !== 403 && typeof detail === 'string' && detail.trim()
       ? detail
       : fallback;
   const fields = Array.isArray(body['errors'])

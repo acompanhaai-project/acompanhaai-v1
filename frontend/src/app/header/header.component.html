@@ -1,14 +1,36 @@
 <header class="header">
   <nav class="header__nav" aria-label="Navegação principal">
-    <a class="logo" href="#" aria-label="Acompanha Aí">Acompanha Aí</a>
-    <a class="link" href="#">Página inicial</a>
-    <a class="link" href="#">Avaliações de Empresas</a>
-    <a class="link" href="#">Cargos e salários</a>
+    <a class="logo" [routerLink]="authenticated() ? '/candidaturas' : '/entrar'">Acompanha Aí</a>
+    @if (authenticated()) {
+      <a
+        class="link"
+        routerLink="/candidaturas"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        [routerLinkActiveOptions]="{ exact: true }"
+        >Candidaturas</a
+      >
+      <a
+        class="link"
+        routerLink="/candidaturas/importar"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >Importar vaga</a
+      >
+    }
+    <a class="link" routerLink="/ajuda" routerLinkActive="active" ariaCurrentWhenActive="page"
+      >Ajuda</a
+    >
   </nav>
 
   <div class="header__right">
-    <a class="link" href="#"><span aria-hidden="true">🇧🇷</span> País e idioma</a>
-    <a class="link" href="#">Empresas/Anunciar vagas</a>
+    @if (authenticated()) {
+      <a class="link" routerLink="/conta" routerLinkActive="active" ariaCurrentWhenActive="page"
+        >Minha conta</a
+      >
+    } @else {
+      <a class="link" routerLink="/entrar">Entrar</a>
+    }
     <button class="theme" type="button" (click)="alternarTema()" aria-label="Alternar tema">
       Tema
     </button>
