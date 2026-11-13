@@ -35,12 +35,24 @@ describe('Destino interno após login', () => {
     '/conta;destino=externo',
     '/%2f%2fexample.test',
     '/conta?x=\n',
+    '/candidaturas/importar/0',
+    '/candidaturas/importar/abc',
+    '/candidaturas/importar//example.test',
+    '/candidaturas/importar/1/../../entrar',
   ])('rejeita destino externo, inválido ou em loop: %s', (value) => {
     expect(safeReturnUrl(value)).toBe('/conta');
   });
 
   it('preserva query e fragmento de um destino privado permitido', () => {
     expect(safeReturnUrl('/conta?aba=perfil#dados')).toBe('/conta?aba=perfil#dados');
+  });
+
+  it.each([
+    '/candidaturas/importar',
+    '/candidaturas/importar/42',
+    '/candidaturas?etapa=APPLIED&busca=java',
+  ])('volta para a importação ou para a lista filtrada após o login: %s', (value) => {
+    expect(safeReturnUrl(value)).toBe(value);
   });
 });
 
