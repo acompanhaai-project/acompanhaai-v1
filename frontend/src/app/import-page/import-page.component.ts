@@ -1,9 +1,13 @@
+import { DOCUMENT } from '@angular/common';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
+  Injector,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -167,6 +171,24 @@ export class ImportPageComponent {
     return task.status === 'COMPLETED' ? 'completed' : 'attention';
   });
 
+  /** Texto do anúncio permanente: estados assíncronos não dependem de regiões recém-criadas. */
+  protected readonly announcement = computed(() => {
+    switch (this.phase()) {
+      case 'active':
+        return this.task()?.status === 'PENDING' ? 'Importação na fila.' : 'Lendo a vaga.';
+      case 'ready':
+        return 'Dados prontos para revisão.';
+      case 'attention':
+        return `${this.failureTitle()}.`;
+      case 'completed':
+        return 'Vaga salva.';
+      case 'missing':
+        return 'Importação indisponível.';
+      default:
+        return '';
+    }
+  });
+
   protected readonly failureTitle = computed(() => {
     const code = this.task()?.failure?.code ?? '';
     if (BLOCKED.has(code)) {
@@ -182,6 +204,22 @@ export class ImportPageComponent {
   });
 
   constructor() {
+    const document = inject(DOCUMENT);
+    const injector = inject(Injector);
+    let shown: Phase | null = null;
+    effect(() => {
+      const phase = this.phase();
+      if (phase === shown) {
+        return;
+      }
+      const previous = shown;
+      shown = phase;
+      if (previous === null || phase === 'form' || phase === 'loading') {
+        return;
+      }
+      afterNextRender(() => document.getElementById(`${phase}-title`)?.focus(), { injector });
+    });
+
     this.route.paramMap
       .pipe(
         map((params) => params.get('id')),
@@ -224,8 +262,14 @@ export class ImportPageComponent {
       this.error.set(
         this.review.controls.title.invalid
           ? 'Preencha o título da vaga com até 255 caracteres.'
-          : 'Confira os campos do formulário e tente novamente.',
+          : this.review.controls.salary.invalid
+            ? 'Informe um salário maior que zero ou deixe o campo em branco.'
+            : 'Confira os campos do formulário e tente novamente.',
       );
+      return;
+    }
+    if (value.salary !== null && !(value.salary > 0)) {
+      this.error.set('Informe um salário maior que zero ou deixe o campo em branco.');
       return;
     }
     if (value.salary !== null && !value.salaryPeriod) {
@@ -283,6 +327,15 @@ export class ImportPageComponent {
 
   protected isMissing(field: string): boolean {
     return this.missingFields().has(field);
+  }
+
+  protected describedBy(field: string, hint?: string): string | null {
+    const ids = [
+      hint,
+      this.isMissing(field) ? `${field}-missing` : undefined,
+      this.evidenceFor(field) ? `${field}-evidence` : undefined,
+    ].filter((id): id is string => id !== undefined);
+    return ids.length > 0 ? ids.join(' ') : null;
   }
 
   protected evidenceFor(field: string): string | null {
