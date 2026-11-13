@@ -46,6 +46,16 @@ final class BrowserEnvironment {
         registry.add("app.password-reset.mail.host", () -> "127.0.0.1");
         registry.add("app.password-reset.mail.port", () -> MAIL.getSmtp().getPort());
         registry.add("app.password-reset.mail.reset-url", () -> BASE + "/reset-password");
+        registry.add("app.import-worker.scheduling-enabled", () -> true);
+        registry.add("app.import-worker.poll-delay", () -> "300ms");
+        registry.add("app.extraction.provider", () -> "gemini");
+        registry.add("app.extraction.gemini.base-url", ImportSimulation::providerUrl);
+        registry.add("app.extraction.gemini.api-key", () -> "chave-ficticia-de-teste");
+        registry.add("app.extraction.timeout", () -> "3s");
+        registry.add("app.extraction.max-attempts", () -> "2");
+        registry.add("app.extraction.retry-delay", () -> "10ms");
+        registry.add("app.extraction.daily-limit", () -> "0");
+        registry.add("app.extraction.failure-threshold", () -> "1000");
     }
 
     static void startFrontend(int apiPort) throws Exception {
@@ -106,6 +116,7 @@ final class BrowserEnvironment {
             frontend = null;
         }
         MAIL.stop();
+        ImportSimulation.stop();
     }
 
     private static int freePort() {

@@ -3,7 +3,9 @@ export const DEFAULT_RETURN_URL = '/conta';
 export function safeReturnUrl(value: string | null | undefined): string {
   if (
     !value ||
-    !/^\/(?:conta(?:\/perfil)?|candidaturas(?:\/(?:nova|[1-9]\d*))?)(?:[?#].*)?$/.test(value) ||
+    !/^\/(?:conta(?:\/perfil)?|candidaturas(?:\/(?:nova|importar(?:\/[1-9]\d*)?|[1-9]\d*))?)(?:[?#].*)?$/.test(
+      value,
+    ) ||
     /\s|\\/.test(value) ||
     Array.from(value).some(
       (character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127,
