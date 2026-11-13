@@ -41,7 +41,9 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import com.maiconamaral.acompanhaai.services.BrowserImportNetwork;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -53,6 +55,7 @@ import org.springframework.test.context.DynamicPropertySource;
     properties = "spring.config.import="
 )
 @ActiveProfiles("test")
+@Import(BrowserImportNetwork.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccessJourneysBrowserIT {
@@ -645,6 +648,148 @@ class AccessJourneysBrowserIT {
             );
             """);
         assertEquals(List.of(), violations, "Violações de acessibilidade em " + context);
+    }
+
+    @ParameterizedTest(name = "Importação por texto: {0}px, tema {1}")
+    @CsvSource({ "1440, light", "390, dark" })
+    void importFromTextAndSaveOnce(int width, String theme) throws Exception {
+        openBrowser(width, theme);
+        String marker = UUID.randomUUID().toString().substring(0, 8);
+        String email = "qa.importacao." + UUID.randomUUID() + "@example.test";
+        String title = "Engenheira de Qualidade " + marker;
+        register(email);
+        visit("/candidaturas/importar");
+        visible("#email");
+        signIn(email, INITIAL_PASSWORD);
+        heading("Importar vaga");
+
+        visible("input[value='TEXT']").click();
+        visible("textarea[formcontrolname='text']").sendKeys(String.join(
+            "\n",
+            "Cargo: " + title,
+            "Empresa: Empresa Simulada",
+            "Local: Recife, PE",
+            "Salário: R$ 9.500 por mês.",
+            "Requisitos: Java, Selenium e PostgreSQL."
+        ));
+        button("Importar").click();
+        message("#ready-title", "Revise os dados da vaga");
+        String review = path();
+        assertTrue(review.matches("/candidaturas/importar/[1-9]\\d*"));
+        long task = Long.parseLong(review.substring(review.lastIndexOf('/') + 1));
+        assertReviewFilledBy(title);
+        message("small.evidence", "Trecho da vaga:");
+        assertNoOverflow();
+        assertAccessible("revisão da importação " + width + "px " + theme);
+        screenshot("import-review-" + width + "-" + theme + ".png");
+
+        browser.navigate().refresh();
+        message("#ready-title", "Revise os dados da vaga");
+        assertReviewFilledBy(title);
+        reviewField("notes").sendKeys("Revisado no E2E");
+
+        browser.manage().deleteAllCookies();
+        button("Salvar vaga").click();
+        wait.until(driver -> path().equals("/entrar")
+            || !driver.findElements(By.cssSelector("main [role='alert']")).isEmpty());
+        if (!path().equals("/entrar")) {
+            visible("main [role='alert']");
+            assertEquals("Revisado no E2E", reviewField("notes").getDomProperty("value"));
+            button("Salvar vaga").click();
+        }
+        wait.until(driver -> path().equals("/entrar"));
+        message("main", "Sua sessão expirou. Entre novamente para continuar.");
+        signIn(email, INITIAL_PASSWORD);
+        wait.until(driver -> path().equals(review));
+        message("#ready-title", "Revise os dados da vaga");
+        assertReviewFilledBy(title);
+
+        ChromiumDriver chromium = (ChromiumDriver) browser;
+        chromium.executeCdpCommand("Network.enable", Map.of());
+        chromium.executeCdpCommand("Network.setBlockedURLs", Map.of("urls", List.of("*/confirm")));
+        try {
+            button("Salvar vaga").click();
+            message("main [role='alert']", "Não foi possível receber uma resposta do servidor.");
+            assertEquals(title, reviewField("title").getDomProperty("value"));
+        } finally {
+            chromium.executeCdpCommand("Network.setBlockedURLs", Map.of("urls", List.of()));
+        }
+
+        WebElement save = button("Salvar vaga");
+        ((JavascriptExecutor) browser).executeScript("arguments[0].click(); arguments[0].click();", save);
+        heading(title);
+        assertTrue(path().matches("/candidaturas/[1-9]\\d*"));
+        Map<?, ?> found = (Map<?, ?>) browserApi("GET", "/api/applications?q=" + marker, null, 200);
+        assertEquals(1, ((Number) found.get("totalElements")).intValue());
+        Map<?, ?> completed = (Map<?, ?>) browserApi("GET", "/api/import-tasks/" + task, null, 200);
+        assertEquals("COMPLETED", completed.get("status"));
+
+        visit(review);
+        message("#completed-title", "Vaga salva");
+        browserApi("DELETE", "/api/users/me", null, 204);
+    }
+
+    @ParameterizedTest(name = "Importação por link e revisão manual: {0}px, tema {1}")
+    @CsvSource({ "1440, light" })
+    void importFromPageAndReviewManuallyWhenTheProviderFails(int width, String theme) throws Exception {
+        openBrowser(width, theme);
+        String marker = UUID.randomUUID().toString().substring(0, 8);
+        String email = "qa.importacao.link." + UUID.randomUUID() + "@example.test";
+        String fromPage = "Desenvolvedora Java " + marker;
+        register(email);
+        visit("/candidaturas/importar");
+        visible("#email");
+        signIn(email, INITIAL_PASSWORD);
+        heading("Importar vaga");
+
+        visible("input[formcontrolname='url']").sendKeys(ImportSimulation.pageUrl(fromPage, "Empresa da Página"));
+        button("Importar").click();
+        message("#ready-title", "Revise os dados da vaga");
+        assertEquals(fromPage, reviewField("title").getDomProperty("value"));
+        assertEquals("Empresa da Página", reviewField("companyName").getDomProperty("value"));
+        message("small.evidence", "Origem: dados estruturados da página.");
+        visible("input[formcontrolname='decision'][value='SAVED']").click();
+        button("Salvar vaga").click();
+        heading(fromPage);
+
+        int calls = ImportSimulation.extractions();
+        String manual = "Analista de Testes " + marker;
+        visit("/candidaturas/importar");
+        heading("Importar vaga");
+        visible("input[value='TEXT']").click();
+        visible("textarea[formcontrolname='text']").sendKeys(
+            "Vaga de analista de testes com foco em automação. " + ImportSimulation.UNAVAILABLE
+        );
+        button("Importar").click();
+        message("#ready-title", "Revise os dados da vaga");
+        assertEquals("", reviewField("title").getDomProperty("value"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+            "//label[.//input[@formcontrolname='title']]//span[@class='missing' and normalize-space(.)='Não encontrado']"
+        )));
+        assertTrue(reviewField("description").getDomProperty("value").contains("analista de testes"));
+        assertEquals(calls + 2, ImportSimulation.extractions(), "duas tentativas no provedor indisponível");
+        button("Salvar vaga").click();
+        message("main [role='alert']", "Preencha o título da vaga");
+        reviewField("title").sendKeys(manual);
+        button("Salvar vaga").click();
+        heading(manual);
+
+        visit("/candidaturas?busca=" + marker);
+        message(".count", "Mostrando 2 de 2");
+        assertEquals(2, browser.findElements(By.cssSelector("article")).size());
+        browserApi("DELETE", "/api/users/me", null, 204);
+    }
+
+    private void assertReviewFilledBy(String title) {
+        assertEquals(title, reviewField("title").getDomProperty("value"));
+        assertEquals("Empresa Simulada", reviewField("companyName").getDomProperty("value"));
+        assertEquals("Recife, PE", reviewField("location").getDomProperty("value"));
+        assertEquals("9500", reviewField("salary").getDomProperty("value"));
+        assertEquals("Java\nSelenium\nPostgreSQL", reviewField("hardSkills").getDomProperty("value"));
+    }
+
+    private WebElement reviewField(String name) {
+        return visible("form [formcontrolname='" + name + "']");
     }
 
     private void switchAccount(String email) {

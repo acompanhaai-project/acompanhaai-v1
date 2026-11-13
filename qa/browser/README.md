@@ -1,9 +1,9 @@
-# Jornadas no navegador — KAN-40 e KAN-45
+# Jornadas no navegador — KAN-40, KAN-45 e KAN-62
 
 Suíte Selenium WebDriver/Java com JUnit, API Spring Boot real, Angular real e
 SMTP capturado pelo GreenMail. A suíte cobre o acesso da KAN-36, o perfil da
 KAN-37, o quadro e o cadastro de candidaturas e o fluxo manual completo da
-KAN-45 com requisições reais.
+KAN-45 e a importação com revisão da KAN-62 com requisições reais.
 
 ## Executar no Windows com PostgreSQL descartável
 
@@ -73,6 +73,17 @@ ou comportamento específico de Safari/Android. As esperas são condicionais.
 | `keyboardAndFieldErrors` | Primeiro campo inválido, Tab entre campos, e-mail inválido e `aria-invalid`, confirmação divergente e mensagem associada, Enter para avançar no login, foco na senha, Space no botão de mostrar senha, erro na recuperação e link sem token |
 | `profileLifecycle` | Retorno ao perfil após login, edição e persistência de nome/e-mail, foco no seletor de foto, prévia e cancelamento, envio PNG e substituição JPEG, limites de 2 MiB e 4 milhões de pixels, remoção e avatar padrão, senha atual incorreta e troca com novo login, confirmação de exclusão com e-mail, cancelamento com Escape e restauração de foco |
 | `manualFlowAcrossAccounts` | Duas contas exclusivas; criação pela interface, edição e persistência, conflito 409 com outra aba (rascunho preservado e recarga), falha de rede simulada com dados preservados e novo envio, pesquisa e etapa no quadro, movimentação para fora do filtro, histórico na tela e na API, filtros mantidos ao voltar dos detalhes, outra conta sem acesso pelo quadro, pela pesquisa, pela URL e pela API (404), exclusão da candidatura e das duas contas ao final |
+| `importFromTextAndSaveOnce` | Descrição colada, processamento pelo worker e provedor simulado, revisão preenchida com evidência, axe-core, recarga com os dados mantidos, sessão expirada com retorno à revisão após login, falha de rede na confirmação, clique duplo sem duplicata, consulta pela API e importação concluída ao reabrir |
+| `importFromPageAndReviewManuallyWhenTheProviderFails` | Link para página controlada com JSON-LD, origem "dados estruturados", decisão "Salva", provedor indisponível (duas tentativas) com revisão manual, título obrigatório e as duas vagas no quadro filtrado |
+
+A importação usa o worker real (intervalo de 300 ms) e um servidor local
+(`ImportSimulation`) que publica páginas de vaga e responde no formato do Gemini.
+O nome `vagas.qa.test` aponta para esse servidor só nesta suíte
+(`BrowserImportNetwork`); os demais destinos seguem a política de endereços.
+Nenhuma chamada vai ao provedor real. A avaliação com o Gemini de verdade fica
+separada em `ExtractionEvaluationLiveTest`, que só roda com
+`-Dextraction.eval=true`, usa 20 vagas fictícias por execução e espera entre as
+chamadas.
 
 As jornadas também conferem ausência de rolagem horizontal. O quadro passa
 pelo axe-core (dependência de desenvolvimento do frontend) nas quatro
